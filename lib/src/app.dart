@@ -56,7 +56,61 @@ class MyApp extends StatelessWidget {
           // Define a light and dark color theme. Then, read the user's
           // preferred ThemeMode (light, dark, or system default) from the
           // SettingsController to display the correct theme.
-          theme: ThemeData(),
+          theme: ThemeData(
+            useMaterial3: true,
+            fontFamily: 'Dongle',
+            textTheme: TextTheme(
+              titleLarge: TextStyle(
+                fontSize: 28.0,
+              ),
+              bodySmall: TextStyle(fontSize: 14.0),
+              bodyMedium: TextStyle(fontSize: 16.0),
+              bodyLarge: TextStyle(fontSize: 20.0),
+              labelSmall: TextStyle(fontSize: 12.0),
+              labelMedium: TextStyle(fontSize: 14.0),
+              labelLarge: TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            tabBarTheme: TabBarTheme(
+              labelColor: Colors.red,
+              dividerColor: Colors.transparent,
+              labelStyle: TextStyle(
+                fontSize: 14.0,
+                fontWeight: FontWeight.w400,
+              ),
+              unselectedLabelStyle: TextStyle(
+                fontSize: 14.0,
+                color: Colors.white.withOpacity(0.4),
+              ),
+              indicator: UnderlineTabIndicator(
+                borderSide: BorderSide.none,
+              ),
+              overlayColor: WidgetStatePropertyAll(
+                Colors.white.withOpacity(0.1),
+              ),
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.amber,
+                padding: EdgeInsets.symmetric(
+                  vertical: 12.0,
+                  horizontal: 16.0,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+              ),
+            ),
+            appBarTheme: AppBarTheme(
+              iconTheme: IconThemeData(color: Colors.red),
+              color: Colors.transparent,
+              scrolledUnderElevation: 0.0,
+              elevation: 0,
+            ),
+          ),
           darkTheme: ThemeData.dark(),
           themeMode: settingsController.themeMode,
 
@@ -73,7 +127,7 @@ class MyApp extends StatelessWidget {
                     return const SampleItemDetailsView();
                   case SampleItemListView.routeName:
                   default:
-                    return const SampleItemListView();
+                    return const NavigationExample();
                 }
               },
             );
