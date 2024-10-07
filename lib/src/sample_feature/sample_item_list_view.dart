@@ -80,20 +80,21 @@ class _NavigationExampleState extends State<NavigationExample> {
         selectedIndex: currentPageIndex,
         destinations: const <Widget>[
           NavigationDestination(
-            selectedIcon: Icon(Icons.home),
+            selectedIcon: Icon(Icons.image_outlined),
             icon: Icon(Icons.home_outlined),
-            label: 'Home',
+            label: 'PECS',
           ),
           NavigationDestination(
-            icon: Badge(child: Icon(Icons.notifications_sharp)),
-            label: 'Notifications',
+            icon: Icon(Icons.layers_outlined),
+            label: 'FRASES',
           ),
           NavigationDestination(
-            icon: Badge(
-              label: Text('2'),
-              child: Icon(Icons.messenger_sharp),
-            ),
-            label: 'Messages',
+            icon: Icon(Icons.cast_for_education_rounded),
+            label: 'APRENDER',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.timer_outlined),
+            label: 'ROTINA',
           ),
         ],
       ),
