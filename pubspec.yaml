@@ -17,6 +17,8 @@ dependencies:
   google_fonts: ^6.2.1
   iconify_flutter: ^0.0.5
   flutter_tts: ^4.0.2
+  flutter_svg: ^1.1.5
+  gap: ^3.0.1
 
 dev_dependencies:
   flutter_test:
