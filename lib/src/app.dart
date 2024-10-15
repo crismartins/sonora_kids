@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:sonora_kids/src/appStyles.dart';
 
 import 'sample_feature/sample_item_details_view.dart';
 import 'sample_feature/sample_item_list_view.dart';
@@ -42,7 +43,7 @@ class MyApp extends StatelessWidget {
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: const [
-            Locale('en', ''), // English, no country code
+            Locale('pt', 'br'), // English, no country code
           ],
 
           // Use AppLocalizations to configure the correct application title
@@ -74,7 +75,7 @@ class MyApp extends StatelessWidget {
                 ),
               ),
               tabBarTheme: TabBarTheme(
-                labelColor: Colors.red,
+                labelColor: Color(colorDark),
                 dividerColor: Colors.transparent,
                 labelStyle: TextStyle(
                   fontSize: 14.0,
@@ -82,7 +83,7 @@ class MyApp extends StatelessWidget {
                 ),
                 unselectedLabelStyle: TextStyle(
                   fontSize: 14.0,
-                  color: Colors.white.withOpacity(0.4),
+                  color: Color(colorDark),
                 ),
                 indicator: UnderlineTabIndicator(
                   borderSide: BorderSide.none,
@@ -105,10 +106,13 @@ class MyApp extends StatelessWidget {
                 ),
               ),
               appBarTheme: AppBarTheme(
-                iconTheme: IconThemeData(color: Colors.red),
-                color: Colors.transparent,
+                iconTheme: IconThemeData(color: Color(colorPrimary)),
+                color: Color(colorDark),
                 scrolledUnderElevation: 0.0,
                 elevation: 0,
+              ),
+              chipTheme: ChipThemeData(
+                labelStyle: TextStyle(fontSize: 20.0),
               ),
               navigationBarTheme: NavigationBarThemeData(
                 backgroundColor: Colors.transparent,
