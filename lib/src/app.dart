@@ -117,7 +117,7 @@ class MyApp extends StatelessWidget {
               navigationBarTheme: NavigationBarThemeData(
                 backgroundColor: Colors.transparent,
               )),
-          darkTheme: ThemeData.dark(),
+          // darkTheme: ThemeData.dark(),
           themeMode: settingsController.themeMode,
 
           // Define a function to handle named routes in order to support

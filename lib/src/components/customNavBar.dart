@@ -6,11 +6,16 @@ import '../appStyles.dart';
 import '../constants.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 
-class CustomNavBar extends StatelessWidget {
+class CustomNavBar extends StatefulWidget {
   const CustomNavBar({
     super.key,
   });
 
+  @override
+  State<CustomNavBar> createState() => _CustomNavBarState();
+}
+
+class _CustomNavBarState extends State<CustomNavBar> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -37,20 +42,38 @@ class CustomNavBar extends StatelessWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(68),
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Iconify(
-                                item['icon'],
-                                color: Color(colorNeutralDark),
-                              ),
-                              Text(
-                                item['title'].toUpperCase(),
-                                style: TextStyle(
-                                  color: Color(colorNeutralDark),
+                          child: GestureDetector(
+                            onTap: () => {
+                              Navigator.of(context).pushNamed(item['route']),
+                              print(ModalRoute.of(context)?.settings.name)
+                            },
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Iconify(
+                                  item['icon'],
+                                  color:
+                                      ModalRoute.of(context)?.settings.name !=
+                                              item['route']
+                                          ? Color(colorNeutralDark)
+                                          : Color(colorPrimary),
                                 ),
-                              ),
-                            ],
+                                Gap(4),
+                                Text(
+                                  item['title'].toUpperCase(),
+                                  style: TextStyle(
+                                    height: 0.8,
+                                    leadingDistribution:
+                                        TextLeadingDistribution.even,
+                                    color:
+                                        ModalRoute.of(context)?.settings.name !=
+                                                item['route']
+                                            ? Color(colorNeutralDark)
+                                            : Color(colorPrimary),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ))
                     .toList(),
