@@ -20,6 +20,7 @@ dependencies:
   flutter_svg: ^1.1.5
   gap: ^3.0.1
   flutter_native_splash: ^2.4.3
+  graphql_flutter: ^5.1.2
 
 dev_dependencies:
   flutter_test:

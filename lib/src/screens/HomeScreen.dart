@@ -8,6 +8,32 @@ import '/src/appIcons.dart';
 import 'package:gap/gap.dart';
 import 'dart:ui';
 
+import 'package:graphql_flutter/graphql_flutter.dart';
+import '/services/graphql_service.dart';
+
+final String fetchCategoriesQuery = """
+  query {
+    categorias {
+      nodes {
+        name
+        slug
+        pECS {
+          nodes {
+            id
+            title
+            featuredImage {
+              node {
+                sourceUrl
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+""";
+
+
 @immutable
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -173,200 +199,237 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildTabView() {
-    return TabBarView(
-      controller: _pecsTabController,
-      children: pecs.map((pec) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: PecsList(
-            flutterTts: _flutterTts,
-            pecsCollection: pec['collection'],
-            pecsColor: pec['color'].shade100,
-          ),
-        );
-      }).toList(),
-    );
-  }
+  // List<Widget> _widgetOptions() => <Widget>[
+  //       Scaffold(
+  //         appBar: TabBar(
+  //           controller: _pecsTabController,
+  //           isScrollable: true,
+  //           tabAlignment: TabAlignment.start,
+  //           padding: EdgeInsets.symmetric(
+  //             vertical: 0,
+  //             horizontal: 16,
+  //           ),
+  //           labelPadding: EdgeInsets.symmetric(
+  //             vertical: 0,
+  //             horizontal: 4,
+  //           ),
+  //           tabs: pecs
+  //               .map(
+  //                 (tab) => Tab(
+  //                   child: Chip(
+  //                     avatar: Container(
+  //                       padding: EdgeInsets.all(4),
+  //                       decoration: BoxDecoration(
+  //                         borderRadius: BorderRadius.circular(80),
+  //                         color: Color(colorNeutralLight).withOpacity(0.60),
+  //                       ),
+  //                       child: Image.asset(tab['icon']),
+  //                     ),
+  //                     label: Text(tab['category'].toUpperCase()),
+  //                     backgroundColor: tab['color'].shade100,
+  //                     padding: EdgeInsets.fromLTRB(4, 4, 4, 4),
+  //                     shape: RoundedRectangleBorder(
+  //                       borderRadius: BorderRadius.circular(24),
+  //                     ),
+  //                     side: BorderSide.none,
+  //                     labelStyle: TextStyle(
+  //                       color: tab['color'].shade700,
+  //                       fontSize: 20,
+  //                       height: 0.8,
+  //                       leadingDistribution: TextLeadingDistribution.even,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               )
+  //               .toList(),
+  //         ),
+  //         body: TabBarView(
+  //           controller: _pecsTabController,
+  //           children: pecs
+  //               .map((pecs) => Padding(
+  //                     padding: const EdgeInsets.symmetric(horizontal: 16),
+  //                     child: PecsList(
+  //                         flutterTts: FlutterTts(),
+  //                         pecsCollection: pecs['collection'],
+  //                         pecsColor: pecs['color'].shade100),
+  //                   ))
+  //               .toList(),
+  //         ),
+  //       ),
+  //       Scaffold(
+  //         appBar: TabBar(
+  //           controller: _phrasesTabController,
+  //           isScrollable: true,
+  //           tabAlignment: TabAlignment.start,
+  //           padding: EdgeInsets.symmetric(
+  //             vertical: 0,
+  //             horizontal: 16,
+  //           ),
+  //           labelPadding: EdgeInsets.symmetric(
+  //             vertical: 0,
+  //             horizontal: 4,
+  //           ),
+  //           tabs: phrases
+  //               .map(
+  //                 (tab) => Tab(
+  //                   child: Chip(
+  //                     label: Text(tab['category'].toUpperCase()),
+  //                     backgroundColor: Color(colorNeutral),
+  //                     padding: EdgeInsets.fromLTRB(4, 4, 4, 4),
+  //                     shape: RoundedRectangleBorder(
+  //                       borderRadius: BorderRadius.circular(24),
+  //                     ),
+  //                     side: BorderSide.none,
+  //                     labelStyle: TextStyle(
+  //                       color: Color(colorPrimary),
+  //                       fontSize: 20,
+  //                       height: 0.8,
+  //                       leadingDistribution: TextLeadingDistribution.even,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               )
+  //               .toList(),
+  //         ),
+  //         body: TabBarView(
+  //           controller: _phrasesTabController,
+  //           children: phrases
+  //               .map((phrases) => Padding(
+  //                     padding: const EdgeInsets.symmetric(horizontal: 16),
+  //                     child: PhrasesList(
+  //                       flutterTts: FlutterTts(),
+  //                       phrasesCollection: phrases['collection'],
+  //                     ),
+  //                   ))
+  //               .toList(),
+  //         ),
+  //       ),
+  //       SingleChildScrollView(
+  //         child: Padding(
+  //           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+  //           child: Container(
+  //             padding: const EdgeInsets.all(16),
+  //             decoration: BoxDecoration(
+  //                 borderRadius: BorderRadius.circular(20),
+  //                 gradient: LinearGradient(
+  //                     colors: [Color(colorPrimary), Color(colorPrimaryDark)])),
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.center,
+  //               children: [
+  //                 Text(
+  //                   'Aprenda Jogando',
+  //                   style: TextStyle(
+  //                       color: Color(colorNeutralLight),
+  //                       fontSize: 28,
+  //                       fontWeight: FontWeight.bold),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //       Scaffold(
+  //         appBar: TabBar(
+  //           controller: _phrasesTabController,
+  //           isScrollable: true,
+  //           tabAlignment: TabAlignment.start,
+  //           padding: EdgeInsets.symmetric(
+  //             vertical: 0,
+  //             horizontal: 16,
+  //           ),
+  //           labelPadding: EdgeInsets.symmetric(
+  //             vertical: 0,
+  //             horizontal: 4,
+  //           ),
+  //           tabs: phrases
+  //               .map(
+  //                 (tab) => Tab(
+  //                   child: Chip(
+  //                     label: Text(tab['category'].toUpperCase()),
+  //                     backgroundColor: Color(colorNeutral),
+  //                     padding: EdgeInsets.fromLTRB(4, 4, 4, 4),
+  //                     shape: RoundedRectangleBorder(
+  //                       borderRadius: BorderRadius.circular(24),
+  //                     ),
+  //                     side: BorderSide.none,
+  //                     labelStyle: TextStyle(
+  //                       color: Color(colorPrimary),
+  //                       fontSize: 20,
+  //                       height: 0.8,
+  //                       leadingDistribution: TextLeadingDistribution.even,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               )
+  //               .toList(),
+  //         ),
+  //         body: TabBarView(
+  //           controller: _phrasesTabController,
+  //           children: phrases
+  //               .map((phrases) => Padding(
+  //                     padding: const EdgeInsets.symmetric(horizontal: 16),
+  //                     child: PhrasesList(
+  //                       flutterTts: FlutterTts(),
+  //                       phrasesCollection: phrases['collection'],
+  //                     ),
+  //                   ))
+  //               .toList(),
+  //         ),
+  //       ),
+  //     ];
 
   List<Widget> _widgetOptions() => <Widget>[
-        Scaffold(
-          appBar: TabBar(
-            controller: _pecsTabController,
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-            padding: EdgeInsets.symmetric(
-              vertical: 0,
-              horizontal: 16,
-            ),
-            labelPadding: EdgeInsets.symmetric(
-              vertical: 0,
-              horizontal: 4,
-            ),
-            tabs: pecs
-                .map(
-                  (tab) => Tab(
-                    child: Chip(
-                      avatar: Container(
-                        padding: EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(80),
-                          color: Color(colorNeutralLight).withOpacity(0.60),
-                        ),
-                        child: Image.asset(tab['icon']),
-                      ),
-                      label: Text(tab['category'].toUpperCase()),
-                      backgroundColor: tab['color'].shade100,
-                      padding: EdgeInsets.fromLTRB(4, 4, 4, 4),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      side: BorderSide.none,
-                      labelStyle: TextStyle(
-                        color: tab['color'].shade700,
-                        fontSize: 20,
-                        height: 0.8,
-                        leadingDistribution: TextLeadingDistribution.even,
-                      ),
-                    ),
-                  ),
-                )
-                .toList(),
+      GraphQLProvider(
+        client: GraphQLService.client, // Make sure this is initialized
+        child: Query(
+          options: QueryOptions(
+            document: gql(fetchCategoriesQuery),
           ),
-          body: TabBarView(
-            controller: _pecsTabController,
-            children: pecs
-                .map((pecs) => Padding(
+          builder: (QueryResult result, {VoidCallback? refetch, FetchMore? fetchMore}) {
+            if (result.isLoading) {
+              return Center(child: CircularProgressIndicator());
+            }
+            if (result.hasException) {
+              print("GraphQL Error: ${result.exception.toString()}");
+              return Center(child: Text("Error loading categories"));
+            }
+
+            // Fetch categories data
+            List categories = result.data?['categorias']['nodes'] ?? [];
+
+            return DefaultTabController(
+              length: categories.length,
+              child: Scaffold(
+                appBar: TabBar(
+                  isScrollable: true,
+                  tabs: categories.map((category) {
+                    return Tab(
+                      child: Chip(
+                        label: Text(category['name'].toUpperCase()),
+                        backgroundColor: Colors.blue.shade100,
+                      ),
+                    );
+                  }).toList(),
+                ),
+                body: TabBarView(
+                  children: categories.map((category) {
+                    List pecsItems = category['pECS']['nodes'] ?? [];
+                    return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: PecsList(
-                          flutterTts: FlutterTts(),
-                          pecsCollection: pecs['collection'],
-                          pecsColor: pecs['color'].shade100),
-                    ))
-                .toList(),
-          ),
-        ),
-        Scaffold(
-          appBar: TabBar(
-            controller: _phrasesTabController,
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-            padding: EdgeInsets.symmetric(
-              vertical: 0,
-              horizontal: 16,
-            ),
-            labelPadding: EdgeInsets.symmetric(
-              vertical: 0,
-              horizontal: 4,
-            ),
-            tabs: phrases
-                .map(
-                  (tab) => Tab(
-                    child: Chip(
-                      label: Text(tab['category'].toUpperCase()),
-                      backgroundColor: Color(colorNeutral),
-                      padding: EdgeInsets.fromLTRB(4, 4, 4, 4),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      side: BorderSide.none,
-                      labelStyle: TextStyle(
-                        color: Color(colorPrimary),
-                        fontSize: 20,
-                        height: 0.8,
-                        leadingDistribution: TextLeadingDistribution.even,
-                      ),
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-          body: TabBarView(
-            controller: _phrasesTabController,
-            children: phrases
-                .map((phrases) => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: PhrasesList(
                         flutterTts: FlutterTts(),
-                        phrasesCollection: phrases['collection'],
+                        pecsCollection: pecsItems,
+                        pecsColor: Colors.blue.shade100,
                       ),
-                    ))
-                .toList(),
-          ),
-        ),
-        SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  gradient: LinearGradient(
-                      colors: [Color(colorPrimary), Color(colorPrimaryDark)])),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    'Aprenda Jogando',
-                    style: TextStyle(
-                        color: Color(colorNeutralLight),
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
+                    );
+                  }).toList(),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
-        Scaffold(
-          appBar: TabBar(
-            controller: _phrasesTabController,
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-            padding: EdgeInsets.symmetric(
-              vertical: 0,
-              horizontal: 16,
-            ),
-            labelPadding: EdgeInsets.symmetric(
-              vertical: 0,
-              horizontal: 4,
-            ),
-            tabs: phrases
-                .map(
-                  (tab) => Tab(
-                    child: Chip(
-                      label: Text(tab['category'].toUpperCase()),
-                      backgroundColor: Color(colorNeutral),
-                      padding: EdgeInsets.fromLTRB(4, 4, 4, 4),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      side: BorderSide.none,
-                      labelStyle: TextStyle(
-                        color: Color(colorPrimary),
-                        fontSize: 20,
-                        height: 0.8,
-                        leadingDistribution: TextLeadingDistribution.even,
-                      ),
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-          body: TabBarView(
-            controller: _phrasesTabController,
-            children: phrases
-                .map((phrases) => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: PhrasesList(
-                        flutterTts: FlutterTts(),
-                        phrasesCollection: phrases['collection'],
-                      ),
-                    ))
-                .toList(),
-          ),
-        ),
-      ];
+      ),
+    ];
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
@@ -423,7 +486,7 @@ class PecsList extends StatefulWidget {
 
 class _PecsListState extends State<PecsList> {
   int? selectedIndex;
-
+  
   @override
   Widget build(BuildContext context) {
     return GridView.count(
@@ -433,12 +496,13 @@ class _PecsListState extends State<PecsList> {
       children: widget.pecsCollection
           .map(
             (pec) => GestureDetector(
+              
               onTap: () {
                 setState(() {
                   selectedIndex = widget.pecsCollection.indexOf(pec);
                 });
                 widget._flutterTts.speak(
-                  pec['text'],
+                  pec['title'],
                 );
                 HapticFeedback.vibrate();
               },
@@ -478,8 +542,15 @@ class _PecsListState extends State<PecsList> {
                               strokeAlign: BorderSide.strokeAlignOutside,
                             )),
                         child: CircleAvatar(
+                          
                           radius: 50,
-                          backgroundImage: AssetImage(pec['image']),
+                          backgroundImage: pec['featuredImage']?['node']['sourceUrl'] != null
+                              ? NetworkImage(pec['featuredImage']?['node']['sourceUrl'])
+                              : AssetImage('assets/placeholder.png') as ImageProvider,
+                          onBackgroundImageError: (exception, stackTrace) {
+                            print('Image loading error: $exception');
+                          },
+                          
                         ),
                       ),
                       Gap(12),
@@ -491,7 +562,7 @@ class _PecsListState extends State<PecsList> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          pec['text'],
+                          pec['title'],
                           // style: Theme.of(context).textTheme.titleMedium,
                           style: TextStyle(
                             fontSize: 24.0,
