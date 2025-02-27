@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:sonora_kids/viewmodels/category_view_model.dart';
 import 'src/constants.dart';
 import 'src/appStyles.dart';
 import 'src/screens/HomeScreen.dart';
@@ -9,7 +11,19 @@ void main() {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   runApp(
-    MaterialApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CategoryViewModel()),
+      ],
+      child: MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  // @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
       theme: ThemeData(
           useMaterial3: true,
           fontFamily: 'Dongle',
@@ -143,8 +157,8 @@ void main() {
         );
       },
       debugShowCheckedModeBanner: false,
-    ),
-  );
+    );
+  }
 }
 
 @immutable

@@ -1,4 +1,4 @@
-import '../src/appIcons.dart';
+import 'appIcons.dart';
 import 'package:flutter/material.dart';
 
 const routeHome = '/';
@@ -59,6 +59,61 @@ const List phrases = [
     ]
   }
 ];
+
+// Map string values to actual Color objects
+final Map<String, Color> colorMap = {
+  "greenAccent": Colors.greenAccent,
+  "orange": Colors.orange,
+  "deepOrange": Colors.deepOrange,
+  "pink": Colors.pink,
+  "blue": Colors.blue,
+  "teal": Colors.teal,
+  "deepPurple": Colors.deepPurple,
+  "brown": Colors.brown,
+  "cyan": Colors.cyan,
+  "blueGrey": Colors.blueGrey,
+  "grey": Colors.grey,
+  "lightGreen": Colors.lightGreen,
+  "purple": Colors.purple,
+  "indigo": Colors.indigo,
+  "yellow": Colors.yellow,
+};
+
+Color getColorFromString(String colorName) {
+  return colorMap[colorName] ?? Colors.grey; // Default to grey if not found
+}
+
+final String fetchCategoriesQuery = """
+  query {
+    categorias {
+      nodes {
+        name
+        slug
+        categoriasDePec {
+          configuracoesCategorias {
+            cor
+            icone {
+              node {
+                mediaItemUrl
+              }
+            }
+          }
+        }
+        pECS {
+          nodes {
+            id
+            title
+            featuredImage {
+              node {
+                sourceUrl
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+""";
 
 const List pecs = [
   {

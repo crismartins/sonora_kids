@@ -2,41 +2,58 @@ import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 class GraphQLService {
-  static final HttpLink httpLink = HttpLink("https://darkturquoise-stork-856497.hostingersite.com/graphql");
+  static final HttpLink httpLink =
+      HttpLink('https://darkturquoise-stork-856497.hostingersite.com/graphql');
 
-  static ValueNotifier<GraphQLClient> client = ValueNotifier(
+  static final ValueNotifier<GraphQLClient> client = ValueNotifier(
     GraphQLClient(
       link: httpLink,
       cache: GraphQLCache(),
     ),
   );
 
-  Future<QueryResult> fetchPosts() async {
-    String query = """
-      query {
-        categorias {
-          nodes {
-            name
-            slug
-            pECS {
-              nodes {
-                id
-                title
-                featuredImage {
-                  node {
-                    sourceUrl
-                  }
+  static const String fetchCategoriesQuery = '''
+    query {
+      categorias {
+        nodes {
+          name
+          slug
+          categoriasDePec {
+            configuracoesCategorias {
+              cor
+              icone {
+                node {
+                  mediaItemUrl
+                }
+              }
+            }
+          }
+          pECS {
+            nodes {
+              id
+              title
+              featuredImage {
+                node {
+                  sourceUrl
                 }
               }
             }
           }
         }
       }
-    """;
+    }
+  ''';
 
-    QueryResult result = await client.value.query(QueryOptions(document: gql(query)));
-    return result;
-    
+  Future<List<dynamic>> fetchCategories() async {
+    final QueryOptions options =
+        QueryOptions(document: gql(fetchCategoriesQuery));
+
+    final QueryResult result = await client.value.query(options);
+
+    if (result.hasException) {
+      throw Exception(result.exception.toString());
+    }
+
+    return result.data?['categorias']['nodes'] ?? [];
   }
-
 }
