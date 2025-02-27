@@ -53,6 +53,7 @@ class _CategoryTabsState extends State<CategoryTabs>
                 horizontal: 4,
               ),
               tabs: categories.map((category) {
+                String name = category['name'];
                 String colorString = category['categoriasDePec']
                     ['configuracoesCategorias']['cor'];
                 Color color = getColorFromString(colorString);
@@ -70,15 +71,15 @@ class _CategoryTabsState extends State<CategoryTabs>
                       ),
                       child: Image.network(iconUrl),
                     ),
-                    label: Text(category['name'].toUpperCase()),
-                    backgroundColor: color.withValues(alpha: 0.1),
+                    label: Text(name.toUpperCase()),
+                    backgroundColor: color.withValues(alpha: 0.2),
                     padding: EdgeInsets.fromLTRB(4, 4, 4, 4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),
                     ),
                     side: BorderSide.none,
                     labelStyle: TextStyle(
-                      color: color.withValues(alpha: 0.7),
+                      color: color.withValues(alpha: 1),
                       fontSize: 20,
                       height: 0.8,
                       leadingDistribution: TextLeadingDistribution.even,
@@ -100,7 +101,7 @@ class _CategoryTabsState extends State<CategoryTabs>
                   child: PecsList(
                     flutterTts: FlutterTts(),
                     pecsCollection: pecsItems,
-                    pecsColor: color.withOpacity(0.1),
+                    pecsColor: color.withValues(alpha: 0.2),
                   ),
                 );
               }).toList(),
@@ -169,7 +170,7 @@ class _PecsListState extends State<PecsList> {
                         decoration: BoxDecoration(
                             boxShadow: [
                               BoxShadow(
-                                color: Color(colorDark).withOpacity(0.16),
+                                color: Color(colorDark).withValues(alpha: 0.16),
                                 spreadRadius: 0,
                                 blurRadius: 12,
                                 offset: Offset(0, 4),
@@ -177,7 +178,8 @@ class _PecsListState extends State<PecsList> {
                             ],
                             borderRadius: BorderRadius.circular(80),
                             border: Border.all(
-                              color: Color(colorNeutralLight).withOpacity(0.60),
+                              color: Color(colorNeutralLight)
+                                  .withValues(alpha: 0.60),
                               width: selectedIndex ==
                                       widget.pecsCollection.indexOf(pec)
                                   ? 8
@@ -203,12 +205,12 @@ class _PecsListState extends State<PecsList> {
                         padding:
                             EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                         decoration: BoxDecoration(
-                          color: Color(colorNeutralLight).withOpacity(0.60),
+                          color:
+                              Color(colorNeutralLight).withValues(alpha: 0.60),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           pec['title'],
-                          // style: Theme.of(context).textTheme.titleMedium,
                           style: TextStyle(
                             fontSize: 24.0,
                             height: 0.8,
