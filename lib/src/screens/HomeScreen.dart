@@ -110,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             child: SafeArea(
               child: Container(
                 height: 80,
-                margin: EdgeInsets.symmetric(horizontal: 24.0),
+                margin: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
                 decoration: BoxDecoration(
                   color: Color(colorNeutralLight).withOpacity(0.98),
                   borderRadius: BorderRadius.circular(68),
