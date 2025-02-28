@@ -14,7 +14,7 @@ class GraphQLService {
 
   static const String fetchCategoriesQuery = '''
     query {
-      categorias {
+      categorias(where: {orderby: TERM_ORDER, order: ASC}, first: 20) {
         nodes {
           name
           slug
@@ -28,7 +28,7 @@ class GraphQLService {
               }
             }
           }
-          pECS {
+          pECS(where: {orderby: {order: ASC, field: MENU_ORDER}}, first: 20) {
             nodes {
               id
               title
