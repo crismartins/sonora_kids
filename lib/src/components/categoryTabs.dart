@@ -193,7 +193,8 @@ class _PecsListState extends State<PecsList> {
                                   null
                               ? NetworkImage(
                                   pec['featuredImage']?['node']['sourceUrl'])
-                              : AssetImage('assets/placeholder.png')
+                              : AssetImage(
+                                      'assets/images/avatar_default_v1.png')
                                   as ImageProvider,
                           onBackgroundImageError: (exception, stackTrace) {
                             print('Image loading error: $exception');
