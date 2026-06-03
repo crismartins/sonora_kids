@@ -10,54 +10,63 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import { PhraseCard } from "@/components/PhraseCard";
+import * as Speech from "expo-speech";
+import { Ionicons } from "@expo/vector-icons";
+import { RoutinePecCard } from "@/components/PecCard";
 import { colors } from "@/constants/colors";
-import { ROUTINE } from "@/constants/phrases";
+import { ROUTINE_BLOCKS } from "@/constants/phrases";
+
+const DAYS = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
+const FULL_DAYS = [
+  "DOMINGO",
+  "SEGUNDA-FEIRA",
+  "TERÇA-FEIRA",
+  "QUARTA-FEIRA",
+  "QUINTA-FEIRA",
+  "SEXTA-FEIRA",
+  "SÁBADO",
+];
 
 export default function RotinaScreen() {
   const insets = useSafeAreaInsets();
-  const [selectedCategory, setSelectedCategory] = useState(0);
+  const today = new Date().getDay();
+  const [selectedDay, setSelectedDay] = useState(today);
 
-  const handleSelectCategory = useCallback((idx: number) => {
-    setSelectedCategory(idx);
+  const handleSelectDay = useCallback((idx: number) => {
+    setSelectedDay(idx);
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
   }, []);
 
-  const currentGroup = ROUTINE[selectedCategory];
-  const tabBarHeight = Platform.OS === "web" ? 34 + 68 : insets.bottom + 8 + 68;
+  const tabBarHeight = Platform.OS === "web" ? 84 : 60 + insets.bottom;
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.neutralLight }]}>
-      <View style={styles.chipsContainer}>
+    <View style={styles.container}>
+      <View style={styles.daysBar}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chipsContent}
+          contentContainerStyle={styles.daysContent}
         >
-          {ROUTINE.map((group, idx) => {
-            const isActive = idx === selectedCategory;
+          {DAYS.map((day, idx) => {
+            const isActive = idx === selectedDay;
             return (
               <Pressable
-                key={group.category}
-                onPress={() => handleSelectCategory(idx)}
+                key={day}
+                onPress={() => handleSelectDay(idx)}
                 style={[
-                  styles.chip,
-                  {
-                    backgroundColor: isActive ? colors.neutral : `${colors.neutral}66`,
-                    borderWidth: isActive ? 1.5 : 0,
-                    borderColor: isActive ? colors.primary : "transparent",
-                  },
+                  styles.dayChip,
+                  isActive && styles.dayChipActive,
                 ]}
               >
                 <Text
                   style={[
-                    styles.chipLabel,
-                    { color: isActive ? colors.primary : colors.neutralDark },
+                    styles.dayLabel,
+                    isActive && styles.dayLabelActive,
                   ]}
                 >
-                  {group.category.toUpperCase()}
+                  {day}
                 </Text>
               </Pressable>
             );
@@ -65,17 +74,42 @@ export default function RotinaScreen() {
         </ScrollView>
       </View>
 
-      <FlatList
-        data={currentGroup.collection}
-        keyExtractor={(_, idx) => `routine-${idx}`}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={[
-          styles.listContent,
+          styles.scrollContent,
           { paddingBottom: tabBarHeight + 16 },
         ]}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => <PhraseCard phrase={item} />}
-        ItemSeparatorComponent={() => <View style={{ height: 2 }} />}
-      />
+      >
+        {ROUTINE_BLOCKS.map((block) => (
+          <View key={block.time} style={styles.timeBlock}>
+            <View style={styles.blockHeader}>
+              <View style={styles.timeTag}>
+                <Text style={styles.timeText}>{block.time}</Text>
+              </View>
+              <Text style={styles.blockLabel}>{block.label}</Text>
+              <Pressable
+                onPress={() => Speech.speak(block.label, { language: "pt-BR" })}
+                style={styles.speakBtn}
+              >
+                <Ionicons name="volume-high" size={18} color={colors.primary} />
+              </Pressable>
+            </View>
+
+            <View style={styles.pecGrid}>
+              {block.items.map((item, itemIdx) => (
+                <View key={item.id} style={styles.pecWrapper}>
+                  <RoutinePecCard
+                    id={item.id}
+                    title={item.title}
+                    color={item.color}
+                  />
+                </View>
+              ))}
+            </View>
+          </View>
+        ))}
+      </ScrollView>
     </View>
   );
 }
@@ -83,28 +117,84 @@ export default function RotinaScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#FFFFFF",
   },
-  chipsContainer: {
+  daysBar: {
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral,
+    borderBottomColor: "#F0F0F0",
   },
-  chipsContent: {
+  daysContent: {
     paddingHorizontal: 12,
     paddingVertical: 10,
     gap: 6,
     flexDirection: "row",
   },
-  chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+  dayChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
     borderRadius: 100,
+    backgroundColor: "#F5F5F5",
   },
-  chipLabel: {
+  dayChipActive: {
+    backgroundColor: "#E3F2FD",
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+  },
+  dayLabel: {
     fontFamily: "Dongle-Bold",
-    fontSize: 16,
+    fontSize: 15,
+    color: colors.neutralDark,
+    letterSpacing: 0.3,
+  },
+  dayLabelActive: {
+    color: colors.primary,
+  },
+  scrollContent: {
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    gap: 16,
+  },
+  timeBlock: {
+    gap: 10,
+  },
+  blockHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  timeTag: {
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  timeText: {
+    fontFamily: "Dongle-Bold",
+    fontSize: 18,
+    color: "#fff",
+    lineHeight: 20,
+  },
+  blockLabel: {
+    fontFamily: "Dongle-Bold",
+    fontSize: 20,
+    color: colors.dark,
+    flex: 1,
     letterSpacing: 0.5,
   },
-  listContent: {
-    paddingTop: 12,
+  speakBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#E3F2FD",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pecGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  pecWrapper: {
+    width: "50%",
   },
 });

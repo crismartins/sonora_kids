@@ -1,6 +1,37 @@
 import { PhraseGroup } from "@/types";
 
-export const PHRASES: PhraseGroup[] = [
+export const PHRASES_MAIS_USADAS: PhraseGroup[] = [
+  {
+    category: "Mais Usadas",
+    collection: [
+      [
+        { text: "Eu quero", color: "blue" },
+        { text: "Bolo", color: "orange" },
+        { text: "Chocolate", color: "brown" },
+      ],
+      [
+        { text: "Eu quero", color: "blue" },
+        { text: "Bolo", color: "orange" },
+        { text: "Chocolate", color: "brown" },
+      ],
+      [
+        { text: "Eu quero", color: "blue" },
+        { text: "Bolo", color: "orange" },
+      ],
+      [
+        { text: "Eu quero", color: "blue" },
+        { text: "Água", color: "cyan" },
+      ],
+      [
+        { text: "Eu", color: "greenAccent" },
+        { text: "quero", color: "blue" },
+        { text: "Brincar", color: "purple" },
+      ],
+    ],
+  },
+];
+
+export const PHRASES_TODAS: PhraseGroup[] = [
   {
     category: "Todas",
     collection: [
@@ -10,9 +41,9 @@ export const PHRASES: PhraseGroup[] = [
         { text: "Obrigado", color: "greenAccent" },
       ],
       [
-        { text: "Quero", color: "greenAccent" },
+        { text: "Eu quero", color: "blue" },
         { text: "Comer", color: "orange" },
-        { text: "Banana", color: "greenAccent" },
+        { text: "Banana", color: "yellow" },
       ],
       [
         { text: "Eu", color: "blue" },
@@ -20,92 +51,66 @@ export const PHRASES: PhraseGroup[] = [
         { text: "Água", color: "cyan" },
       ],
       [
+        { text: "Eu quero", color: "blue" },
+        { text: "Bolo", color: "orange" },
+        { text: "Chocolate", color: "brown" },
+      ],
+      [
         { text: "Por favor", color: "purple" },
         { text: "Me ajuda", color: "teal" },
       ],
-    ],
-  },
-  {
-    category: "Saudações",
-    collection: [
       [
-        { text: "Bom", color: "yellow" },
-        { text: "dia", color: "yellow" },
+        { text: "Bom dia", color: "yellow" },
       ],
       [
-        { text: "Boa", color: "orange" },
-        { text: "tarde", color: "orange" },
+        { text: "Boa tarde", color: "orange" },
       ],
       [
-        { text: "Boa", color: "indigo" },
-        { text: "noite", color: "indigo" },
+        { text: "Boa noite", color: "indigo" },
       ],
       [
-        { text: "Oi", color: "greenAccent" },
-        { text: "tudo bem?", color: "greenAccent" },
-      ],
-    ],
-  },
-  {
-    category: "Necessidades",
-    collection: [
-      [
+        { text: "Eu", color: "blue" },
         { text: "Quero", color: "blue" },
-        { text: "ir ao", color: "blue" },
-        { text: "banheiro", color: "teal" },
+        { text: "ir ao banheiro", color: "teal" },
       ],
       [
         { text: "Estou", color: "orange" },
         { text: "com fome", color: "orange" },
       ],
-      [
-        { text: "Estou", color: "cyan" },
-        { text: "com sede", color: "cyan" },
-      ],
-      [
-        { text: "Quero", color: "purple" },
-        { text: "descansar", color: "purple" },
-      ],
     ],
   },
 ];
 
-export const ROUTINE: PhraseGroup[] = [
+export const PHRASES: PhraseGroup[] = PHRASES_TODAS;
+
+export const ROUTINE_BLOCKS = [
   {
-    category: "Manhã",
-    collection: [
-      [
-        { text: "Acordar", color: "yellow" },
-        { text: "Escovar dentes", color: "blue" },
-        { text: "Café", color: "orange" },
-      ],
-      [
-        { text: "Tomar banho", color: "cyan" },
-        { text: "Vestir roupa", color: "purple" },
-      ],
+    time: "8:00",
+    label: "ROTINA MANHÃ",
+    items: [
+      { id: "r1", title: "Acordar", color: "yellow" },
+      { id: "r2", title: "Escovar dentes", color: "blue" },
+      { id: "r3", title: "Café", color: "orange" },
+      { id: "r4", title: "Banho", color: "cyan" },
     ],
   },
   {
-    category: "Tarde",
-    collection: [
-      [
-        { text: "Almoço", color: "orange" },
-        { text: "Brincar", color: "greenAccent" },
-      ],
-      [
-        { text: "Estudar", color: "indigo" },
-        { text: "Descansar", color: "teal" },
-      ],
+    time: "13:00",
+    label: "ROTINA TARDE",
+    items: [
+      { id: "r5", title: "Almoço", color: "orange" },
+      { id: "r6", title: "Oi", color: "greenAccent" },
+      { id: "r7", title: "Tchau", color: "blue" },
+      { id: "r8", title: "Brincar", color: "purple" },
     ],
   },
   {
-    category: "Noite",
-    collection: [
-      [
-        { text: "Jantar", color: "orange" },
-        { text: "Escovar dentes", color: "blue" },
-        { text: "Dormir", color: "indigo" },
-      ],
+    time: "20:00",
+    label: "ROTINA NOITE",
+    items: [
+      { id: "r9", title: "Jantar", color: "orange" },
+      { id: "r10", title: "Banho", color: "cyan" },
+      { id: "r11", title: "Dormir", color: "indigo" },
     ],
   },
 ];

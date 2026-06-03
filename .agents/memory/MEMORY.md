@@ -1,1 +1,2 @@
 - [Sonora Kids Expo setup](expo-setup.md) — Expo app lives in mobile/ subdirectory; workflow command, versions, and asset path rules documented.
+- [Expo 54 upgrade](expo54-upgrade.md) — Reanimated v4 needs react-native-worklets peer; correct package versions for SDK 54; babel plugin order.

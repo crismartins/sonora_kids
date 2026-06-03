@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   Platform,
 } from "react-native";
@@ -25,7 +25,6 @@ interface PhraseCardProps {
 
 export function PhraseCard({ phrase }: PhraseCardProps) {
   const scale = useSharedValue(1);
-  const elevation = useSharedValue(0);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -33,18 +32,12 @@ export function PhraseCard({ phrase }: PhraseCardProps) {
 
   const handlePress = useCallback(() => {
     scale.value = withSequence(
-      withTiming(0.97, { duration: 60 }),
-      withSpring(1, { damping: 10 })
+      withTiming(0.98, { duration: 60 }),
+      withSpring(1, { damping: 12 })
     );
-    elevation.value = withSequence(
-      withTiming(1, { duration: 60 }),
-      withTiming(0, { duration: 600 })
-    );
-
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-
     const fullPhrase = phrase.map((p) => p.text).join(" ");
     Speech.speak(fullPhrase, { language: "pt-BR" });
   }, [phrase]);
@@ -54,25 +47,16 @@ export function PhraseCard({ phrase }: PhraseCardProps) {
   }, []);
 
   return (
-    <TouchableOpacity
-      onPress={handlePress}
-      onLongPress={handleLongPress}
-      activeOpacity={0.9}
-    >
+    <Pressable onPress={handlePress} onLongPress={handleLongPress}>
       <Animated.View style={[styles.card, animatedStyle]}>
         <View style={styles.wordsRow}>
           {phrase.map((item, idx) => {
             const bgColor = getCategoryBgColor(item.color);
             const textColor = getCategoryColor(item.color);
-            const isLast = idx === phrase.length - 1;
             return (
               <View
                 key={idx}
-                style={[
-                  styles.wordCell,
-                  { backgroundColor: bgColor },
-                  !isLast && styles.wordCellBorder,
-                ]}
+                style={[styles.wordCell, { backgroundColor: bgColor }]}
               >
                 <Text style={[styles.wordText, { color: textColor }]}>
                   {item.text}
@@ -81,44 +65,45 @@ export function PhraseCard({ phrase }: PhraseCardProps) {
             );
           })}
         </View>
-        <View style={styles.soundButton}>
+        <Pressable onPress={handlePress} style={styles.soundButton}>
           <Ionicons name="volume-high" size={20} color={colors.primary} />
-        </View>
+        </Pressable>
       </Animated.View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
-    backgroundColor: colors.neutral,
+    backgroundColor: "#fff",
     borderRadius: 16,
     marginHorizontal: 16,
-    marginVertical: 5,
+    marginVertical: 4,
     overflow: "hidden",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E4F4FF",
+    minHeight: 64,
   },
   wordsRow: {
     flex: 1,
     flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 4,
+    padding: 10,
   },
   wordCell: {
-    flex: 1,
-    paddingVertical: 18,
-    paddingHorizontal: 8,
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     alignItems: "center",
     justifyContent: "center",
   },
-  wordCellBorder: {
-    borderRightWidth: 1,
-    borderRightColor: `${colors.dark}22`,
-  },
   wordText: {
     fontFamily: "Dongle-Bold",
-    fontSize: 22,
-    textAlign: "center",
-    lineHeight: 24,
+    fontSize: 20,
+    lineHeight: 22,
   },
   soundButton: {
     paddingHorizontal: 16,

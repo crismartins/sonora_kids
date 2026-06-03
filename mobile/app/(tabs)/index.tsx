@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,44 +7,36 @@ import {
   Pressable,
   Image,
   StyleSheet,
-  Dimensions,
   Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
+import { Ionicons } from "@expo/vector-icons";
 import { useCategories } from "@/hooks/useCategories";
 import { PecCard } from "@/components/PecCard";
 import { SkeletonPecCard, SkeletonChip } from "@/components/SkeletonCard";
 import { colors, getCategoryColor, getCategoryBgColor } from "@/constants/colors";
 import { PecItem } from "@/types";
-import { Ionicons } from "@expo/vector-icons";
-
-const { width } = Dimensions.get("window");
-const NUM_COLUMNS = 2;
 
 export default function PecsScreen() {
   const insets = useSafeAreaInsets();
   const { data: categories, isLoading, error, refetch } = useCategories();
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const handleSelectCategory = useCallback(
-    (index: number) => {
-      setSelectedIndex(index);
-      if (Platform.OS !== "web") {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-    },
-    []
-  );
+  const handleSelectCategory = useCallback((index: number) => {
+    setSelectedIndex(index);
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+  }, []);
 
   const selectedCategory = categories?.[selectedIndex];
   const pecs: PecItem[] = selectedCategory?.pECS?.nodes ?? [];
-  const categoryConfig =
-    selectedCategory?.categoriasDePec?.configuracoesCategorias;
-  const categoryColorName = categoryConfig?.cor ?? "blue";
+  const categoryColorName =
+    selectedCategory?.categoriasDePec?.configuracoesCategorias?.cor ?? "blue";
   const cardBg = getCategoryBgColor(categoryColorName);
 
-  const tabBarHeight = Platform.OS === "web" ? 34 + 68 : insets.bottom + 8 + 68;
+  const tabBarHeight = Platform.OS === "web" ? 84 : 60 + insets.bottom;
 
   if (error) {
     return (
@@ -59,7 +51,7 @@ export default function PecsScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.neutralLight }]}>
+    <View style={styles.container}>
       <View style={styles.chipsContainer}>
         <ScrollView
           horizontal
@@ -69,12 +61,10 @@ export default function PecsScreen() {
           {isLoading
             ? Array.from({ length: 5 }).map((_, i) => <SkeletonChip key={i} />)
             : categories?.map((cat, idx) => {
-                const catColor = getCategoryColor(
-                  cat.categoriasDePec?.configuracoesCategorias?.cor ?? "blue"
-                );
-                const catBg = getCategoryBgColor(
-                  cat.categoriasDePec?.configuracoesCategorias?.cor ?? "blue"
-                );
+                const catColorName =
+                  cat.categoriasDePec?.configuracoesCategorias?.cor ?? "blue";
+                const catColor = getCategoryColor(catColorName);
+                const catBg = getCategoryBgColor(catColorName);
                 const isActive = idx === selectedIndex;
                 const iconUrl =
                   cat.categoriasDePec?.configuracoesCategorias?.icone?.node?.mediaItemUrl;
@@ -85,24 +75,19 @@ export default function PecsScreen() {
                     style={[
                       styles.chip,
                       {
-                        backgroundColor: isActive
-                          ? catBg
-                          : `${catBg}88`,
+                        backgroundColor: isActive ? catBg : "#F5F5F5",
                         borderColor: isActive ? catColor : "transparent",
                         borderWidth: isActive ? 1.5 : 0,
                       },
                     ]}
                   >
-                    {iconUrl && (
-                      <Image
-                        source={{ uri: iconUrl }}
-                        style={styles.chipIcon}
-                      />
-                    )}
+                    {iconUrl ? (
+                      <Image source={{ uri: iconUrl }} style={styles.chipIcon} />
+                    ) : null}
                     <Text
                       style={[
                         styles.chipLabel,
-                        { color: catColor, opacity: isActive ? 1 : 0.7 },
+                        { color: isActive ? catColor : colors.neutralDark },
                       ]}
                     >
                       {cat.name.toUpperCase()}
@@ -118,7 +103,7 @@ export default function PecsScreen() {
           key="skeleton"
           data={Array.from({ length: 6 })}
           keyExtractor={(_, i) => `skel-${i}`}
-          numColumns={NUM_COLUMNS}
+          numColumns={2}
           contentContainerStyle={[
             styles.gridContent,
             { paddingBottom: tabBarHeight + 16 },
@@ -135,14 +120,14 @@ export default function PecsScreen() {
           key="pecs"
           data={pecs}
           keyExtractor={(item) => item.id}
-          numColumns={NUM_COLUMNS}
+          numColumns={2}
           contentContainerStyle={[
             styles.gridContent,
             { paddingBottom: tabBarHeight + 16 },
           ]}
           renderItem={({ item }) => (
             <View style={styles.cardWrapper}>
-              <PecCard item={item} bgColor={cardBg} />
+              <PecCard item={item} />
             </View>
           )}
           showsVerticalScrollIndicator={false}
@@ -155,10 +140,12 @@ export default function PecsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#FFFFFF",
   },
   chipsContainer: {
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: `${colors.neutral}`,
+    borderBottomColor: "#F0F0F0",
   },
   chipsContent: {
     paddingHorizontal: 12,
@@ -169,25 +156,25 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
     borderRadius: 100,
-    gap: 6,
+    gap: 5,
   },
   chipIcon: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: `${colors.neutralLight}99`,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "#fff",
   },
   chipLabel: {
     fontFamily: "Dongle-Bold",
     fontSize: 16,
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
   gridContent: {
     paddingHorizontal: 10,
-    paddingTop: 8,
+    paddingTop: 10,
   },
   cardWrapper: {
     flex: 1,
@@ -197,6 +184,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 12,
+    backgroundColor: "#FFFFFF",
   },
   errorText: {
     fontFamily: "Dongle-Regular",

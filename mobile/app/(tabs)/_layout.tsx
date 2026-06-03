@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Platform,
 } from "react-native";
-import { BlurView } from "expo-blur";
 import { MaterialCommunityIcons, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/constants/colors";
@@ -18,9 +17,9 @@ function HeaderLeft() {
   return (
     <Pressable
       onPress={() => router.push("/settings")}
-      style={styles.headerBtn}
+      style={styles.headerIconBtn}
     >
-      <Ionicons name="settings-outline" size={22} color={colors.neutralDark} />
+      <Ionicons name="settings-outline" size={20} color={colors.primary} />
     </Pressable>
   );
 }
@@ -36,66 +35,37 @@ function HeaderRight() {
   );
 }
 
-function TabBarBackground() {
-  if (Platform.OS === "ios") {
-    return (
-      <BlurView
-        intensity={60}
-        tint="systemChromeMaterialLight"
-        style={StyleSheet.absoluteFill}
-      />
-    );
-  }
-  return (
-    <View
-      style={[StyleSheet.absoluteFill, { backgroundColor: `${colors.neutralLight}F5` }]}
-    />
-  );
-}
-
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
-  const tabBarBottom = Platform.OS === "web" ? 34 : insets.bottom + 8;
+  const tabBarHeight = Platform.OS === "web" ? 84 : 60 + insets.bottom;
 
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: colors.neutralLight },
+        headerStyle: { backgroundColor: "#FFFFFF" },
         headerTitleStyle: {
           fontFamily: "Dongle-Bold",
-          fontSize: 30,
+          fontSize: 28,
           color: colors.dark,
         },
-        headerTintColor: colors.dark,
         headerShadowVisible: false,
+        headerTintColor: colors.dark,
         headerLeft: () => <HeaderLeft />,
         headerRight: () => <HeaderRight />,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.neutralDark,
         tabBarStyle: {
-          position: "absolute",
-          bottom: tabBarBottom,
-          left: 20,
-          right: 20,
-          height: 68,
-          borderRadius: 40,
-          borderTopWidth: 0,
-          backgroundColor: "transparent",
-          elevation: 8,
-          boxShadow:
-            Platform.OS === "web"
-              ? `0px 4px 24px ${colors.dark}22`
-              : undefined,
-          paddingBottom: 0,
-          overflow: Platform.OS === "android" ? "hidden" : "visible",
+          backgroundColor: "#FFFFFF",
+          borderTopWidth: 1,
+          borderTopColor: "#E4F4FF",
+          height: tabBarHeight,
+          paddingBottom: Platform.OS === "web" ? 34 : insets.bottom,
+          paddingTop: 6,
         },
-        tabBarBackground: () => <TabBarBackground />,
         tabBarLabelStyle: {
           fontFamily: "Dongle-Bold",
-          fontSize: 12,
-          marginBottom: 4,
+          fontSize: 13,
         },
-        tabBarIconStyle: { marginTop: 6 },
         tabBarItemStyle: { paddingVertical: 4 },
       }}
     >
@@ -105,7 +75,7 @@ export default function TabLayout() {
           title: "Pecs",
           tabBarLabel: "PECS",
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="card-multiple-outline" size={22} color={color} />
+            <MaterialCommunityIcons name="card-multiple-outline" size={24} color={color} />
           ),
         }}
       />
@@ -115,7 +85,7 @@ export default function TabLayout() {
           title: "Frases",
           tabBarLabel: "FRASES",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="chatbubbles-outline" size={22} color={color} />
+            <Ionicons name="chatbubbles-outline" size={24} color={color} />
           ),
         }}
       />
@@ -125,7 +95,7 @@ export default function TabLayout() {
           title: "Aprender",
           tabBarLabel: "APRENDER",
           tabBarIcon: ({ color }) => (
-            <MaterialIcons name="school" size={22} color={color} />
+            <MaterialIcons name="sports-esports" size={24} color={color} />
           ),
         }}
       />
@@ -135,7 +105,7 @@ export default function TabLayout() {
           title: "Rotina",
           tabBarLabel: "ROTINA",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="time-outline" size={22} color={color} />
+            <Ionicons name="time-outline" size={24} color={color} />
           ),
         }}
       />
@@ -144,22 +114,22 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
-  headerBtn: {
+  headerIconBtn: {
     marginLeft: 16,
     width: 36,
     height: 36,
+    borderRadius: 10,
+    backgroundColor: "#E3F2FD",
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 10,
-    backgroundColor: colors.neutral,
   },
   avatarBtn: {
     marginRight: 16,
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: 18,
     overflow: "hidden",
-    backgroundColor: colors.neutral,
+    backgroundColor: "#E4F4FF",
   },
   avatar: {
     width: 36,

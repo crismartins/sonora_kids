@@ -12,7 +12,7 @@ import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-ic
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/constants/colors";
 
-interface SettingRowProps {
+interface RowProps {
   icon: React.ReactNode;
   label: string;
   description?: string;
@@ -20,57 +20,50 @@ interface SettingRowProps {
   value?: boolean;
   onToggle?: (val: boolean) => void;
   destructive?: boolean;
+  isLast?: boolean;
 }
 
-function SettingRow({
-  icon,
-  label,
-  description,
-  toggle,
-  value,
-  onToggle,
-  destructive,
-}: SettingRowProps) {
+function Row({ icon, label, description, toggle, value, onToggle, destructive, isLast }: RowProps) {
   return (
     <Pressable
       style={({ pressed }) => [
         styles.row,
-        pressed && !toggle && { backgroundColor: colors.neutral },
+        !isLast && styles.rowBorder,
+        pressed && !toggle && { backgroundColor: "#FAFAFA" },
       ]}
     >
-      <View style={[styles.rowIcon, { backgroundColor: `${colors.neutral}` }]}>
+      <View style={[styles.rowIcon, { backgroundColor: destructive ? "#FFEBEE" : "#F0F8FF" }]}>
         {icon}
       </View>
       <View style={styles.rowContent}>
-        <Text
-          style={[styles.rowLabel, destructive && { color: "#D32F2F" }]}
-        >
+        <Text style={[styles.rowLabel, destructive && { color: "#D32F2F" }]}>
           {label}
         </Text>
-        {description && (
+        {description ? (
           <Text style={styles.rowDesc}>{description}</Text>
-        )}
+        ) : null}
       </View>
       {toggle && onToggle ? (
         <Switch
           value={value}
           onValueChange={onToggle}
-          trackColor={{ false: colors.neutral, true: `${colors.primary}66` }}
-          thumbColor={value ? colors.primary : colors.neutralDark}
+          trackColor={{ false: "#E0E0E0", true: `${colors.primary}66` }}
+          thumbColor={value ? colors.primary : "#9E9E9E"}
         />
       ) : (
-        <Ionicons
-          name="chevron-forward"
-          size={18}
-          color={colors.neutralDark}
-        />
+        <Ionicons name="chevron-forward" size={18} color="#BDBDBD" />
       )}
     </Pressable>
   );
 }
 
-function SectionHeader({ title }: { title: string }) {
-  return <Text style={styles.sectionHeader}>{title}</Text>;
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      <View style={styles.sectionCard}>{children}</View>
+    </View>
+  );
 }
 
 export default function SettingsScreen() {
@@ -82,89 +75,104 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: colors.neutralLight }]}
+      style={[styles.container, { backgroundColor: "#FFFFFF" }]}
       contentContainerStyle={[
         styles.content,
-        { paddingBottom: (Platform.OS === "web" ? 34 : insets.bottom) + 32 },
+        {
+          paddingBottom:
+            (Platform.OS === "web" ? 34 : insets.bottom) + 32,
+        },
       ]}
     >
-      <SectionHeader title="Comunicação" />
-      <View style={styles.group}>
-        <SettingRow
+      <Section title="Primeiros Passos">
+        <Row
+          icon={<MaterialIcons name="flag" size={20} color={colors.primary} />}
+          label="Guia de início"
+          description="Configure o app pela primeira vez"
+          isLast
+        />
+      </Section>
+
+      <Section title="Comunicação">
+        <Row
           icon={<Ionicons name="mic-outline" size={20} color={colors.primary} />}
           label="Idioma da voz"
           description="Português (Brasil)"
         />
-        <SettingRow
+        <Row
           icon={<Ionicons name="volume-high-outline" size={20} color={colors.primary} />}
           label="Falar automaticamente"
-          description="Fala ao selecionar uma categoria"
+          description="Fala ao selecionar categoria"
           toggle
           value={autoSpeak}
           onToggle={setAutoSpeak}
         />
-        <SettingRow
+        <Row
           icon={<MaterialCommunityIcons name="speedometer" size={20} color={colors.primary} />}
           label="Velocidade da fala"
           description="Normal"
+          isLast
         />
-      </View>
+      </Section>
 
-      <SectionHeader title="Acessibilidade" />
-      <View style={styles.group}>
-        <SettingRow
+      <Section title="Acessibilidade">
+        <Row
           icon={<MaterialIcons name="vibration" size={20} color="#00897B" />}
           label="Vibração (haptics)"
           toggle
           value={haptics}
           onToggle={setHaptics}
         />
-        <SettingRow
+        <Row
           icon={<MaterialIcons name="text-fields" size={20} color="#00897B" />}
           label="Texto grande"
           toggle
           value={largeText}
           onToggle={setLargeText}
         />
-        <SettingRow
+        <Row
           icon={<Ionicons name="contrast-outline" size={20} color="#00897B" />}
           label="Alto contraste"
           toggle
           value={highContrast}
           onToggle={setHighContrast}
+          isLast
         />
-      </View>
+      </Section>
 
-      <SectionHeader title="Conta" />
-      <View style={styles.group}>
-        <SettingRow
-          icon={<Ionicons name="person-outline" size={20} color="#6A1B9A" />}
+      <Section title="Conectar">
+        <Row
+          icon={<Ionicons name="mic-circle-outline" size={20} color="#6A1B9A" />}
+          label="Conecta à Alexa"
+          description="Integrar com Amazon Alexa"
+        />
+        <Row
+          icon={<Ionicons name="chatbubble-outline" size={20} color="#6A1B9A" />}
+          label="Envie-nos Sugestões"
+          description="Nos ajude a melhorar o app"
+          isLast
+        />
+      </Section>
+
+      <Section title="Conta">
+        <Row
+          icon={<Ionicons name="person-outline" size={20} color={colors.neutralDark} />}
           label="Editar perfil"
         />
-        <SettingRow
-          icon={<Ionicons name="cloud-download-outline" size={20} color="#6A1B9A" />}
+        <Row
+          icon={<Ionicons name="cloud-download-outline" size={20} color={colors.neutralDark} />}
           label="Sincronizar dados"
           description="Último sync: hoje"
         />
-      </View>
-
-      <SectionHeader title="Sobre" />
-      <View style={styles.group}>
-        <SettingRow
-          icon={<Ionicons name="information-circle-outline" size={20} color={colors.neutralDark} />}
-          label="Versão do app"
-          description="1.0.0"
-        />
-        <SettingRow
-          icon={<Ionicons name="document-text-outline" size={20} color={colors.neutralDark} />}
-          label="Termos de uso"
-        />
-        <SettingRow
+        <Row
           icon={<Ionicons name="trash-outline" size={20} color="#D32F2F" />}
           label="Redefinir configurações"
           destructive
+          isLast
         />
-      </View>
+      </Section>
+
+      <Text style={styles.version}>App Versão 1.0</Text>
     </ScrollView>
   );
 }
@@ -173,33 +181,40 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: {
     paddingTop: 8,
+    gap: 0,
   },
-  sectionHeader: {
+  section: {
+    marginBottom: 4,
+  },
+  sectionTitle: {
     fontFamily: "Dongle-Bold",
-    fontSize: 18,
+    fontSize: 17,
     color: colors.neutralDark,
     letterSpacing: 0.5,
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 4,
+    paddingTop: 18,
+    paddingBottom: 5,
     textTransform: "uppercase",
   },
-  group: {
+  sectionCard: {
     marginHorizontal: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    overflow: "hidden",
     borderWidth: 1,
-    borderColor: colors.neutral,
+    borderColor: "#F0F0F0",
+    overflow: "hidden",
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
     gap: 12,
+    backgroundColor: "#FFFFFF",
+  },
+  rowBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral,
+    borderBottomColor: "#F5F5F5",
   },
   rowIcon: {
     width: 36,
@@ -224,5 +239,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.neutralDark,
     lineHeight: 17,
+  },
+  version: {
+    fontFamily: "Dongle-Regular",
+    fontSize: 16,
+    color: "#BDBDBD",
+    textAlign: "center",
+    marginTop: 12,
+    marginBottom: 4,
   },
 });
