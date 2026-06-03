@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           useMaterial3: true,
           fontFamily: 'Dongle',
-          cardTheme: CardTheme(
+          cardTheme: CardThemeData(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.all(
                 Radius.circular(20.0),
@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
             labelLarge: TextStyle(
                 fontSize: 16.0, fontWeight: FontWeight.w400, color: Colors.red),
           ),
-          tabBarTheme: TabBarTheme(
+          tabBarTheme: TabBarThemeData(
             labelColor: Colors.red,
             dividerColor: Colors.transparent,
             labelStyle: TextStyle(
