@@ -1,0 +1,1 @@
+- [Sonora Kids Expo setup](expo-setup.md) — Expo app lives in mobile/ subdirectory; workflow command, versions, and asset path rules documented.
