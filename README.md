@@ -1,29 +1,46 @@
-# sonora_kids
+# Sonora Kids
 
-A new Flutter project.
+Augmentative and Alternative Communication (AAC) app for autistic children, built with Expo / React Native.
 
-## Getting Started
+Uses the PECS (Picture Exchange Communication System) methodology with a GraphQL backend, text-to-speech in Portuguese (pt-BR), haptic feedback, and animated interactions.
 
-This project is a starting point for a Flutter application that follows the
-[simple app state management
-tutorial](https://flutter.dev/to/state-management-sample).
+## Tech Stack
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- **Expo SDK 54** (React Native 0.81.5, React 19)
+- **Expo Router v6** — file-based navigation
+- **NativeWind v4** + TailwindCSS — utility-first styling
+- **@tanstack/react-query** — GraphQL data fetching & caching
+- **react-native-reanimated v4** — spring animations
+- **expo-speech** — TTS in pt-BR
+- **expo-haptics** — tactile feedback
 
-## Assets
+## Project Structure
 
-The `assets` directory houses images, fonts, and any other files you want to
-include with your application.
+```
+mobile/
+├── app/                  # Expo Router screens
+│   ├── (tabs)/           # Bottom-tab screens (Pecs, Frases, Aprender, Rotina)
+│   ├── profile.tsx       # Profile modal
+│   └── settings.tsx      # Settings modal
+├── components/           # PecCard, PhraseCard, SkeletonCard
+├── constants/            # colors.ts, phrases.ts
+├── hooks/                # useCategories (GraphQL)
+├── services/             # graphqlClient
+├── types/                # TypeScript interfaces
+└── assets/               # fonts (Dongle), images
+```
 
-The `assets/images` directory contains [resolution-aware
-images](https://flutter.dev/to/resolution-aware-images).
+## Running
 
-## Localization
+```bash
+cd mobile
+npx expo start --web --port 5000
+```
 
-This project generates localized messages based on arb files found in
-the `lib/src/localization` directory.
+Scan the QR code with **Expo Go** on your phone for the full native experience (haptics, TTS, animations).
 
-To support additional languages, please visit the tutorial on
-[Internationalizing Flutter apps](https://flutter.dev/to/internationalization).
+## GraphQL Backend
+
+`https://darkturquoise-stork-856497.hostingersite.com/graphql`
+
+CORS is restricted on web preview — all features work fully via Expo Go on a physical device.
