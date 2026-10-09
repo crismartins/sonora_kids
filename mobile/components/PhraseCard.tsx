@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { View, Text, Pressable, Platform } from "react-native";
+import { View, Pressable, Platform } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -12,6 +12,7 @@ import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { PhraseItem } from "@/types";
 import { colors, getCategoryColor, getCategoryBgColor } from "@/constants/colors";
+import { PillText } from "@/components/PillText";
 
 interface PhraseCardProps {
   phrase: PhraseItem[];
@@ -53,15 +54,12 @@ export function PhraseCard({ phrase }: PhraseCardProps) {
             return (
               <View
                 key={idx}
-                className="items-center justify-center rounded-[10px] px-3 py-2"
+                className="h-9 items-center justify-center rounded-full px-3"
                 style={{ backgroundColor: bgColor }}
               >
-                <Text
-                  className="font-dongle-bold text-xl leading-[22px]"
-                  style={{ color: textColor }}
-                >
+                <PillText size={18} style={{ color: textColor }}>
                   {item.text}
-                </Text>
+                </PillText>
               </View>
             );
           })}

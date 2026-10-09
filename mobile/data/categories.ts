@@ -1,10 +1,25 @@
-import { Category } from "@/types";
+import { ImageSourcePropType } from "react-native";
+import { Category, PecItem } from "@/types";
 
 const AVATAR = require("../assets/images/avatar_default_v1.png");
 const AVATAR_2 = require("../assets/images/avatar_default_v2.png");
 
+function pec(slug: string, title: string, index: number): PecItem {
+  const image: ImageSourcePropType = index % 2 === 0 ? AVATAR : AVATAR_2;
+  return {
+    id: `pec-${slug}-${index + 1}`,
+    title,
+    localImage: image,
+  };
+}
+
+function pecs(slug: string, titles: string[], start = 0): PecItem[] {
+  return titles.map((title, offset) => pec(slug, title, start + offset));
+}
+
 /**
- * Static PECS catalog (snapshot of WordPress GraphQL data, offline-friendly).
+ * Static PECS catalog for a non-speaking autistic child.
+ * Short, speakable labels: requests, refusal, body needs, and sensory regulation.
  */
 export const MOCK_CATEGORIES: Category[] = [
   {
@@ -16,11 +31,25 @@ export const MOCK_CATEGORIES: Category[] = [
     pECS: {
       nodes: [
         { id: "cG9zdDo1", title: "Oi", localImage: AVATAR },
-        { id: "cG9zdDo5", title: "Tchau", localImage: AVATAR_2 },
+        { id: "cG9zdDo9", title: "Tchau", localImage: AVATAR_2 },
         { id: "cG9zdDozMg==", title: "Bom Dia", localImage: AVATAR },
         { id: "cG9zdDozMQ==", title: "Obrigado", localImage: AVATAR },
         { id: "cG9zdDozMw==", title: "Boa Tarde", localImage: AVATAR_2 },
         { id: "cG9zdDozNA==", title: "Boa Noite", localImage: AVATAR_2 },
+        ...pecs(
+          "boas-maneiras",
+          [
+            "Por favor",
+            "Desculpa",
+            "Com licença",
+            "De nada",
+            "Tudo bem",
+            "Até logo",
+            "Posso",
+            "Parabéns",
+          ],
+          6,
+        ),
       ],
     },
   },
@@ -30,7 +59,26 @@ export const MOCK_CATEGORIES: Category[] = [
     categoriasDePec: {
       configuracoesCategorias: { cor: "orange" },
     },
-    pECS: { nodes: [] },
+    pECS: {
+      nodes: pecs("sentimentos", [
+        "Feliz",
+        "Triste",
+        "Bravo",
+        "Com medo",
+        "Cansado",
+        "Com dor",
+        "Calmo",
+        "Animado",
+        "Nervoso",
+        "Ansioso",
+        "Frustrado",
+        "Confuso",
+        "Entediado",
+        "Com saudade",
+        "Envergonhado",
+        "Orgulhoso",
+      ]),
+    },
   },
   {
     name: "Comida e Bebida",
@@ -42,6 +90,30 @@ export const MOCK_CATEGORIES: Category[] = [
       nodes: [
         { id: "cG9zdDozNQ==", title: "Maçã", localImage: AVATAR },
         { id: "cG9zdDoxOQ==", title: "Pão de Queijo", localImage: AVATAR_2 },
+        ...pecs(
+          "comida-e-bebida",
+          [
+            "Água",
+            "Suco",
+            "Leite",
+            "Banana",
+            "Pão",
+            "Biscoito",
+            "Iogurte",
+            "Arroz",
+            "Feijão",
+            "Frango",
+            "Macarrão",
+            "Ovo",
+            "Sopa",
+            "Lanche",
+            "Sorvete",
+            "Comida",
+            "Mais",
+            "Acabou",
+          ],
+          2,
+        ),
       ],
     },
   },
@@ -51,7 +123,35 @@ export const MOCK_CATEGORIES: Category[] = [
     categoriasDePec: {
       configuracoesCategorias: { cor: "pink" },
     },
-    pECS: { nodes: [] },
+    pECS: {
+      nodes: pecs("necessidades", [
+        "Banheiro",
+        "Xixi",
+        "Cocô",
+        "Com fome",
+        "Com sede",
+        "Ajuda",
+        "Dor",
+        "Dor de cabeça",
+        "Dor de barriga",
+        "Cansado",
+        "Quero dormir",
+        "Quero banho",
+        "Lavar as mãos",
+        "Escovar os dentes",
+        "Trocar a roupa",
+        "Está frio",
+        "Está quente",
+        "Muito barulho",
+        "Quero silêncio",
+        "Quero pausa",
+        "Quero abraço",
+        "Quero ficar sozinho",
+        "Não gosto",
+        "Para",
+        "Coceira",
+      ]),
+    },
   },
   {
     name: "Objetos e Brinquedos",
@@ -59,7 +159,28 @@ export const MOCK_CATEGORIES: Category[] = [
     categoriasDePec: {
       configuracoesCategorias: { cor: "blue" },
     },
-    pECS: { nodes: [] },
+    pECS: {
+      nodes: pecs("objetos-e-brinquedos", [
+        "Brinquedo",
+        "Bola",
+        "Carrinho",
+        "Boneca",
+        "Pelúcia",
+        "Blocos",
+        "Massinha",
+        "Quebra-cabeça",
+        "Livro",
+        "Lápis",
+        "Papel",
+        "Desenho",
+        "Tablet",
+        "Música",
+        "Fone de ouvido",
+        "Copo",
+        "Prato",
+        "Colher",
+      ]),
+    },
   },
   {
     name: "Pessoas",
@@ -67,7 +188,25 @@ export const MOCK_CATEGORIES: Category[] = [
     categoriasDePec: {
       configuracoesCategorias: { cor: "teal" },
     },
-    pECS: { nodes: [] },
+    pECS: {
+      nodes: pecs("pessoas", [
+        "Eu",
+        "Mamãe",
+        "Papai",
+        "Irmão",
+        "Irmã",
+        "Vovó",
+        "Vovô",
+        "Tia",
+        "Tio",
+        "Professora",
+        "Terapeuta",
+        "Amigo",
+        "Amiga",
+        "Médico",
+        "Família",
+      ]),
+    },
   },
   {
     name: "Dia a Dia",
@@ -75,7 +214,28 @@ export const MOCK_CATEGORIES: Category[] = [
     categoriasDePec: {
       configuracoesCategorias: { cor: "deepPurple" },
     },
-    pECS: { nodes: [] },
+    pECS: {
+      nodes: pecs("dia-a-dia", [
+        "Acordar",
+        "Escovar os dentes",
+        "Tomar banho",
+        "Vestir a roupa",
+        "Café da manhã",
+        "Ir para a escola",
+        "Almoço",
+        "Brincar",
+        "Lanche",
+        "Jantar",
+        "História",
+        "Hora de dormir",
+        "Usar o banheiro",
+        "Lavar as mãos",
+        "Arrumar a mochila",
+        "Agora",
+        "Depois",
+        "Terminou",
+      ]),
+    },
   },
   {
     name: "Animais",
@@ -83,7 +243,25 @@ export const MOCK_CATEGORIES: Category[] = [
     categoriasDePec: {
       configuracoesCategorias: { cor: "brown" },
     },
-    pECS: { nodes: [] },
+    pECS: {
+      nodes: pecs("animais", [
+        "Cachorro",
+        "Gato",
+        "Pássaro",
+        "Peixe",
+        "Cavalo",
+        "Vaca",
+        "Galinha",
+        "Pato",
+        "Coelho",
+        "Porco",
+        "Leão",
+        "Elefante",
+        "Macaco",
+        "Tartaruga",
+        "Borboleta",
+      ]),
+    },
   },
   {
     name: "Perguntas e Respostas",
@@ -91,7 +269,30 @@ export const MOCK_CATEGORIES: Category[] = [
     categoriasDePec: {
       configuracoesCategorias: { cor: "cyan" },
     },
-    pECS: { nodes: [] },
+    pECS: {
+      nodes: pecs("perguntas-e-respostas", [
+        "Sim",
+        "Não",
+        "Não sei",
+        "Eu quero",
+        "Não quero",
+        "Mais",
+        "Acabou",
+        "Ajuda",
+        "Espera",
+        "Meu",
+        "Seu",
+        "Onde",
+        "O quê",
+        "Quando",
+        "Quem",
+        "Por quê",
+        "Posso",
+        "Agora",
+        "Depois",
+        "De novo",
+      ]),
+    },
   },
   {
     name: "Datas e Eventos",
@@ -99,7 +300,24 @@ export const MOCK_CATEGORIES: Category[] = [
     categoriasDePec: {
       configuracoesCategorias: { cor: "blueGrey" },
     },
-    pECS: { nodes: [] },
+    pECS: {
+      nodes: pecs("datas-e-eventos", [
+        "Hoje",
+        "Amanhã",
+        "Ontem",
+        "Aniversário",
+        "Festa",
+        "Natal",
+        "Páscoa",
+        "Carnaval",
+        "Dia das crianças",
+        "Férias",
+        "Fim de semana",
+        "Feriado",
+        "Escola",
+        "Consulta",
+      ]),
+    },
   },
   {
     name: "Formas e Cores",
@@ -107,7 +325,27 @@ export const MOCK_CATEGORIES: Category[] = [
     categoriasDePec: {
       configuracoesCategorias: { cor: "grey" },
     },
-    pECS: { nodes: [] },
+    pECS: {
+      nodes: pecs("formas-e-cores", [
+        "Vermelho",
+        "Azul",
+        "Amarelo",
+        "Verde",
+        "Laranja",
+        "Rosa",
+        "Roxo",
+        "Preto",
+        "Branco",
+        "Marrom",
+        "Círculo",
+        "Quadrado",
+        "Triângulo",
+        "Estrela",
+        "Coração",
+        "Grande",
+        "Pequeno",
+      ]),
+    },
   },
   {
     name: "Lugares",
@@ -115,7 +353,25 @@ export const MOCK_CATEGORIES: Category[] = [
     categoriasDePec: {
       configuracoesCategorias: { cor: "lightGreen" },
     },
-    pECS: { nodes: [] },
+    pECS: {
+      nodes: pecs("lugares", [
+        "Casa",
+        "Escola",
+        "Parque",
+        "Playground",
+        "Banheiro",
+        "Quarto",
+        "Cozinha",
+        "Sala",
+        "Cantinho calmo",
+        "Mercado",
+        "Padaria",
+        "Restaurante",
+        "Consultório",
+        "Praia",
+        "Casa da vovó",
+      ]),
+    },
   },
   {
     name: "Ações e Atividades",
@@ -123,7 +379,30 @@ export const MOCK_CATEGORIES: Category[] = [
     categoriasDePec: {
       configuracoesCategorias: { cor: "purple" },
     },
-    pECS: { nodes: [] },
+    pECS: {
+      nodes: pecs("acoes-e-atividades", [
+        "Brincar",
+        "Comer",
+        "Beber",
+        "Dormir",
+        "Descansar",
+        "Correr",
+        "Pular",
+        "Dançar",
+        "Nadar",
+        "Desenhar",
+        "Pintar",
+        "Ler",
+        "Cantar",
+        "Ouvir música",
+        "Assistir",
+        "Abraçar",
+        "Abrir",
+        "Fechar",
+        "Ir",
+        "Parar",
+      ]),
+    },
   },
   {
     name: "Roupas e Acessórios",
@@ -131,7 +410,25 @@ export const MOCK_CATEGORIES: Category[] = [
     categoriasDePec: {
       configuracoesCategorias: { cor: "indigo" },
     },
-    pECS: { nodes: [] },
+    pECS: {
+      nodes: pecs("roupas-e-acessorios", [
+        "Camiseta",
+        "Calça",
+        "Shorts",
+        "Vestido",
+        "Pijama",
+        "Cueca",
+        "Calcinha",
+        "Meia",
+        "Sapato",
+        "Chinelo",
+        "Casaco",
+        "Boné",
+        "Óculos",
+        "Mochila",
+        "Fralda",
+      ]),
+    },
   },
   {
     name: "Transporte",
@@ -139,6 +436,22 @@ export const MOCK_CATEGORIES: Category[] = [
     categoriasDePec: {
       configuracoesCategorias: { cor: "yellow" },
     },
-    pECS: { nodes: [] },
+    pECS: {
+      nodes: pecs("transporte", [
+        "Carro",
+        "Ônibus",
+        "Van escolar",
+        "Metrô",
+        "Trem",
+        "Bicicleta",
+        "A pé",
+        "Táxi",
+        "Avião",
+        "Barco",
+        "Caminhão",
+        "Moto",
+        "Cinto",
+      ]),
+    },
   },
 ];

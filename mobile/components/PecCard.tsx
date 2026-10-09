@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { View, Text, Image, Pressable, Platform } from "react-native";
+import { View, Image, Pressable, Platform } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -11,14 +11,16 @@ import * as Speech from "expo-speech";
 import * as Haptics from "expo-haptics";
 import { PecItem } from "@/types";
 import { getCategoryBgColor } from "@/constants/colors";
+import { PillText } from "@/components/PillText";
 
 interface PecCardProps {
   item: PecItem;
+  backgroundColor: string;
 }
 
 const FALLBACK_IMAGE = require("../assets/images/avatar_default_v1.png");
 
-export function PecCard({ item }: PecCardProps) {
+export function PecCard({ item, backgroundColor }: PecCardProps) {
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -52,21 +54,28 @@ export function PecCard({ item }: PecCardProps) {
   return (
     <Pressable onPress={handlePress} onLongPress={handleLongPress} className="m-[5px] flex-1">
       <Animated.View
-        className="min-h-[150px] flex-1 items-center justify-center rounded-[20px] bg-[#E8F5E9] p-3"
-        style={animatedStyle}
+        className="min-h-[150px] flex-1 items-center justify-center rounded-[20px] p-3"
+        style={[
+          {
+            backgroundColor,
+            borderRadius: 20,
+            minHeight: 150,
+            padding: 12,
+            alignItems: "center",
+            justifyContent: "center",
+          },
+          animatedStyle,
+        ]}
       >
         <Image
           source={imageSource}
           className="mb-2.5 h-[88px] w-[88px] rounded-full bg-white"
           defaultSource={FALLBACK_IMAGE}
         />
-        <View className="max-w-full rounded-full bg-white px-3 py-[5px]">
-          <Text
-            className="text-center font-dongle-bold text-xl leading-[22px] text-dark"
-            numberOfLines={2}
-          >
+        <View className="max-w-full items-center justify-center rounded-full bg-white px-3 py-1">
+          <PillText size={20} numberOfLines={2} style={{ color: "#001D4A" }}>
             {item.title}
-          </Text>
+          </PillText>
         </View>
       </Animated.View>
     </Pressable>
@@ -109,13 +118,10 @@ export function RoutinePecCard({
           source={FALLBACK_IMAGE}
           className="mb-2.5 h-[88px] w-[88px] rounded-full bg-white"
         />
-        <View className="max-w-full rounded-full bg-white px-3 py-[5px]">
-          <Text
-            className="text-center font-dongle-bold text-xl leading-[22px] text-dark"
-            numberOfLines={2}
-          >
+        <View className="max-w-full items-center justify-center rounded-full bg-white px-3 py-1">
+          <PillText size={20} numberOfLines={2} style={{ color: "#001D4A" }}>
             {title}
-          </Text>
+          </PillText>
         </View>
       </Animated.View>
     </Pressable>

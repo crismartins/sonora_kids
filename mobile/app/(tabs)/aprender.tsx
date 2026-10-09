@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable, Platform, Image } from "react-native
 import { MaterialIcons, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/constants/colors";
+import { PillText } from "@/components/PillText";
 
 const AVATAR = require("../../assets/images/avatar_default_v1.png");
 
@@ -39,10 +40,13 @@ function ActivityCard({
           {description}
         </Text>
       </View>
-      <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: bgColor }}>
-        <Text className="font-dongle-bold text-[13px]" style={{ color: tagColor }}>
+      <View
+        className="h-7 items-center justify-center rounded-full px-2.5"
+        style={{ backgroundColor: bgColor }}
+      >
+        <PillText size={14} style={{ color: tagColor }}>
           {comingSoon ? "Em breve" : tag}
-        </Text>
+        </PillText>
       </View>
     </Pressable>
   );

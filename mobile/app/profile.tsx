@@ -3,6 +3,7 @@ import { View, Text, Image, ScrollView, Pressable, Platform } from "react-native
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
+import { PillText } from "@/components/PillText";
 
 const AVATAR = require("../assets/images/avatar_default_v1.png");
 const AVATAR_2 = require("../assets/images/avatar_default_v2.png");
@@ -59,20 +60,17 @@ export default function ProfileScreen() {
           {MOST_USED.map((word, idx) => (
             <View
               key={idx}
-              className="flex-row items-center gap-1.5 rounded-[10px] px-2.5 py-1.5"
+              className="h-8 flex-row items-center gap-1.5 rounded-full px-2.5"
               style={{ backgroundColor: getCategoryBgColor(word.color) }}
             >
-              <View className="min-w-[26px] items-center rounded-lg bg-white/85 px-1.5 py-0.5">
-                <Text className="font-dongle-bold text-[15px] leading-[17px] text-dark">
+              <View className="h-5 min-w-[26px] items-center justify-center rounded-full bg-white/85 px-1.5">
+                <PillText size={14} style={{ color: "#001D4A" }}>
                   {word.count}
-                </Text>
+                </PillText>
               </View>
-              <Text
-                className="font-dongle-bold text-base leading-[18px]"
-                style={{ color: getCategoryColor(word.color) }}
-              >
+              <PillText size={15} style={{ color: getCategoryColor(word.color) }}>
                 {word.text}
-              </Text>
+              </PillText>
             </View>
           ))}
         </View>

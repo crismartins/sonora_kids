@@ -3,6 +3,8 @@ import { View, Text, FlatList, Pressable, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { PhraseCard } from "@/components/PhraseCard";
+import { PillText } from "@/components/PillText";
+import { colors } from "@/constants/colors";
 import { PHRASES_MAIS_USADAS, PHRASES_TODAS } from "@/constants/phrases";
 import { PhraseItem } from "@/types";
 
@@ -45,17 +47,19 @@ export default function FrasesScreen() {
             <Pressable
               key={tab}
               onPress={() => handleSelectFilter(tab)}
-              className={`flex-1 items-center justify-center rounded-full py-2 ${
-                isActive ? "border-[1.5px] border-primary bg-[#E3F2FD]" : "bg-[#F5F5F5]"
+              className={`h-10 flex-1 items-center justify-center rounded-full border-[1.5px] px-2 ${
+                isActive ? "border-primary bg-[#E3F2FD]" : "border-transparent bg-[#F5F5F5]"
               }`}
             >
-              <Text
-                className={`font-dongle-bold text-[13px] tracking-wide ${
-                  isActive ? "text-primary" : "text-neutral-dark"
-                }`}
+              <PillText
+                size={15}
+                style={{
+                  color: isActive ? colors.primary : colors.neutralDark,
+                  letterSpacing: 0.3,
+                }}
               >
                 {tab}
-              </Text>
+              </PillText>
             </Pressable>
           );
         })}
