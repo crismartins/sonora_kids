@@ -1,13 +1,5 @@
 import React, { useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  ScrollView,
-  Pressable,
-  StyleSheet,
-  Platform,
-} from "react-native";
+import { View, Text, ScrollView, Pressable, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import * as Speech from "expo-speech";
@@ -17,15 +9,6 @@ import { colors } from "@/constants/colors";
 import { ROUTINE_BLOCKS } from "@/constants/phrases";
 
 const DAYS = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
-const FULL_DAYS = [
-  "DOMINGO",
-  "SEGUNDA-FEIRA",
-  "TERÇA-FEIRA",
-  "QUARTA-FEIRA",
-  "QUINTA-FEIRA",
-  "SEXTA-FEIRA",
-  "SÁBADO",
-];
 
 export default function RotinaScreen() {
   const insets = useSafeAreaInsets();
@@ -42,12 +25,17 @@ export default function RotinaScreen() {
   const tabBarHeight = Platform.OS === "web" ? 84 : 60 + insets.bottom;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.daysBar}>
+    <View className="flex-1 bg-white">
+      <View className="border-b border-[#F0F0F0] bg-white">
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.daysContent}
+          contentContainerStyle={{
+            paddingHorizontal: 12,
+            paddingVertical: 10,
+            gap: 6,
+            flexDirection: "row",
+          }}
         >
           {DAYS.map((day, idx) => {
             const isActive = idx === selectedDay;
@@ -55,16 +43,16 @@ export default function RotinaScreen() {
               <Pressable
                 key={day}
                 onPress={() => handleSelectDay(idx)}
-                style={[
-                  styles.dayChip,
-                  isActive && styles.dayChipActive,
-                ]}
+                className={`rounded-full px-3.5 py-[7px] ${
+                  isActive
+                    ? "border-[1.5px] border-primary bg-[#E3F2FD]"
+                    : "bg-[#F5F5F5]"
+                }`}
               >
                 <Text
-                  style={[
-                    styles.dayLabel,
-                    isActive && styles.dayLabelActive,
-                  ]}
+                  className={`font-dongle-bold text-[15px] tracking-wide ${
+                    isActive ? "text-primary" : "text-neutral-dark"
+                  }`}
                 >
                   {day}
                 </Text>
@@ -76,29 +64,35 @@ export default function RotinaScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingBottom: tabBarHeight + 16 },
-        ]}
+        contentContainerStyle={{
+          paddingHorizontal: 12,
+          paddingTop: 12,
+          paddingBottom: tabBarHeight + 16,
+          gap: 16,
+        }}
       >
         {ROUTINE_BLOCKS.map((block) => (
-          <View key={block.time} style={styles.timeBlock}>
-            <View style={styles.blockHeader}>
-              <View style={styles.timeTag}>
-                <Text style={styles.timeText}>{block.time}</Text>
+          <View key={block.time} className="gap-2.5">
+            <View className="flex-row items-center gap-2">
+              <View className="rounded-lg bg-primary px-2.5 py-1">
+                <Text className="font-dongle-bold text-lg leading-5 text-white">
+                  {block.time}
+                </Text>
               </View>
-              <Text style={styles.blockLabel}>{block.label}</Text>
+              <Text className="flex-1 font-dongle-bold text-xl tracking-wide text-dark">
+                {block.label}
+              </Text>
               <Pressable
                 onPress={() => Speech.speak(block.label, { language: "pt-BR" })}
-                style={styles.speakBtn}
+                className="h-8 w-8 items-center justify-center rounded-full bg-[#E3F2FD]"
               >
                 <Ionicons name="volume-high" size={18} color={colors.primary} />
               </Pressable>
             </View>
 
-            <View style={styles.pecGrid}>
-              {block.items.map((item, itemIdx) => (
-                <View key={item.id} style={styles.pecWrapper}>
+            <View className="flex-row flex-wrap">
+              {block.items.map((item) => (
+                <View key={item.id} className="w-1/2">
                   <RoutinePecCard
                     id={item.id}
                     title={item.title}
@@ -113,88 +107,3 @@ export default function RotinaScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-  daysBar: {
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
-  },
-  daysContent: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    gap: 6,
-    flexDirection: "row",
-  },
-  dayChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 100,
-    backgroundColor: "#F5F5F5",
-  },
-  dayChipActive: {
-    backgroundColor: "#E3F2FD",
-    borderWidth: 1.5,
-    borderColor: colors.primary,
-  },
-  dayLabel: {
-    fontFamily: "Dongle-Bold",
-    fontSize: 15,
-    color: colors.neutralDark,
-    letterSpacing: 0.3,
-  },
-  dayLabelActive: {
-    color: colors.primary,
-  },
-  scrollContent: {
-    paddingHorizontal: 12,
-    paddingTop: 12,
-    gap: 16,
-  },
-  timeBlock: {
-    gap: 10,
-  },
-  blockHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  timeTag: {
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  timeText: {
-    fontFamily: "Dongle-Bold",
-    fontSize: 18,
-    color: "#fff",
-    lineHeight: 20,
-  },
-  blockLabel: {
-    fontFamily: "Dongle-Bold",
-    fontSize: 20,
-    color: colors.dark,
-    flex: 1,
-    letterSpacing: 0.5,
-  },
-  speakBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#E3F2FD",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  pecGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  pecWrapper: {
-    width: "50%",
-  },
-});

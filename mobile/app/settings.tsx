@@ -1,13 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  StyleSheet,
-  Switch,
-  Platform,
-} from "react-native";
+import { View, Text, ScrollView, Pressable, Switch, Platform } from "react-native";
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/constants/colors";
@@ -23,24 +15,40 @@ interface RowProps {
   isLast?: boolean;
 }
 
-function Row({ icon, label, description, toggle, value, onToggle, destructive, isLast }: RowProps) {
+function Row({
+  icon,
+  label,
+  description,
+  toggle,
+  value,
+  onToggle,
+  destructive,
+  isLast,
+}: RowProps) {
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.row,
-        !isLast && styles.rowBorder,
-        pressed && !toggle && { backgroundColor: "#FAFAFA" },
-      ]}
+      className={`flex-row items-center gap-3 bg-white px-3.5 py-[13px] ${
+        !isLast ? "border-b border-[#F5F5F5]" : ""
+      } ${!toggle ? "active:bg-[#FAFAFA]" : ""}`}
     >
-      <View style={[styles.rowIcon, { backgroundColor: destructive ? "#FFEBEE" : "#F0F8FF" }]}>
+      <View
+        className="h-9 w-9 shrink-0 items-center justify-center rounded-[10px]"
+        style={{ backgroundColor: destructive ? "#FFEBEE" : "#F0F8FF" }}
+      >
         {icon}
       </View>
-      <View style={styles.rowContent}>
-        <Text style={[styles.rowLabel, destructive && { color: "#D32F2F" }]}>
+      <View className="flex-1 gap-px">
+        <Text
+          className={`font-dongle-bold text-xl leading-[22px] ${
+            destructive ? "text-[#D32F2F]" : "text-dark"
+          }`}
+        >
           {label}
         </Text>
         {description ? (
-          <Text style={styles.rowDesc}>{description}</Text>
+          <Text className="font-dongle text-[15px] leading-[17px] text-neutral-dark">
+            {description}
+          </Text>
         ) : null}
       </View>
       {toggle && onToggle ? (
@@ -59,9 +67,13 @@ function Row({ icon, label, description, toggle, value, onToggle, destructive, i
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      <View style={styles.sectionCard}>{children}</View>
+    <View className="mb-1">
+      <Text className="px-5 pb-[5px] pt-[18px] font-dongle-bold text-[17px] uppercase tracking-wide text-neutral-dark">
+        {title}
+      </Text>
+      <View className="mx-4 overflow-hidden rounded-2xl border border-[#F0F0F0] bg-white">
+        {children}
+      </View>
     </View>
   );
 }
@@ -75,14 +87,11 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: "#FFFFFF" }]}
-      contentContainerStyle={[
-        styles.content,
-        {
-          paddingBottom:
-            (Platform.OS === "web" ? 34 : insets.bottom) + 32,
-        },
-      ]}
+      className="flex-1 bg-white"
+      contentContainerStyle={{
+        paddingTop: 8,
+        paddingBottom: (Platform.OS === "web" ? 34 : insets.bottom) + 32,
+      }}
     >
       <Section title="Primeiros Passos">
         <Row
@@ -172,80 +181,9 @@ export default function SettingsScreen() {
         />
       </Section>
 
-      <Text style={styles.version}>App Versão 1.0</Text>
+      <Text className="mb-1 mt-3 text-center font-dongle text-base text-[#BDBDBD]">
+        App Versão 1.0
+      </Text>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: {
-    paddingTop: 8,
-    gap: 0,
-  },
-  section: {
-    marginBottom: 4,
-  },
-  sectionTitle: {
-    fontFamily: "Dongle-Bold",
-    fontSize: 17,
-    color: colors.neutralDark,
-    letterSpacing: 0.5,
-    paddingHorizontal: 20,
-    paddingTop: 18,
-    paddingBottom: 5,
-    textTransform: "uppercase",
-  },
-  sectionCard: {
-    marginHorizontal: 16,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#F0F0F0",
-    overflow: "hidden",
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 13,
-    gap: 12,
-    backgroundColor: "#FFFFFF",
-  },
-  rowBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
-  },
-  rowIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  rowContent: {
-    flex: 1,
-    gap: 1,
-  },
-  rowLabel: {
-    fontFamily: "Dongle-Bold",
-    fontSize: 20,
-    color: colors.dark,
-    lineHeight: 22,
-  },
-  rowDesc: {
-    fontFamily: "Dongle-Regular",
-    fontSize: 15,
-    color: colors.neutralDark,
-    lineHeight: 17,
-  },
-  version: {
-    fontFamily: "Dongle-Regular",
-    fontSize: 16,
-    color: "#BDBDBD",
-    textAlign: "center",
-    marginTop: 12,
-    marginBottom: 4,
-  },
-});

@@ -1,15 +1,15 @@
 # Sonora Kids
 
-Augmentative and Alternative Communication (AAC) app for autistic children, built with Expo / React Native.
+Augmentative and Alternative Communication (AAC) app for autistic children, built with **Expo / React Native**.
 
-Uses the PECS (Picture Exchange Communication System) methodology with a GraphQL backend, text-to-speech in Portuguese (pt-BR), haptic feedback, and animated interactions.
+Uses the PECS (Picture Exchange Communication System) methodology with local catalog data, text-to-speech in Portuguese (pt-BR), haptic feedback, and animated interactions.
 
 ## Tech Stack
 
-- **Expo SDK 54** (React Native 0.81.5, React 19)
+- **Expo SDK 57** (React Native 0.86.3, React 19.2)
 - **Expo Router v6** — file-based navigation
 - **NativeWind v4** + TailwindCSS — utility-first styling
-- **@tanstack/react-query** — GraphQL data fetching & caching
+- **TypeScript**
 - **react-native-reanimated v4** — spring animations
 - **expo-speech** — TTS in pt-BR
 - **expo-haptics** — tactile feedback
@@ -23,9 +23,9 @@ mobile/
 │   ├── profile.tsx       # Profile modal
 │   └── settings.tsx      # Settings modal
 ├── components/           # PecCard, PhraseCard, SkeletonCard
-├── constants/            # colors.ts, phrases.ts
-├── hooks/                # useCategories (GraphQL)
-├── services/             # graphqlClient
+├── constants/            # colors, phrases, category icons
+├── data/                 # Local PECS category catalog (mock)
+├── hooks/                # useCategories
 ├── types/                # TypeScript interfaces
 └── assets/               # fonts (Dongle), images
 ```
@@ -34,13 +34,20 @@ mobile/
 
 ```bash
 cd mobile
-npx expo start --web --port 5000
+npm install
+npx expo start
 ```
 
 Scan the QR code with **Expo Go** on your phone for the full native experience (haptics, TTS, animations).
 
-## GraphQL Backend
+For web preview:
 
-`https://darkturquoise-stork-856497.hostingersite.com/graphql`
+```bash
+npx expo start --web
+```
 
-CORS is restricted on web preview — all features work fully via Expo Go on a physical device.
+## Data
+
+PECS categories and cards are loaded from `mobile/data/categories.ts` (offline snapshot of the original WordPress catalog). No backend or authentication is required to run the app.
+
+Settings toggles and profile content are local UI state only.

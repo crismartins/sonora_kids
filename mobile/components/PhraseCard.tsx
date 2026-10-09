@@ -1,11 +1,5 @@
 import React, { useCallback } from "react";
-import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  Platform,
-} from "react-native";
+import { View, Text, Pressable, Platform } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -40,7 +34,7 @@ export function PhraseCard({ phrase }: PhraseCardProps) {
     }
     const fullPhrase = phrase.map((p) => p.text).join(" ");
     Speech.speak(fullPhrase, { language: "pt-BR" });
-  }, [phrase]);
+  }, [phrase, scale]);
 
   const handleLongPress = useCallback(() => {
     Speech.stop();
@@ -48,67 +42,34 @@ export function PhraseCard({ phrase }: PhraseCardProps) {
 
   return (
     <Pressable onPress={handlePress} onLongPress={handleLongPress}>
-      <Animated.View style={[styles.card, animatedStyle]}>
-        <View style={styles.wordsRow}>
+      <Animated.View
+        className="mx-4 my-1 min-h-[64px] flex-row items-center overflow-hidden rounded-2xl border border-neutral bg-white"
+        style={animatedStyle}
+      >
+        <View className="flex-1 flex-row flex-wrap gap-1 p-2.5">
           {phrase.map((item, idx) => {
             const bgColor = getCategoryBgColor(item.color);
             const textColor = getCategoryColor(item.color);
             return (
               <View
                 key={idx}
-                style={[styles.wordCell, { backgroundColor: bgColor }]}
+                className="items-center justify-center rounded-[10px] px-3 py-2"
+                style={{ backgroundColor: bgColor }}
               >
-                <Text style={[styles.wordText, { color: textColor }]}>
+                <Text
+                  className="font-dongle-bold text-xl leading-[22px]"
+                  style={{ color: textColor }}
+                >
                   {item.text}
                 </Text>
               </View>
             );
           })}
         </View>
-        <Pressable onPress={handlePress} style={styles.soundButton}>
+        <Pressable onPress={handlePress} className="items-center justify-center px-4 py-[18px]">
           <Ionicons name="volume-high" size={20} color={colors.primary} />
         </Pressable>
       </Animated.View>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: "row",
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    marginHorizontal: 16,
-    marginVertical: 4,
-    overflow: "hidden",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#E4F4FF",
-    minHeight: 64,
-  },
-  wordsRow: {
-    flex: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 4,
-    padding: 10,
-  },
-  wordCell: {
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  wordText: {
-    fontFamily: "Dongle-Bold",
-    fontSize: 20,
-    lineHeight: 22,
-  },
-  soundButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 18,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});

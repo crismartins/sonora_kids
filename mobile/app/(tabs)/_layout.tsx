@@ -1,12 +1,5 @@
 import { Tabs, router } from "expo-router";
-import {
-  View,
-  Text,
-  Pressable,
-  Image,
-  StyleSheet,
-  Platform,
-} from "react-native";
+import { Pressable, Image, Platform } from "react-native";
 import { MaterialCommunityIcons, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/constants/colors";
@@ -17,7 +10,7 @@ function HeaderLeft() {
   return (
     <Pressable
       onPress={() => router.push("/settings")}
-      style={styles.headerIconBtn}
+      className="ml-4 h-9 w-9 items-center justify-center rounded-[10px] bg-[#E3F2FD]"
     >
       <Ionicons name="settings-outline" size={20} color={colors.primary} />
     </Pressable>
@@ -28,9 +21,9 @@ function HeaderRight() {
   return (
     <Pressable
       onPress={() => router.push("/profile")}
-      style={styles.avatarBtn}
+      className="mr-4 h-9 w-9 overflow-hidden rounded-full bg-neutral"
     >
-      <Image source={AVATAR} style={styles.avatar} />
+      <Image source={AVATAR} className="h-9 w-9" />
     </Pressable>
   );
 }
@@ -112,27 +105,3 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  headerIconBtn: {
-    marginLeft: 16,
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "#E3F2FD",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarBtn: {
-    marginRight: 16,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    overflow: "hidden",
-    backgroundColor: "#E4F4FF",
-  },
-  avatar: {
-    width: 36,
-    height: 36,
-  },
-});

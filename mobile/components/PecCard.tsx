@@ -1,12 +1,5 @@
 import React, { useCallback } from "react";
-import {
-  View,
-  Text,
-  Image,
-  Pressable,
-  StyleSheet,
-  Platform,
-} from "react-native";
+import { View, Text, Image, Pressable, Platform } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -21,12 +14,11 @@ import { getCategoryBgColor } from "@/constants/colors";
 
 interface PecCardProps {
   item: PecItem;
-  categoryColor?: string;
 }
 
 const FALLBACK_IMAGE = require("../assets/images/avatar_default_v1.png");
 
-export function PecCard({ item, categoryColor }: PecCardProps) {
+export function PecCard({ item }: PecCardProps) {
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -44,7 +36,7 @@ export function PecCard({ item, categoryColor }: PecCardProps) {
     }
 
     Speech.speak(item.title, { language: "pt-BR" });
-  }, [item.title]);
+  }, [item.title, scale]);
 
   const handleLongPress = useCallback(() => {
     Speech.stop();
@@ -54,17 +46,25 @@ export function PecCard({ item, categoryColor }: PecCardProps) {
   }, []);
 
   const imageUri = item.featuredImage?.node?.sourceUrl;
+  const imageSource =
+    item.localImage ?? (imageUri ? { uri: imageUri } : FALLBACK_IMAGE);
 
   return (
-    <Pressable onPress={handlePress} onLongPress={handleLongPress} style={styles.pressable}>
-      <Animated.View style={[styles.card, animatedStyle]}>
+    <Pressable onPress={handlePress} onLongPress={handleLongPress} className="m-[5px] flex-1">
+      <Animated.View
+        className="min-h-[150px] flex-1 items-center justify-center rounded-[20px] bg-[#E8F5E9] p-3"
+        style={animatedStyle}
+      >
         <Image
-          source={imageUri ? { uri: imageUri } : FALLBACK_IMAGE}
-          style={styles.image}
+          source={imageSource}
+          className="mb-2.5 h-[88px] w-[88px] rounded-full bg-white"
           defaultSource={FALLBACK_IMAGE}
         />
-        <View style={styles.labelPill}>
-          <Text style={styles.label} numberOfLines={2}>
+        <View className="max-w-full rounded-full bg-white px-3 py-[5px]">
+          <Text
+            className="text-center font-dongle-bold text-xl leading-[22px] text-dark"
+            numberOfLines={2}
+          >
             {item.title}
           </Text>
         </View>
@@ -74,7 +74,6 @@ export function PecCard({ item, categoryColor }: PecCardProps) {
 }
 
 export function RoutinePecCard({
-  id,
   title,
   color,
 }: {
@@ -98,14 +97,23 @@ export function RoutinePecCard({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     Speech.speak(title, { language: "pt-BR" });
-  }, [title]);
+  }, [title, scale]);
 
   return (
-    <Pressable onPress={handlePress} style={styles.pressable}>
-      <Animated.View style={[styles.card, { backgroundColor: bg }, animatedStyle]}>
-        <Image source={FALLBACK_IMAGE} style={styles.image} />
-        <View style={styles.labelPill}>
-          <Text style={styles.label} numberOfLines={2}>
+    <Pressable onPress={handlePress} className="m-[5px] flex-1">
+      <Animated.View
+        className="min-h-[150px] flex-1 items-center justify-center rounded-[20px] p-3"
+        style={[{ backgroundColor: bg }, animatedStyle]}
+      >
+        <Image
+          source={FALLBACK_IMAGE}
+          className="mb-2.5 h-[88px] w-[88px] rounded-full bg-white"
+        />
+        <View className="max-w-full rounded-full bg-white px-3 py-[5px]">
+          <Text
+            className="text-center font-dongle-bold text-xl leading-[22px] text-dark"
+            numberOfLines={2}
+          >
             {title}
           </Text>
         </View>
@@ -113,40 +121,3 @@ export function RoutinePecCard({
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  pressable: {
-    flex: 1,
-    margin: 5,
-  },
-  card: {
-    flex: 1,
-    backgroundColor: "#E8F5E9",
-    borderRadius: 20,
-    padding: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 150,
-  },
-  image: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    marginBottom: 10,
-    backgroundColor: "#fff",
-  },
-  labelPill: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 100,
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-    maxWidth: "100%",
-  },
-  label: {
-    fontFamily: "Dongle-Bold",
-    fontSize: 20,
-    color: "#001D4A",
-    textAlign: "center",
-    lineHeight: 22,
-  },
-});

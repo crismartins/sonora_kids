@@ -1,3 +1,5 @@
+import { ImageSourcePropType } from "react-native";
+
 export interface PecItem {
   id: string;
   title: string;
@@ -6,11 +8,12 @@ export interface PecItem {
       sourceUrl: string;
     };
   } | null;
+  localImage?: ImageSourcePropType;
 }
 
 export interface CategoryConfig {
   cor: string;
-  icone: {
+  icone?: {
     node: {
       mediaItemUrl: string;
     };

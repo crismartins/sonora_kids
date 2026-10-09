@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, ViewStyle } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -9,7 +9,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { colors } from "@/constants/colors";
 
-function SkeletonPulse({ style }: { style: object }) {
+function SkeletonPulse({ className, style }: { className?: string; style?: ViewStyle }) {
   const opacity = useSharedValue(0.4);
 
   useEffect(() => {
@@ -21,55 +21,32 @@ function SkeletonPulse({ style }: { style: object }) {
       -1,
       false
     );
-  }, []);
+  }, [opacity]);
 
   const animStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
 
-  return <Animated.View style={[style, animStyle]} />;
+  return <Animated.View className={className} style={[style, animStyle]} />;
 }
 
 export function SkeletonPecCard() {
   return (
-    <View style={styles.card}>
-      <SkeletonPulse style={styles.circle} />
-      <SkeletonPulse style={styles.label} />
+    <View className="m-1.5 min-h-[160px] flex-1 items-center justify-center rounded-[20px] bg-neutral p-4">
+      <SkeletonPulse
+        className="mb-3 h-[88px] w-[88px] rounded-full"
+        style={{ backgroundColor: colors.neutralDark }}
+      />
+      <SkeletonPulse
+        className="h-5 w-20 rounded-lg"
+        style={{ backgroundColor: colors.neutralDark }}
+      />
     </View>
   );
 }
 
 export function SkeletonChip() {
-  return <SkeletonPulse style={styles.chip} />;
+  return (
+    <SkeletonPulse
+      className="mx-1 h-9 w-[100px] rounded-[20px] bg-neutral"
+    />
+  );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    flex: 1,
-    margin: 6,
-    borderRadius: 20,
-    backgroundColor: colors.neutral,
-    padding: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 160,
-  },
-  circle: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    backgroundColor: colors.neutralDark,
-    marginBottom: 12,
-  },
-  label: {
-    width: 80,
-    height: 20,
-    borderRadius: 8,
-    backgroundColor: colors.neutralDark,
-  },
-  chip: {
-    width: 100,
-    height: 36,
-    borderRadius: 20,
-    backgroundColor: colors.neutral,
-    marginHorizontal: 4,
-  },
-});
