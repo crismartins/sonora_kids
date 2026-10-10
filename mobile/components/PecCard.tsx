@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import { View, Image, Pressable, Platform } from "react-native";
 import Animated, {
   useSharedValue,
@@ -16,18 +16,24 @@ import { PillText } from "@/components/PillText";
 interface PecCardProps {
   item: PecItem;
   backgroundColor: string;
+  onLongPressManage?: () => void;
 }
 
 const FALLBACK_IMAGE = require("../assets/images/avatar_default_v1.png");
 
-export function PecCard({ item, backgroundColor }: PecCardProps) {
+export function PecCard({ item, backgroundColor, onLongPressManage }: PecCardProps) {
   const scale = useSharedValue(1);
+  const longPressed = useRef(false);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
   const handlePress = useCallback(() => {
+    if (longPressed.current) {
+      longPressed.current = false;
+      return;
+    }
     scale.value = withSequence(
       withTiming(0.92, { duration: 80 }),
       withSpring(1, { damping: 10, stiffness: 200 })
@@ -41,18 +47,26 @@ export function PecCard({ item, backgroundColor }: PecCardProps) {
   }, [item.title, scale]);
 
   const handleLongPress = useCallback(() => {
+    longPressed.current = true;
     Speech.stop();
     if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-  }, []);
+    onLongPressManage?.();
+  }, [onLongPressManage]);
 
   const imageUri = item.featuredImage?.node?.sourceUrl;
   const imageSource =
     item.localImage ?? (imageUri ? { uri: imageUri } : FALLBACK_IMAGE);
 
   return (
-    <Pressable onPress={handlePress} onLongPress={handleLongPress} className="m-[5px] flex-1">
+    <Pressable
+      accessibilityLabel={item.title}
+      onPress={handlePress}
+      onLongPress={onLongPressManage ? handleLongPress : undefined}
+      delayLongPress={450}
+      className="m-[5px] flex-1"
+    >
       <Animated.View
         className="min-h-[150px] flex-1 items-center justify-center rounded-[20px] p-3"
         style={[

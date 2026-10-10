@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import {
   View,
   Text,
@@ -15,7 +15,11 @@ import * as Haptics from "expo-haptics";
 import * as Speech from "expo-speech";
 import { Ionicons } from "@expo/vector-icons";
 import { useCategories } from "@/hooks/useCategories";
+import { useCustomPecs } from "@/hooks/useCustomPecs";
+import { CustomPec, customPecToItem } from "@/services/customPecs";
 import { PecCard } from "@/components/PecCard";
+import { AddPecModal } from "@/components/AddPecModal";
+import { PecActionsModal } from "@/components/PecActionsModal";
 import { PillText } from "@/components/PillText";
 import { SkeletonPecCard, SkeletonChip } from "@/components/SkeletonCard";
 import { colors, getCategoryColor, getCategoryBgColor } from "@/constants/colors";
@@ -28,7 +32,11 @@ const CATEGORY_PILL_SIZE = 60;
 export default function PecsScreen() {
   const insets = useSafeAreaInsets();
   const { data: categories, isLoading, error, refetch } = useCategories();
+  const { pecs: customPecs, addPec, updatePec, deletePec } = useCustomPecs();
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [addOpen, setAddOpen] = useState(false);
+  const [menuPec, setMenuPec] = useState<CustomPec | null>(null);
+  const [editingPec, setEditingPec] = useState<CustomPec | null>(null);
   const [pageSize, setPageSize] = useState({ width: 0, height: 0 });
   const chipScrollRef = useRef<ScrollView>(null);
   const pagerRef = useRef<ScrollView>(null);
@@ -109,6 +117,22 @@ export default function PecsScreen() {
       if (scrollEndTimer.current) clearTimeout(scrollEndTimer.current);
     };
   }, []);
+
+  const displayCategories = useMemo(() => {
+    if (!categories) return undefined;
+    if (customPecs.length === 0) return categories;
+    return categories.map((category) => ({
+      ...category,
+      pECS: {
+        nodes: [
+          ...category.pECS.nodes,
+          ...customPecs
+            .filter((pec) => pec.categorySlug === category.slug)
+            .map(customPecToItem),
+        ],
+      },
+    }));
+  }, [categories, customPecs]);
 
   const tabBarHeight = Platform.OS === "web" ? 84 : 60 + insets.bottom;
 
@@ -242,18 +266,81 @@ export default function PecsScreen() {
             scrollEventThrottle={16}
             style={{ width: pageSize.width, height: pageSize.height }}
           >
-            {categories?.map((category) => (
+            {displayCategories?.map((category) => (
               <CategoryPage
                 key={category.slug}
                 category={category}
                 width={pageSize.width}
                 height={pageSize.height}
                 tabBarHeight={tabBarHeight}
+                onManageItem={(item) => {
+                  const pec = customPecs.find((entry) => entry.id === item.id);
+                  if (pec) setMenuPec(pec);
+                }}
               />
             ))}
           </ScrollView>
         )}
       </View>
+
+      {!isLoading && categories ? (
+        <Pressable
+          accessibilityLabel="Adicionar PEC"
+          onPress={() => setAddOpen(true)}
+          className="absolute right-5 h-14 w-14 items-center justify-center rounded-full bg-primary"
+          style={{
+            bottom: tabBarHeight + 12,
+            shadowColor: "#001D4A",
+            shadowOpacity: 0.22,
+            shadowRadius: 8,
+            shadowOffset: { width: 0, height: 4 },
+            elevation: 6,
+          }}
+        >
+          <Ionicons name="add" size={32} color="#fff" />
+        </Pressable>
+      ) : null}
+
+      {categories ? (
+        <AddPecModal
+          visible={addOpen || !!editingPec}
+          categories={categories}
+          initialCategorySlug={
+            editingPec?.categorySlug ??
+            categories[selectedIndex]?.slug ??
+            categories[0].slug
+          }
+          initialPec={editingPec}
+          onClose={() => {
+            setAddOpen(false);
+            setEditingPec(null);
+          }}
+          onSubmit={async (input) => {
+            if (editingPec) {
+              await updatePec(editingPec.id, input);
+            } else {
+              await addPec(input);
+            }
+            const index = categories.findIndex((category) => category.slug === input.categorySlug);
+            setAddOpen(false);
+            setEditingPec(null);
+            if (index >= 0) selectCategory(index, "chip");
+          }}
+        />
+      ) : null}
+
+      <PecActionsModal
+        pec={menuPec}
+        onClose={() => setMenuPec(null)}
+        onEdit={(pec) => {
+          setMenuPec(null);
+          setEditingPec(pec);
+        }}
+        onDelete={async (pec) => {
+          await deletePec(pec.id);
+          setMenuPec(null);
+        }}
+      />
     </View>
   );
 }
@@ -263,11 +350,13 @@ function CategoryPage({
   width,
   height,
   tabBarHeight,
+  onManageItem,
 }: {
   category: Category;
   width: number;
   height: number;
   tabBarHeight: number;
+  onManageItem: (item: PecItem) => void;
 }) {
   const pecs: PecItem[] = category.pECS?.nodes ?? [];
   const colorName = category.categoriasDePec?.configuracoesCategorias?.cor ?? "blue";
@@ -289,13 +378,19 @@ function CategoryPage({
           contentContainerStyle={{
             paddingHorizontal: 10,
             paddingTop: 10,
-            paddingBottom: tabBarHeight + 16,
+            paddingBottom: tabBarHeight + 88,
           }}
         >
           <View className="flex-row flex-wrap">
             {pecs.map((item) => (
               <View key={item.id} className="w-1/2">
-                <PecCard item={item} backgroundColor={backgroundColor} />
+                <PecCard
+                  item={item}
+                  backgroundColor={backgroundColor}
+                  onLongPressManage={
+                    item.id.startsWith("custom-") ? () => onManageItem(item) : undefined
+                  }
+                />
               </View>
             ))}
           </View>
