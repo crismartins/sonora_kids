@@ -6,8 +6,45 @@ import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { AppSettingsProvider, useAppSettings } from "@/context/AppSettingsContext";
 
 SplashScreen.preventAutoHideAsync();
+
+function RootNavigator() {
+  const { fontScale } = useAppSettings();
+  const headerTitleStyle = {
+    fontFamily: "Dongle-Bold",
+    fontSize: Math.round(28 * fontScale),
+  };
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="profile"
+        options={{
+          presentation: "modal",
+          headerShown: true,
+          title: "Perfil",
+          headerTitleStyle,
+          headerTintColor: "#001D4A",
+          headerStyle: { backgroundColor: "#FDFEFF" },
+        }}
+      />
+      <Stack.Screen
+        name="settings"
+        options={{
+          presentation: "modal",
+          headerShown: true,
+          title: "Configurações",
+          headerTitleStyle,
+          headerTintColor: "#001D4A",
+          headerStyle: { backgroundColor: "#FDFEFF" },
+        }}
+      />
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -29,38 +66,10 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView className="flex-1">
       <SafeAreaProvider>
-        <StatusBar style="dark" />
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="profile"
-            options={{
-              presentation: "modal",
-              headerShown: true,
-              title: "Perfil",
-              headerTitleStyle: {
-                fontFamily: "Dongle-Bold",
-                fontSize: 28,
-              },
-              headerTintColor: "#001D4A",
-              headerStyle: { backgroundColor: "#FDFEFF" },
-            }}
-          />
-          <Stack.Screen
-            name="settings"
-            options={{
-              presentation: "modal",
-              headerShown: true,
-              title: "Configurações",
-              headerTitleStyle: {
-                fontFamily: "Dongle-Bold",
-                fontSize: 28,
-              },
-              headerTintColor: "#001D4A",
-              headerStyle: { backgroundColor: "#FDFEFF" },
-            }}
-          />
-        </Stack>
+        <AppSettingsProvider>
+          <StatusBar style="dark" />
+          <RootNavigator />
+        </AppSettingsProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

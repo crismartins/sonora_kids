@@ -10,6 +10,7 @@ type PillTextProps = TextProps & {
 /**
  * Dongle draws its letters above the line-box center (the descender area is empty).
  * Shift the label down so the ink sits on the pill axis, on iOS, Android, and web.
+ * The app-wide font setting scales this text together with every other label.
  */
 export function PillText({ size = 16, style, ...props }: PillTextProps) {
   const textStyle: TextStyle = {

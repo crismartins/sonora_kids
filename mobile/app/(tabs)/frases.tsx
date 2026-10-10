@@ -1,42 +1,96 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { View, Text, FlatList, Pressable, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
+import { Ionicons } from "@expo/vector-icons";
+import { useAppSettings } from "@/context/AppSettingsContext";
 import { PhraseCard } from "@/components/PhraseCard";
 import { PillText } from "@/components/PillText";
+import { AddPhraseModal } from "@/components/AddPhraseModal";
+import { PhraseActionsModal } from "@/components/PhraseActionsModal";
 import { colors } from "@/constants/colors";
 import { PHRASES_MAIS_USADAS, PHRASES_TODAS } from "@/constants/phrases";
+import { useCategories } from "@/hooks/useCategories";
+import { useCustomPecs } from "@/hooks/useCustomPecs";
+import { useCustomPhrases } from "@/hooks/useCustomPhrases";
+import { customPecToItem } from "@/services/customPecs";
+import { CustomPhrase } from "@/services/customPhrases";
 import { PhraseItem } from "@/types";
 
 const FILTER_TABS = ["MAIS USADAS", "TODAS", "MINHAS FRASES"] as const;
 type FilterTab = (typeof FILTER_TABS)[number];
 
-function getPhrasesForFilter(filter: FilterTab): PhraseItem[][] {
-  switch (filter) {
-    case "MAIS USADAS":
-      return PHRASES_MAIS_USADAS[0].collection;
-    case "TODAS":
-      return PHRASES_TODAS[0].collection;
-    case "MINHAS FRASES":
-      return [];
-    default:
-      return PHRASES_TODAS[0].collection;
-  }
+type ListedPhrase = {
+  key: string;
+  items: PhraseItem[];
+  customId?: string;
+};
+
+function catalogRows(collection: PhraseItem[][], prefix: string): ListedPhrase[] {
+  return collection.map((items, index) => ({
+    key: `${prefix}-${index}`,
+    items,
+  }));
 }
 
 export default function FrasesScreen() {
   const insets = useSafeAreaInsets();
+  const { haptic } = useAppSettings();
+  const { data: categories } = useCategories();
+  const { pecs: customPecs } = useCustomPecs();
+  const { phrases: customPhrases, addPhrase, updatePhrase, deletePhrase } = useCustomPhrases();
   const [activeFilter, setActiveFilter] = useState<FilterTab>("MAIS USADAS");
+  const [addOpen, setAddOpen] = useState(false);
+  const [menuPhrase, setMenuPhrase] = useState<CustomPhrase | null>(null);
+  const [editingPhrase, setEditingPhrase] = useState<CustomPhrase | null>(null);
+
+  const catalog = useMemo(() => {
+    if (!categories) return undefined;
+    if (customPecs.length === 0) return categories;
+    return categories.map((category) => ({
+      ...category,
+      pECS: {
+        nodes: [
+          ...category.pECS.nodes,
+          ...customPecs
+            .filter((pec) => pec.categorySlug === category.slug)
+            .map(customPecToItem),
+        ],
+      },
+    }));
+  }, [categories, customPecs]);
 
   const handleSelectFilter = useCallback((tab: FilterTab) => {
     setActiveFilter(tab);
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-  }, []);
+    haptic(Haptics.ImpactFeedbackStyle.Light);
+  }, [haptic]);
 
-  const phrases = getPhrasesForFilter(activeFilter);
+  const phrases = useMemo(() => {
+    const mine: ListedPhrase[] = customPhrases.map((phrase) => ({
+      key: phrase.id,
+      items: phrase.items,
+      customId: phrase.id,
+    }));
+    switch (activeFilter) {
+      case "MAIS USADAS":
+        return catalogRows(PHRASES_MAIS_USADAS[0].collection, "mais");
+      case "MINHAS FRASES":
+        return mine;
+      case "TODAS":
+      default:
+        return catalogRows(PHRASES_TODAS[0].collection, "todas");
+    }
+  }, [activeFilter, customPhrases]);
+
   const tabBarHeight = Platform.OS === "web" ? 84 : 60 + insets.bottom;
+
+  const openManage = useCallback(
+    (customId: string) => {
+      const phrase = customPhrases.find((entry) => entry.id === customId);
+      if (phrase) setMenuPhrase(phrase);
+    },
+    [customPhrases],
+  );
 
   return (
     <View className="flex-1 bg-white">
@@ -70,18 +124,77 @@ export default function FrasesScreen() {
           <Text className="text-5xl">💬</Text>
           <Text className="font-dongle-bold text-2xl text-dark">Nenhuma frase aqui</Text>
           <Text className="text-center font-dongle text-lg leading-[22px] text-neutral-dark">
-            Suas frases personalizadas aparecerão aqui
+            Toque em + e monte uma frase com os PECs
           </Text>
         </View>
       ) : (
         <FlatList
           data={phrases}
-          keyExtractor={(_, idx) => `phrase-${idx}`}
-          contentContainerStyle={{ paddingTop: 12, paddingBottom: tabBarHeight + 16 }}
+          keyExtractor={(item) => item.key}
+          contentContainerStyle={{ paddingTop: 12, paddingBottom: tabBarHeight + 88 }}
           showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => <PhraseCard phrase={item} />}
+          renderItem={({ item }) => {
+            const customId = item.customId;
+            return (
+              <PhraseCard
+                phrase={item.items}
+                onManage={customId ? () => openManage(customId) : undefined}
+              />
+            );
+          }}
         />
       )}
+
+      <Pressable
+        accessibilityLabel="Adicionar frase"
+        onPress={() => setAddOpen(true)}
+        className="absolute right-5 h-14 w-14 items-center justify-center rounded-full bg-primary"
+        style={{
+          bottom: tabBarHeight + 12,
+          shadowColor: "#001D4A",
+          shadowOpacity: 0.22,
+          shadowRadius: 8,
+          shadowOffset: { width: 0, height: 4 },
+          elevation: 6,
+        }}
+      >
+        <Ionicons name="add" size={32} color="#fff" />
+      </Pressable>
+
+      {catalog ? (
+        <AddPhraseModal
+          visible={addOpen || !!editingPhrase}
+          categories={catalog}
+          initialPhrase={editingPhrase}
+          onClose={() => {
+            setAddOpen(false);
+            setEditingPhrase(null);
+          }}
+          onSubmit={async (items) => {
+            if (editingPhrase) {
+              await updatePhrase(editingPhrase.id, items);
+            } else {
+              await addPhrase(items);
+              setActiveFilter("MINHAS FRASES");
+            }
+            setAddOpen(false);
+            setEditingPhrase(null);
+          }}
+        />
+      ) : null}
+
+      <PhraseActionsModal
+        phrase={menuPhrase}
+        onClose={() => setMenuPhrase(null)}
+        onEdit={(phrase) => {
+          setMenuPhrase(null);
+          setEditingPhrase(phrase);
+        }}
+        onDelete={async (phrase) => {
+          await deletePhrase(phrase.id);
+          setMenuPhrase(null);
+        }}
+      />
     </View>
   );
 }

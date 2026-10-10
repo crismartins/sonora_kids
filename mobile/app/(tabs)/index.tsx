@@ -12,8 +12,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import * as Speech from "expo-speech";
 import { Ionicons } from "@expo/vector-icons";
+import { useAppSettings } from "@/context/AppSettingsContext";
 import { useCategories } from "@/hooks/useCategories";
 import { useCustomPecs } from "@/hooks/useCustomPecs";
 import { CustomPec, customPecToItem } from "@/services/customPecs";
@@ -31,6 +31,7 @@ const CATEGORY_PILL_SIZE = 60;
 
 export default function PecsScreen() {
   const insets = useSafeAreaInsets();
+  const { settings, speak, stopSpeaking, haptic } = useAppSettings();
   const { data: categories, isLoading, error, refetch } = useCategories();
   const { pecs: customPecs, addPec, updatePec, deletePec } = useCustomPecs();
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -62,13 +63,11 @@ export default function PecsScreen() {
       if (index === selectedIndexRef.current) return;
       setSelectedIndex(index);
       const name = categories[index]?.name;
-      if (name) {
-        Speech.stop();
-        Speech.speak(name, { language: "pt-BR" });
+      if (name && settings.autoSpeakCategories) {
+        stopSpeaking();
+        speak(name);
       }
-      if (Platform.OS !== "web") {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
+      haptic(Haptics.ImpactFeedbackStyle.Light);
       if (source === "chip" && pageWidthRef.current > 0) {
         pagerRef.current?.scrollTo({
           x: index * pageWidthRef.current,
@@ -76,7 +75,7 @@ export default function PecsScreen() {
         });
       }
     },
-    [categories],
+    [categories, haptic, settings.autoSpeakCategories, speak, stopSpeaking],
   );
 
   const syncCategoryFromOffset = useCallback(
@@ -194,32 +193,44 @@ export default function PecsScreen() {
                     }}
                     className="flex-row items-center justify-center rounded-full"
                     style={{
-                      backgroundColor: isActive ? catBg : "#F5F5F5",
+                      backgroundColor: settings.highContrast
+                        ? isActive
+                          ? catColor
+                          : "#FFFFFF"
+                        : isActive
+                          ? catBg
+                          : "#F5F5F5",
+                      borderWidth: settings.highContrast ? 2 : 0,
+                      borderColor: catColor,
                       height: CATEGORY_PILL_SIZE,
                       width: isActive ? undefined : CATEGORY_PILL_SIZE,
                       paddingHorizontal: isActive ? 18 : 0,
                       gap: isActive ? 9 : 0,
                     }}
                   >
-                    {iconSource ? (
-                      <View
-                        className="items-center justify-center rounded-full bg-white"
-                        style={{ width: CATEGORY_ICON_SIZE, height: CATEGORY_ICON_SIZE }}
-                      >
+                    <View
+                      className="items-center justify-center rounded-full bg-white"
+                      style={{ width: CATEGORY_ICON_SIZE, height: CATEGORY_ICON_SIZE }}
+                    >
+                      {iconSource ? (
                         <Image
                           source={iconSource}
                           style={{ width: CATEGORY_ICON_SIZE, height: CATEGORY_ICON_SIZE }}
                         />
-                      </View>
-                    ) : null}
+                      ) : (
+                        <PillText size={18} style={{ color: catColor }}>
+                          {cat.name.slice(0, 1)}
+                        </PillText>
+                      )}
+                    </View>
                     {isActive ? (
-                      <PillText
-                        size={16}
-                        style={{
-                          color: catColor,
-                          letterSpacing: 0.4,
-                        }}
-                      >
+                        <PillText
+                          size={16}
+                          style={{
+                            color: settings.highContrast && isActive ? "#FFFFFF" : catColor,
+                            letterSpacing: 0.4,
+                          }}
+                        >
                         {cat.name.toUpperCase()}
                       </PillText>
                     ) : null}

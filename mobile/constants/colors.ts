@@ -25,6 +25,7 @@ export const categoryColorMap: Record<string, string> = {
   purple: "#6A1B9A",
   indigo: "#283593",
   yellow: "#F9A825",
+  amber: "#F57F17",
 };
 
 export const categoryBgColorMap: Record<string, string> = {
@@ -43,6 +44,7 @@ export const categoryBgColorMap: Record<string, string> = {
   purple: "#F3E5F5",
   indigo: "#E8EAF6",
   yellow: "#FFFDE7",
+  amber: "#FFF8E1",
 };
 
 export function getCategoryColor(colorName: string): string {
