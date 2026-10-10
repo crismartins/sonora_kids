@@ -18,7 +18,10 @@ export interface AppSettings {
   highContrast: boolean;
 }
 
-export const LARGE_FONT_SCALE = 1.28;
+/** Current layout sizes. Used when "Texto grande" is on. */
+export const LARGE_FONT_SCALE = 1;
+/** Quicksand Bold reads large at those sizes, so the default sits a step below. */
+export const DEFAULT_FONT_SCALE = 0.85;
 
 export const DEFAULT_SETTINGS: AppSettings = {
   voiceGender: "feminine",

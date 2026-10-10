@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { cssInterop } from "nativewind";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { FONT_FAMILY } from "@/constants/typography";
 
 const InteropText = cssInterop(RNText, { className: "style" });
 const InteropTextInput = cssInterop(RNTextInput, { className: "style" });
@@ -56,14 +57,6 @@ function scaleStyle(style: StyleProp<TextStyle> | undefined, scale: number) {
   const lineHeight = asNumber(flat.lineHeight);
   if (fontSize != null) patch.fontSize = Math.round(fontSize * scale);
   if (lineHeight != null) patch.lineHeight = Math.round(lineHeight * scale);
-  if (Array.isArray(flat.transform)) {
-    patch.transform = flat.transform.map((entry) => {
-      if (entry && "translateY" in entry && typeof entry.translateY === "number") {
-        return { ...entry, translateY: entry.translateY * scale };
-      }
-      return entry;
-    });
-  }
   return Object.keys(patch).length > 0 ? [style, patch] : style;
 }
 
@@ -113,9 +106,19 @@ function useScaledTypography({ className, style }: ScaledProps) {
   };
 }
 
+const appFont: TextStyle = {
+  fontFamily: FONT_FAMILY,
+};
+
 function ScaledTextBase({ className, style, ...props }: TextProps & { className?: string }) {
   const typography = useScaledTypography({ className, style });
-  return <InteropText {...props} className={typography.className} style={typography.style} />;
+  return (
+    <InteropText
+      {...props}
+      className={typography.className}
+      style={[appFont, typography.style]}
+    />
+  );
 }
 
 function ScaledTextInputBase({
@@ -124,7 +127,13 @@ function ScaledTextInputBase({
   ...props
 }: TextInputProps & { className?: string }) {
   const typography = useScaledTypography({ className, style });
-  return <InteropTextInput {...props} className={typography.className} style={typography.style} />;
+  return (
+    <InteropTextInput
+      {...props}
+      className={typography.className}
+      style={[appFont, typography.style]}
+    />
+  );
 }
 
 export const ScaledText = ScaledTextBase;

@@ -57,7 +57,7 @@ export function VoicePickerModal({
           >
             <Ionicons name="close" size={22} color={colors.dark} />
           </Pressable>
-          <Text className="font-dongle-bold text-3xl text-dark">Voz</Text>
+          <Text className="font-quicksand text-3xl text-dark">Voz</Text>
           <View className="w-10" />
         </View>
 
@@ -69,7 +69,7 @@ export function VoicePickerModal({
           }}
         >
           <View className="gap-2">
-            <Text className="font-dongle-bold text-xl text-dark">Tom</Text>
+            <Text className="font-quicksand text-xl text-dark">Tom</Text>
             <View className="flex-row gap-2">
               {(["feminine", "masculine"] as const).map((option) => {
                 const selected = !voiceId && gender === option;
@@ -83,7 +83,7 @@ export function VoicePickerModal({
                     }`}
                   >
                     <Text
-                      className={`font-dongle-bold text-2xl ${selected ? "text-white" : "text-primary"}`}
+                      className={`font-quicksand text-2xl ${selected ? "text-white" : "text-primary"}`}
                     >
                       {genderLabel(option)}
                     </Text>
@@ -91,14 +91,14 @@ export function VoicePickerModal({
                 );
               })}
             </View>
-            <Text className="font-dongle text-lg leading-5 text-neutral-dark">
+            <Text className="font-quicksand text-lg text-neutral-dark">
               Toque para ouvir. “{PREVIEW}”
             </Text>
           </View>
 
           {hasPortugal ? (
             <View className="gap-2">
-              <Text className="font-dongle-bold text-xl text-dark">Idioma</Text>
+              <Text className="font-quicksand text-xl text-dark">Idioma</Text>
               <View className="flex-row gap-2">
                 {(
                   [
@@ -116,7 +116,7 @@ export function VoicePickerModal({
                       }`}
                     >
                       <Text
-                        className={`font-dongle-bold text-lg ${selected ? "text-primary" : "text-neutral-dark"}`}
+                        className={`font-quicksand text-lg ${selected ? "text-primary" : "text-neutral-dark"}`}
                       >
                         {label}
                       </Text>
@@ -128,9 +128,9 @@ export function VoicePickerModal({
           ) : null}
 
           <View className="gap-2">
-            <Text className="font-dongle-bold text-xl text-dark">Vozes neste aparelho</Text>
+            <Text className="font-quicksand text-xl text-dark">Vozes neste aparelho</Text>
             {options.length === 0 ? (
-              <Text className="font-dongle text-lg leading-5 text-neutral-dark">
+              <Text className="font-quicksand text-lg text-neutral-dark">
                 Nenhuma voz em português foi encontrada. Feminina e masculina mudam o tom da voz padrão.
               </Text>
             ) : (
@@ -150,8 +150,8 @@ export function VoicePickerModal({
                       <Ionicons name="volume-medium" size={18} color={colors.primary} />
                     </View>
                     <View className="flex-1">
-                      <Text className="font-dongle-bold text-xl leading-6 text-dark">{voice.name}</Text>
-                      <Text className="font-dongle text-base leading-4 text-neutral-dark">
+                      <Text className="font-quicksand text-xl text-dark">{voice.name}</Text>
+                      <Text className="font-quicksand text-base text-neutral-dark">
                         {inferred ? genderLabel(inferred) : "Tom ajustável"} · {voice.language}
                       </Text>
                     </View>

@@ -68,14 +68,14 @@ function Row({
       </View>
       <View className="flex-1 gap-px">
         <Text
-          className={`font-dongle-bold text-xl leading-[22px] ${
+          className={`font-quicksand text-xl ${
             destructive ? "text-[#D32F2F]" : "text-dark"
           }`}
         >
           {label}
         </Text>
         {description ? (
-          <Text className="font-dongle text-[15px] leading-[17px] text-neutral-dark">
+          <Text className="font-quicksand text-[15px] text-neutral-dark">
             {description}
           </Text>
         ) : null}
@@ -97,7 +97,7 @@ function Row({
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View className="mb-1">
-      <Text className="px-5 pb-[5px] pt-[18px] font-dongle-bold text-[17px] uppercase tracking-wide text-neutral-dark">
+      <Text className="px-5 pb-[5px] pt-[18px] font-quicksand text-[17px] uppercase tracking-wide text-neutral-dark">
         {title}
       </Text>
       <View className="mx-4 overflow-hidden rounded-2xl border border-[#F0F0F0] bg-white">
@@ -317,7 +317,7 @@ export default function SettingsScreen() {
         />
       </Section>
 
-      <Text className="mb-1 mt-3 text-center font-dongle text-base text-[#BDBDBD]">
+      <Text className="mb-1 mt-3 text-center font-quicksand text-base text-[#BDBDBD]">
         App Versão 1.0
       </Text>
 
@@ -352,7 +352,7 @@ export default function SettingsScreen() {
             style={{ paddingBottom: insets.bottom + 20 }}
           >
             <View className="mb-4 h-1.5 w-12 self-center rounded-full bg-[#E4F4FF]" />
-            <Text className="mb-4 text-center font-dongle-bold text-3xl text-dark">
+            <Text className="mb-4 text-center font-quicksand text-3xl text-dark">
               Velocidade da fala
             </Text>
             <View className="gap-3">
@@ -366,7 +366,7 @@ export default function SettingsScreen() {
                       selected ? "bg-primary" : "bg-[#F0F8FF]"
                     }`}
                   >
-                    <Text className={`font-dongle-bold text-2xl ${selected ? "text-white" : "text-primary"}`}>
+                    <Text className={`font-quicksand text-2xl ${selected ? "text-white" : "text-primary"}`}>
                       {SPEECH_RATE_LABELS[rate]}
                     </Text>
                   </Pressable>
@@ -396,21 +396,21 @@ export default function SettingsScreen() {
             style={{ paddingBottom: insets.bottom + 20 }}
           >
             <View className="mb-4 h-1.5 w-12 self-center rounded-full bg-[#E4F4FF]" />
-            <Text className="mb-4 text-center font-dongle-bold text-3xl text-dark">Guia de início</Text>
+            <Text className="mb-4 text-center font-quicksand text-3xl text-dark">Guia de início</Text>
             <View className="gap-3">
               {GUIDE_STEPS.map((step, index) => (
                 <View key={step} className="flex-row gap-3">
                   <View className="h-8 w-8 items-center justify-center rounded-full bg-[#E3F2FD]">
-                    <Text className="font-dongle-bold text-xl text-primary">{index + 1}</Text>
+                    <Text className="font-quicksand text-xl text-primary">{index + 1}</Text>
                   </View>
-                  <Text className="flex-1 font-dongle text-xl leading-6 text-dark">{step}</Text>
+                  <Text className="flex-1 font-quicksand text-xl text-dark">{step}</Text>
                 </View>
               ))}
               <Pressable
                 onPress={() => setGuideOpen(false)}
                 className="mt-2 h-14 items-center justify-center rounded-full bg-primary"
               >
-                <Text className="font-dongle-bold text-2xl text-white">Entendi</Text>
+                <Text className="font-quicksand text-2xl text-white">Entendi</Text>
               </Pressable>
             </View>
           </View>
@@ -433,17 +433,17 @@ export default function SettingsScreen() {
             >
               <Ionicons name="close" size={22} color={colors.dark} />
             </Pressable>
-            <Text className="font-dongle-bold text-3xl text-dark">Sugestão</Text>
+            <Text className="font-quicksand text-3xl text-dark">Sugestão</Text>
             <View className="w-10" />
           </View>
           <View className="gap-4 px-5 pt-5">
             {suggestionSent ? (
-              <Text className="font-dongle text-2xl leading-7 text-dark">
+              <Text className="font-quicksand text-2xl text-dark">
                 Sugestão guardada neste aparelho. Obrigado por ajudar o Sonora.
               </Text>
             ) : (
               <>
-                <Text className="font-dongle text-xl leading-6 text-neutral-dark">
+                <Text className="font-quicksand text-xl text-neutral-dark">
                   Conte o que facilitaria o dia de quem usa o app.
                 </Text>
                 <TextInput
@@ -453,13 +453,13 @@ export default function SettingsScreen() {
                   placeholderTextColor={colors.neutralDark}
                   multiline
                   className="min-h-[140px] rounded-2xl border border-[#E4F4FF] bg-[#FDFEFF] px-4 py-3 text-dark"
-                  style={{ fontFamily: "Dongle-Regular", fontSize: 26, textAlignVertical: "top" }}
+                  style={{ fontSize: 18, textAlignVertical: "top" }}
                 />
                 <Pressable
                   onPress={sendSuggestion}
                   className="h-14 items-center justify-center rounded-full bg-primary"
                 >
-                  <Text className="font-dongle-bold text-2xl text-white">Guardar sugestão</Text>
+                  <Text className="font-quicksand text-2xl text-white">Guardar sugestão</Text>
                 </Pressable>
               </>
             )}

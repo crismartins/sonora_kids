@@ -106,7 +106,7 @@ export function AddPhraseModal({
           >
             <Ionicons name="close" size={22} color={colors.dark} />
           </Pressable>
-          <Text className="font-dongle-bold text-3xl text-dark">
+          <Text className="font-quicksand text-3xl text-dark">
             {initialPhrase ? "Editar frase" : "Nova frase"}
           </Text>
           <View className="w-10" />
@@ -114,16 +114,16 @@ export function AddPhraseModal({
 
         <View className="gap-2 border-b border-[#F0F0F0] px-5 py-4">
           <View className="flex-row items-center justify-between">
-            <Text className="font-dongle-bold text-xl text-dark">Frase</Text>
+            <Text className="font-quicksand text-xl text-dark">Frase</Text>
             {items.length > 0 ? (
               <Pressable accessibilityLabel="Limpar frase" onPress={() => setItems([])}>
-                <Text className="font-dongle-bold text-xl text-primary">Limpar</Text>
+                <Text className="font-quicksand text-xl text-primary">Limpar</Text>
               </Pressable>
             ) : null}
           </View>
           <View className="min-h-[64px] flex-row flex-wrap gap-1 rounded-2xl border border-neutral bg-[#FDFEFF] p-2.5">
             {items.length === 0 ? (
-              <Text className="font-dongle text-xl text-neutral-dark">
+              <Text className="font-quicksand text-xl text-neutral-dark">
                 Toque nos PECs para montar a frase
               </Text>
             ) : (
@@ -153,7 +153,7 @@ export function AddPhraseModal({
           }}
         >
           <View className="gap-2">
-            <Text className="font-dongle-bold text-xl text-dark">Categoria</Text>
+            <Text className="font-quicksand text-xl text-dark">Categoria</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View className="flex-row gap-2">
                 {categories.map((category) => {
@@ -171,7 +171,7 @@ export function AddPhraseModal({
                     >
                       {icon ? <Image source={icon} style={{ width: 24, height: 24 }} /> : null}
                       <Text
-                        className="font-dongle-bold text-lg"
+                        className="font-quicksand text-lg"
                         style={{
                           color: selected ? getCategoryColor(colorName) : colors.neutralDark,
                         }}
@@ -201,7 +201,7 @@ export function AddPhraseModal({
             ))}
           </View>
 
-          {error ? <Text className="font-dongle text-xl text-[#D32F2F]">{error}</Text> : null}
+          {error ? <Text className="font-quicksand text-xl text-[#D32F2F]">{error}</Text> : null}
 
           <Pressable
             onPress={handleSave}
@@ -212,7 +212,7 @@ export function AddPhraseModal({
             {saving ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text className="font-dongle-bold text-2xl text-white">
+              <Text className="font-quicksand text-2xl text-white">
                 {initialPhrase ? "Salvar alterações" : "Salvar frase"}
               </Text>
             )}

@@ -175,7 +175,7 @@ export function AddPecModal({
           >
             <Ionicons name="close" size={22} color={colors.dark} />
           </Pressable>
-          <Text className="font-dongle-bold text-3xl text-dark">
+          <Text className="font-quicksand text-3xl text-dark">
             {initialPec ? "Editar PEC" : "Novo PEC"}
           </Text>
           <View className="w-10" />
@@ -190,19 +190,19 @@ export function AddPecModal({
           }}
         >
           <View className="gap-2">
-            <Text className="font-dongle-bold text-xl text-dark">Nome</Text>
+            <Text className="font-quicksand text-xl text-dark">Nome</Text>
             <TextInput
               value={title}
               onChangeText={setTitle}
               placeholder="Ex: Bola"
               placeholderTextColor={colors.neutralDark}
               className="rounded-2xl border border-[#E4F4FF] bg-[#FDFEFF] px-4 text-dark"
-              style={{ fontFamily: "Dongle-Regular", fontSize: 26, height: 56 }}
+              style={{ fontSize: 18, height: 56 }}
             />
           </View>
 
           <View className="gap-2">
-            <Text className="font-dongle-bold text-xl text-dark">Categoria</Text>
+            <Text className="font-quicksand text-xl text-dark">Categoria</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View className="flex-row gap-2">
                 {categories.map((category) => {
@@ -223,7 +223,7 @@ export function AddPecModal({
                         <Image source={icon} style={{ width: 24, height: 24 }} />
                       ) : null}
                       <Text
-                        className="font-dongle-bold text-lg"
+                        className="font-quicksand text-lg"
                         style={{ color: selected ? getCategoryColor(colorName) : colors.neutralDark }}
                       >
                         {category.name}
@@ -236,7 +236,7 @@ export function AddPecModal({
           </View>
 
           <View className="gap-2">
-            <Text className="font-dongle-bold text-xl text-dark">Imagem</Text>
+            <Text className="font-quicksand text-xl text-dark">Imagem</Text>
             <View className="flex-row flex-wrap gap-2">
               <Pressable
                 accessibilityLabel="Tirar foto"
@@ -244,7 +244,7 @@ export function AddPecModal({
                 className="h-11 flex-row items-center justify-center gap-2 rounded-full bg-[#F0F8FF] px-4"
               >
                 <Ionicons name="camera" size={18} color={colors.primary} />
-                <Text className="font-dongle-bold text-xl text-primary">Tirar foto</Text>
+                <Text className="font-quicksand text-xl text-primary">Tirar foto</Text>
               </Pressable>
               <Pressable
                 accessibilityLabel="Escolher foto do dispositivo"
@@ -252,7 +252,7 @@ export function AddPecModal({
                 className="h-11 flex-row items-center justify-center gap-2 rounded-full bg-[#F0F8FF] px-4"
               >
                 <Ionicons name="image" size={18} color={colors.primary} />
-                <Text className="font-dongle-bold text-xl text-primary">Do dispositivo</Text>
+                <Text className="font-quicksand text-xl text-primary">Do dispositivo</Text>
               </Pressable>
               <Pressable
                 accessibilityLabel="Buscar no Google"
@@ -260,10 +260,10 @@ export function AddPecModal({
                 className="h-11 flex-row items-center justify-center gap-2 rounded-full bg-[#F0F8FF] px-4"
               >
                 <Ionicons name="search" size={18} color={colors.primary} />
-                <Text className="font-dongle-bold text-xl text-primary">Buscar no Google</Text>
+                <Text className="font-quicksand text-xl text-primary">Buscar no Google</Text>
               </Pressable>
             </View>
-            <Text className="font-dongle text-lg leading-5 text-neutral-dark">
+            <Text className="font-quicksand text-lg text-neutral-dark">
               No Google, segure a foto e escolha salvar no dispositivo. Depois, toque em Do dispositivo e selecione essa imagem.
             </Text>
             {previewUri ? (
@@ -275,14 +275,14 @@ export function AddPecModal({
               />
             ) : null}
             {previewFailed ? (
-              <Text className="font-dongle text-lg text-[#D32F2F]">
+              <Text className="font-quicksand text-lg text-[#D32F2F]">
                 Não consegui abrir essa imagem. Escolha outra foto do dispositivo.
               </Text>
             ) : null}
           </View>
 
           {error ? (
-            <Text className="font-dongle text-xl text-[#D32F2F]">{error}</Text>
+            <Text className="font-quicksand text-xl text-[#D32F2F]">{error}</Text>
           ) : null}
 
           <Pressable
@@ -294,7 +294,7 @@ export function AddPecModal({
             {saving ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text className="font-dongle-bold text-2xl text-white">
+              <Text className="font-quicksand text-2xl text-white">
                 {initialPec ? "Salvar alterações" : "Salvar PEC"}
               </Text>
             )}

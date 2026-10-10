@@ -18,9 +18,7 @@ module.exports = {
         "neutral-dark": "#89ACC7",
       },
       fontFamily: {
-        dongle: ["Dongle-Regular"],
-        "dongle-bold": ["Dongle-Bold"],
-        "dongle-light": ["Dongle-Light"],
+        quicksand: ["Quicksand_700Bold"],
       },
     },
   },

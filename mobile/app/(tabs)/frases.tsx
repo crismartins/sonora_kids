@@ -122,8 +122,8 @@ export default function FrasesScreen() {
       {phrases.length === 0 ? (
         <View className="flex-1 items-center justify-center gap-2 px-10">
           <Text className="text-5xl">💬</Text>
-          <Text className="font-dongle-bold text-2xl text-dark">Nenhuma frase aqui</Text>
-          <Text className="text-center font-dongle text-lg leading-[22px] text-neutral-dark">
+          <Text className="font-quicksand text-2xl text-dark">Nenhuma frase aqui</Text>
+          <Text className="text-center font-quicksand text-lg text-neutral-dark">
             Toque em + e monte uma frase com os PECs
           </Text>
         </View>

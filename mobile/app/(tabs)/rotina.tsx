@@ -401,8 +401,8 @@ export default function RotinaScreen() {
             style={{ paddingBottom: insets.bottom + 20 }}
           >
             <View className="mb-1 h-1.5 w-12 self-center rounded-full bg-[#E4F4FF]" />
-            <Text className="text-center font-dongle-bold text-3xl text-dark">{removing?.item.title}</Text>
-            <Text className="text-center font-dongle text-xl text-neutral-dark">
+            <Text className="text-center font-quicksand text-3xl text-dark">{removing?.item.title}</Text>
+            <Text className="text-center font-quicksand text-xl text-neutral-dark">
               Tirar de {removing ? PERIOD_LABELS[removing.period] : ""}? O PEC continua em Dia a Dia.
             </Text>
             <Pressable
@@ -414,7 +414,7 @@ export default function RotinaScreen() {
               }}
               className="h-14 items-center justify-center rounded-full bg-[#D32F2F]"
             >
-              <Text className="font-dongle-bold text-2xl text-white">Tirar da rotina</Text>
+              <Text className="font-quicksand text-2xl text-white">Tirar da rotina</Text>
             </Pressable>
             <Pressable
               accessibilityLabel="Cancelar"
@@ -424,7 +424,7 @@ export default function RotinaScreen() {
               }}
               className="h-14 items-center justify-center rounded-full bg-[#F5F5F5]"
             >
-              <Text className="font-dongle-bold text-2xl text-dark">Cancelar</Text>
+              <Text className="font-quicksand text-2xl text-dark">Cancelar</Text>
             </Pressable>
           </View>
         </View>

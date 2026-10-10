@@ -139,14 +139,14 @@ export default function PecsScreen() {
     return (
       <View className="flex-1 items-center justify-center gap-3 bg-white">
         <Ionicons name="cloud-offline-outline" size={48} color={colors.neutralDark} />
-        <Text className="text-center font-dongle text-xl text-neutral-dark">
+        <Text className="text-center font-quicksand text-xl text-neutral-dark">
           Não foi possível carregar
         </Text>
         <Pressable
           className="mt-2 rounded-full bg-primary px-6 py-2.5"
           onPress={() => refetch()}
         >
-          <Text className="font-dongle-bold text-lg text-white">Tentar novamente</Text>
+          <Text className="font-quicksand text-lg text-white">Tentar novamente</Text>
         </Pressable>
       </View>
     );
@@ -378,7 +378,7 @@ function CategoryPage({
       {pecs.length === 0 ? (
         <View className="flex-1 items-center justify-center gap-3 bg-white">
           <Ionicons name="images-outline" size={48} color={colors.neutralDark} />
-          <Text className="font-dongle text-xl text-neutral-dark">
+          <Text className="font-quicksand text-xl text-neutral-dark">
             Nenhum item nesta categoria
           </Text>
         </View>

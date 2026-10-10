@@ -5,6 +5,7 @@ import * as Speech from "expo-speech";
 import { Voice } from "expo-speech";
 import {
   AppSettings,
+  DEFAULT_FONT_SCALE,
   DEFAULT_SETTINGS,
   LARGE_FONT_SCALE,
   loadAppSettings,
@@ -105,7 +106,7 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
     () => ({
       ready,
       settings,
-      fontScale: settings.largeText ? LARGE_FONT_SCALE : 1,
+      fontScale: settings.largeText ? LARGE_FONT_SCALE : DEFAULT_FONT_SCALE,
       voices,
       updateSettings,
       resetSettings,

@@ -46,16 +46,16 @@ export default function ProfileScreen() {
       </View>
 
       <View className="items-center gap-1">
-        <Text className="font-dongle-bold text-[40px] leading-[42px] text-primary">
+        <Text className="font-quicksand text-[40px] text-primary">
           Joãozinho
         </Text>
-        <Text className="text-center font-dongle text-xl text-neutral-dark">
+        <Text className="text-center font-quicksand text-xl text-neutral-dark">
           João Roberto Pereira da Silva
         </Text>
       </View>
 
       <View className="w-full gap-3.5 rounded-3xl bg-primary p-5">
-        <Text className="font-dongle-bold text-[26px] text-white">Palavras mais usadas</Text>
+        <Text className="font-quicksand text-[26px] text-white">Palavras mais usadas</Text>
         <View className="flex-row flex-wrap gap-2">
           {MOST_USED.map((word, idx) => (
             <View
@@ -78,7 +78,7 @@ export default function ProfileScreen() {
 
       <Pressable className="w-full flex-row items-center justify-center gap-2 rounded-2xl bg-primary py-4 active:opacity-85">
         <Ionicons name="pencil-outline" size={18} color="#fff" />
-        <Text className="font-dongle-bold text-[22px] leading-6 text-white">Editar Perfil</Text>
+        <Text className="font-quicksand text-[22px] text-white">Editar Perfil</Text>
       </Pressable>
     </ScrollView>
   );

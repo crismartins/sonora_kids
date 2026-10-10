@@ -35,8 +35,8 @@ function ActivityCard({
         {icon}
       </View>
       <View className="flex-1 gap-0.5">
-        <Text className="font-dongle-bold text-[21px] leading-[23px] text-dark">{title}</Text>
-        <Text className="font-dongle text-base leading-[18px] text-neutral-dark">
+        <Text className="font-quicksand text-[21px] text-dark">{title}</Text>
+        <Text className="font-quicksand text-base text-neutral-dark">
           {description}
         </Text>
       </View>
@@ -70,7 +70,7 @@ export default function AprenderScreen() {
       <Pressable className="min-h-[140px] flex-row items-center justify-between rounded-3xl bg-primary p-6">
         <View className="flex-1 gap-2">
           <MaterialIcons name="sports-esports" size={40} color="#fff" />
-          <Text className="font-dongle-bold text-4xl leading-9 text-white">
+          <Text className="font-quicksand text-4xl text-white">
             APRENDA{"\n"}JOGANDO
           </Text>
         </View>
@@ -81,7 +81,7 @@ export default function AprenderScreen() {
       </Pressable>
 
       <View className="rounded-[20px] border border-[#F0F0F0] bg-[#FAFAFA] p-4">
-        <Text className="mb-2 font-dongle-bold text-[22px] uppercase tracking-wide text-neutral-dark">
+        <Text className="mb-2 font-quicksand text-[22px] uppercase tracking-wide text-neutral-dark">
           Atividades
         </Text>
         <ActivityCard

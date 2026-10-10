@@ -51,7 +51,7 @@ export function AddRoutineItemModal({
           >
             <Ionicons name="close" size={22} color={colors.dark} />
           </Pressable>
-          <Text className="font-dongle-bold text-3xl text-dark">{title}</Text>
+          <Text className="font-quicksand text-3xl text-dark">{title}</Text>
           <View className="w-10" />
         </View>
 
@@ -62,7 +62,7 @@ export function AddRoutineItemModal({
           }}
         >
           {options.length === 0 ? (
-            <Text className="text-center font-dongle text-xl text-neutral-dark">
+            <Text className="text-center font-quicksand text-xl text-neutral-dark">
               Nenhum PEC de Dia a Dia ainda.
             </Text>
           ) : (
@@ -141,7 +141,7 @@ export function AddRoutineItemModal({
               elevation: 6,
             }}
           >
-            <Text className="font-dongle-bold text-2xl text-white">Confirmar</Text>
+            <Text className="font-quicksand text-2xl text-white">Confirmar</Text>
           </Pressable>
         </View>
       </View>

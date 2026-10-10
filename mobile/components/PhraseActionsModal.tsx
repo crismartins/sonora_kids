@@ -53,10 +53,10 @@ export function PhraseActionsModal({ phrase, onClose, onEdit, onDelete }: Phrase
           style={{ paddingBottom: insets.bottom + 20 }}
         >
           <View className="mb-4 h-1.5 w-12 self-center rounded-full bg-[#E4F4FF]" />
-          <Text className="mb-4 text-center font-dongle-bold text-3xl text-dark">{label}</Text>
+          <Text className="mb-4 text-center font-quicksand text-3xl text-dark">{label}</Text>
           {confirming ? (
             <View className="gap-3">
-              <Text className="text-center font-dongle text-xl text-neutral-dark">
+              <Text className="text-center font-quicksand text-xl text-neutral-dark">
                 Excluir esta frase? Ela sai do aparelho.
               </Text>
               <Pressable
@@ -71,7 +71,7 @@ export function PhraseActionsModal({ phrase, onClose, onEdit, onDelete }: Phrase
                 ) : (
                   <>
                     <Ionicons name="trash" size={20} color="#fff" />
-                    <Text className="font-dongle-bold text-2xl text-white">Excluir</Text>
+                    <Text className="font-quicksand text-2xl text-white">Excluir</Text>
                   </>
                 )}
               </Pressable>
@@ -80,7 +80,7 @@ export function PhraseActionsModal({ phrase, onClose, onEdit, onDelete }: Phrase
                 onPress={() => setConfirming(false)}
                 className="h-14 items-center justify-center rounded-full bg-[#F5F5F5]"
               >
-                <Text className="font-dongle-bold text-2xl text-dark">Voltar</Text>
+                <Text className="font-quicksand text-2xl text-dark">Voltar</Text>
               </Pressable>
             </View>
           ) : (
@@ -91,7 +91,7 @@ export function PhraseActionsModal({ phrase, onClose, onEdit, onDelete }: Phrase
                 className="h-14 flex-row items-center justify-center gap-2 rounded-full bg-[#F0F8FF]"
               >
                 <Ionicons name="pencil" size={20} color={colors.primary} />
-                <Text className="font-dongle-bold text-2xl text-primary">Editar</Text>
+                <Text className="font-quicksand text-2xl text-primary">Editar</Text>
               </Pressable>
               <Pressable
                 accessibilityLabel="Excluir frase"
@@ -99,14 +99,14 @@ export function PhraseActionsModal({ phrase, onClose, onEdit, onDelete }: Phrase
                 className="h-14 flex-row items-center justify-center gap-2 rounded-full bg-[#FDECEC]"
               >
                 <Ionicons name="trash" size={20} color="#D32F2F" />
-                <Text className="font-dongle-bold text-2xl text-[#D32F2F]">Excluir</Text>
+                <Text className="font-quicksand text-2xl text-[#D32F2F]">Excluir</Text>
               </Pressable>
               <Pressable
                 accessibilityLabel="Cancelar"
                 onPress={onClose}
                 className="h-14 items-center justify-center rounded-full bg-[#F5F5F5]"
               >
-                <Text className="font-dongle-bold text-2xl text-dark">Cancelar</Text>
+                <Text className="font-quicksand text-2xl text-dark">Cancelar</Text>
               </Pressable>
             </View>
           )}

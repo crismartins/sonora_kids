@@ -3,6 +3,7 @@ import { Pressable, Image, Platform } from "react-native";
 import { MaterialCommunityIcons, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/constants/colors";
+import { FONT_FAMILY } from "@/constants/typography";
 import { useAppSettings } from "@/context/AppSettingsContext";
 
 const AVATAR = require("../../assets/images/avatar_default_v1.png");
@@ -32,15 +33,16 @@ function HeaderRight() {
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
   const { fontScale } = useAppSettings();
-  const tabBarHeight = (Platform.OS === "web" ? 84 : 60 + insets.bottom) + (fontScale > 1 ? 8 : 0);
+  const tabBarHeight = Platform.OS === "web" ? 84 : 60 + insets.bottom;
 
   return (
     <Tabs
       screenOptions={{
         headerStyle: { backgroundColor: "#FFFFFF" },
         headerTitleStyle: {
-          fontFamily: "Dongle-Bold",
-          fontSize: Math.round(28 * fontScale),
+          fontFamily: FONT_FAMILY,
+          fontWeight: "700",
+          fontSize: Math.round(22 * fontScale),
           color: colors.dark,
         },
         headerShadowVisible: false,
@@ -58,8 +60,9 @@ export default function TabLayout() {
           paddingTop: 6,
         },
         tabBarLabelStyle: {
-          fontFamily: "Dongle-Bold",
-          fontSize: Math.round(13 * fontScale),
+          fontFamily: FONT_FAMILY,
+          fontWeight: "700",
+          fontSize: Math.round(11 * fontScale),
         },
         tabBarItemStyle: { paddingVertical: 4 },
       }}

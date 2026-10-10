@@ -4,17 +4,20 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
+import { Quicksand_700Bold } from "@expo-google-fonts/quicksand";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AppSettingsProvider, useAppSettings } from "@/context/AppSettingsContext";
+import { FONT_FAMILY } from "@/constants/typography";
 
 SplashScreen.preventAutoHideAsync();
 
 function RootNavigator() {
   const { fontScale } = useAppSettings();
   const headerTitleStyle = {
-    fontFamily: "Dongle-Bold",
-    fontSize: Math.round(28 * fontScale),
+    fontFamily: FONT_FAMILY,
+    fontWeight: "700" as const,
+    fontSize: Math.round(22 * fontScale),
   };
 
   return (
@@ -48,9 +51,7 @@ function RootNavigator() {
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    "Dongle-Regular": require("../assets/fonts/Dongle-Regular.ttf"),
-    "Dongle-Bold": require("../assets/fonts/Dongle-Bold.ttf"),
-    "Dongle-Light": require("../assets/fonts/Dongle-Light.ttf"),
+    Quicksand_700Bold,
   });
 
   useEffect(() => {
