@@ -32,7 +32,7 @@ export function SkeletonPecCard() {
   return (
     <View className="m-1.5 min-h-[160px] flex-1 items-center justify-center rounded-[20px] bg-neutral p-4">
       <SkeletonPulse
-        className="mb-3 h-[88px] w-[88px] rounded-full"
+        className="mb-3 aspect-square w-full self-stretch rounded-2xl"
         style={{ backgroundColor: colors.neutralDark }}
       />
       <SkeletonPulse

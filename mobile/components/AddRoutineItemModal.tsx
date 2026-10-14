@@ -13,6 +13,14 @@ export interface RoutinePecOption {
   image?: ImageSourcePropType;
 }
 
+function chunkPairs<T>(items: T[]): T[][] {
+  const rows: T[][] = [];
+  for (let i = 0; i < items.length; i += 2) {
+    rows.push(items.slice(i, i + 2));
+  }
+  return rows;
+}
+
 interface AddRoutineItemModalProps {
   visible: boolean;
   title: string;
@@ -66,38 +74,45 @@ export function AddRoutineItemModal({
               Nenhum PEC de Dia a Dia ainda.
             </Text>
           ) : (
-            <View className="flex-row flex-wrap">
-              {options.map((option) => {
-                const selected = selectedIds.includes(option.id);
-                return (
-                  <View key={option.id} className="w-1/2">
-                    <Pressable
-                      accessibilityLabel={
-                        selected ? `Tirar seleção de ${option.title}` : `Selecionar ${option.title}`
-                      }
-                      onPress={() => onToggle(option)}
-                      className="m-[5px] min-h-[150px] items-center justify-center rounded-[20px] p-3"
-                      style={{ backgroundColor: background }}
-                    >
-                      <Image
-                        source={option.image ?? FALLBACK_IMAGE}
-                        className="mb-2.5 h-[88px] w-[88px] rounded-full bg-white"
-                      />
-                      <View className="max-w-full items-center justify-center rounded-full bg-white px-3 py-1">
-                        <PillText size={20} numberOfLines={2} style={{ color: "#001D4A" }}>
-                          {option.title}
-                        </PillText>
+            <>
+              {chunkPairs(options).map((row) => (
+                <View key={row.map((option) => option.id).join("-")} className="flex-row items-stretch">
+                  {row.map((option) => {
+                    const selected = selectedIds.includes(option.id);
+                    return (
+                      <View key={option.id} className="w-1/2 self-stretch">
+                        <Pressable
+                          accessibilityLabel={
+                            selected ? `Tirar seleção de ${option.title}` : `Selecionar ${option.title}`
+                          }
+                          onPress={() => onToggle(option)}
+                          className="m-[5px] min-h-[150px] items-center justify-start self-stretch rounded-[20px] p-3"
+                          style={{ flexGrow: 1, alignSelf: "stretch", backgroundColor: background }}
+                        >
+                          <View className="mb-2.5 aspect-square w-full self-stretch overflow-hidden rounded-2xl bg-white">
+                            <Image
+                              source={option.image ?? FALLBACK_IMAGE}
+                              className="h-full w-full"
+                              resizeMode="cover"
+                            />
+                          </View>
+                          <View className="max-w-full items-center justify-center px-3 py-1">
+                            <PillText size={20} numberOfLines={2} style={{ color: "#001D4A" }}>
+                              {option.title}
+                            </PillText>
+                          </View>
+                          {selected ? (
+                            <View className="absolute right-3 top-3">
+                              <Ionicons name="checkmark-circle" size={22} color={colors.primary} />
+                            </View>
+                          ) : null}
+                        </Pressable>
                       </View>
-                      {selected ? (
-                        <View className="absolute right-3 top-3">
-                          <Ionicons name="checkmark-circle" size={22} color={colors.primary} />
-                        </View>
-                      ) : null}
-                    </Pressable>
-                  </View>
-                );
-              })}
-            </View>
+                    );
+                  })}
+                </View>
+              ))}
+            </>
           )}
         </ScrollView>
 

@@ -221,7 +221,7 @@ export default function SettingsScreen() {
         <Row
           icon={<Ionicons name="volume-high-outline" size={20} color={colors.primary} />}
           label="Falar automaticamente"
-          description="Fala ao selecionar categoria"
+          description="Fala ao selecionar categoria ou tela"
           toggle
           value={settings.autoSpeakCategories}
           onToggle={(value) => updateSettings({ autoSpeakCategories: value })}

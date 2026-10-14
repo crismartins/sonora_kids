@@ -63,12 +63,15 @@ export function PecCard({ item, backgroundColor, onLongPressManage }: PecCardPro
       onPress={handlePress}
       onLongPress={onLongPressManage ? handleLongPress : undefined}
       delayLongPress={450}
-      className="m-[5px] flex-1"
+      className="m-[5px] self-stretch"
+      style={{ flexGrow: 1 }}
     >
       <Animated.View
-        className="min-h-[150px] flex-1 items-center justify-center rounded-[20px] p-3"
+        className="min-h-[150px] items-center justify-start self-stretch rounded-[20px] p-3"
         style={[
           {
+            flexGrow: 1,
+            alignSelf: "stretch",
             backgroundColor: settings.highContrast ? "#FFFFFF" : backgroundColor,
             borderRadius: 20,
             borderWidth: settings.highContrast ? 2 : 0,
@@ -76,17 +79,20 @@ export function PecCard({ item, backgroundColor, onLongPressManage }: PecCardPro
             minHeight: 150,
             padding: 12,
             alignItems: "center",
-            justifyContent: "center",
+            justifyContent: "flex-start",
           },
           animatedStyle,
         ]}
       >
-        <Image
-          source={imageSource}
-          className="mb-2.5 h-[88px] w-[88px] rounded-full bg-white"
-          defaultSource={FALLBACK_IMAGE}
-        />
-        <View className="max-w-full items-center justify-center rounded-full bg-white px-3 py-1">
+        <View className="mb-2.5 aspect-square w-full self-stretch overflow-hidden rounded-2xl bg-white">
+          <Image
+            source={imageSource}
+            className="h-full w-full"
+            resizeMode="cover"
+            defaultSource={FALLBACK_IMAGE}
+          />
+        </View>
+        <View className="max-w-full items-center justify-center px-3 py-1">
           <PillText size={20} numberOfLines={2} style={{ color: "#001D4A" }}>
             {item.title}
           </PillText>
@@ -177,29 +183,37 @@ export function RoutinePecCard({
   }, [editing, haptic, onCancelEditing, scale, speak, title]);
 
   return (
-    <View className="m-[5px] flex-1">
+    <View className="m-[5px] self-stretch" style={{ flexGrow: 1 }}>
       <Pressable
         accessibilityLabel={title}
         onPress={handlePress}
         onLongPress={onLongPress}
         delayLongPress={450}
+        className="self-stretch"
+        style={{ flexGrow: 1 }}
       >
         <Animated.View
-          className="min-h-[150px] items-center justify-center rounded-[20px] p-3"
+          className="min-h-[150px] items-center justify-start self-stretch rounded-[20px] p-3"
           style={[
             {
+              flexGrow: 1,
+              alignSelf: "stretch",
               backgroundColor: bg,
               borderWidth: settings.highContrast ? 2 : 0,
               borderColor: "#001D4A",
+              justifyContent: "flex-start",
             },
             animatedStyle,
           ]}
         >
-          <Image
-            source={image ?? FALLBACK_IMAGE}
-            className="mb-2.5 h-[88px] w-[88px] rounded-full bg-white"
-          />
-          <View className="max-w-full items-center justify-center rounded-full bg-white px-3 py-1">
+          <View className="mb-2.5 aspect-square w-full self-stretch overflow-hidden rounded-2xl bg-white">
+            <Image
+              source={image ?? FALLBACK_IMAGE}
+              className="h-full w-full"
+              resizeMode="cover"
+            />
+          </View>
+          <View className="max-w-full items-center justify-center px-3 py-1">
             <PillText size={20} numberOfLines={2} style={{ color: "#001D4A" }}>
               {title}
             </PillText>

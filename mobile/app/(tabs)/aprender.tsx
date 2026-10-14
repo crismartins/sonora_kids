@@ -1,8 +1,9 @@
 import React from "react";
-import { View, Text, ScrollView, Pressable, Platform, Image } from "react-native";
+import { View, Text, ScrollView, Pressable, Image } from "react-native";
 import { MaterialIcons, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/constants/colors";
+import { tabBarClearance } from "@/constants/tabBar";
 import { PillText } from "@/components/PillText";
 
 const AVATAR = require("../../assets/images/avatar_default_v1.png");
@@ -54,7 +55,7 @@ function ActivityCard({
 
 export default function AprenderScreen() {
   const insets = useSafeAreaInsets();
-  const tabBarHeight = Platform.OS === "web" ? 84 : 60 + insets.bottom;
+  const tabBarHeight = tabBarClearance(insets.bottom);
 
   return (
     <ScrollView

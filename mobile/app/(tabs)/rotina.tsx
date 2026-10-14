@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, ScrollView, Pressable, Platform, Modal, ImageSourcePropType } from "react-native";
+import { View, Text, ScrollView, Pressable, Modal, ImageSourcePropType } from "react-native";
 import { useNavigation } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
@@ -13,6 +13,7 @@ import { AddRoutineItemModal, RoutinePecOption } from "@/components/AddRoutineIt
 import { AddPecModal } from "@/components/AddPecModal";
 import { PillText } from "@/components/PillText";
 import { colors } from "@/constants/colors";
+import { tabBarClearance } from "@/constants/tabBar";
 import { customPecToItem } from "@/services/customPecs";
 import {
   DAY_LABELS,
@@ -31,6 +32,14 @@ const PERIOD_TABS: { period: DayPeriod; icon: keyof typeof Ionicons.glyphMap }[]
   { period: "tarde", icon: "partly-sunny-outline" },
   { period: "noite", icon: "moon-outline" },
 ];
+
+function chunkPairs<T>(items: T[]): T[][] {
+  const rows: T[][] = [];
+  for (let i = 0; i < items.length; i += 2) {
+    rows.push(items.slice(i, i + 2));
+  }
+  return rows;
+}
 
 function currentPeriod(date = new Date()): DayPeriod {
   const hour = date.getHours();
@@ -103,7 +112,7 @@ export default function RotinaScreen() {
     return map;
   }, [options]);
 
-  const tabBarHeight = Platform.OS === "web" ? 84 : 60 + insets.bottom;
+  const tabBarHeight = tabBarClearance(insets.bottom);
 
   const beginEditing = () => {
     ignoreCancelUntil.current = Date.now() + 500;
@@ -270,34 +279,35 @@ export default function RotinaScreen() {
         <View
           style={{
             flexGrow: 1,
-            gap: 18,
             paddingHorizontal: 12,
             paddingTop: 12,
             paddingBottom: tabBarHeight + 16,
           }}
         >
-        {itemsFor(selectedDay, selectedPeriod).length > 0 ? (
-          <View className="flex-row flex-wrap">
-            {itemsFor(selectedDay, selectedPeriod).map((item) => (
-              <View key={item.id} className="w-1/2">
-                <RoutinePecCard
-                  id={item.id}
-                  title={item.title}
-                  color={dayColor}
-                  image={imageById.get(item.pecId)}
-                  editing={editing}
-                  onLongPress={beginEditing}
-                  onCancelEditing={cancelEditing}
-                  onRemoveFrame={(frame) => rememberRemoveFrame(item.id, frame)}
-                  onRemove={() => {
-                    haptic();
-                    setRemoving({ period: selectedPeriod, item });
-                  }}
-                />
+        {itemsFor(selectedDay, selectedPeriod).length > 0
+          ? chunkPairs(itemsFor(selectedDay, selectedPeriod)).map((row) => (
+              <View key={row.map((item) => item.id).join("-")} className="flex-row items-stretch">
+                {row.map((item) => (
+                  <View key={item.id} className="w-1/2 self-stretch">
+                    <RoutinePecCard
+                      id={item.id}
+                      title={item.title}
+                      color={dayColor}
+                      image={imageById.get(item.pecId)}
+                      editing={editing}
+                      onLongPress={beginEditing}
+                      onCancelEditing={cancelEditing}
+                      onRemoveFrame={(frame) => rememberRemoveFrame(item.id, frame)}
+                      onRemove={() => {
+                        haptic();
+                        setRemoving({ period: selectedPeriod, item });
+                      }}
+                    />
+                  </View>
+                ))}
               </View>
-            ))}
-          </View>
-        ) : null}
+            ))
+          : null}
         </View>
       </ScrollView>
 

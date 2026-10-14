@@ -6,7 +6,6 @@ import {
   ScrollView,
   Pressable,
   Image,
-  Platform,
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from "react-native";
@@ -23,6 +22,7 @@ import { PecActionsModal } from "@/components/PecActionsModal";
 import { PillText } from "@/components/PillText";
 import { SkeletonPecCard, SkeletonChip } from "@/components/SkeletonCard";
 import { colors, getCategoryColor, getCategoryBgColor } from "@/constants/colors";
+import { tabBarClearance } from "@/constants/tabBar";
 import { categoryIconBySlug } from "@/constants/categoryIcons";
 import { Category, PecItem } from "@/types";
 
@@ -133,7 +133,7 @@ export default function PecsScreen() {
     }));
   }, [categories, customPecs]);
 
-  const tabBarHeight = Platform.OS === "web" ? 84 : 60 + insets.bottom;
+  const tabBarHeight = tabBarClearance(insets.bottom);
 
   if (error) {
     return (
@@ -356,6 +356,14 @@ export default function PecsScreen() {
   );
 }
 
+function chunkPairs<T>(items: T[]): T[][] {
+  const rows: T[][] = [];
+  for (let i = 0; i < items.length; i += 2) {
+    rows.push(items.slice(i, i + 2));
+  }
+  return rows;
+}
+
 function CategoryPage({
   category,
   width,
@@ -392,19 +400,21 @@ function CategoryPage({
             paddingBottom: tabBarHeight + 88,
           }}
         >
-          <View className="flex-row flex-wrap">
-            {pecs.map((item) => (
-              <View key={item.id} className="w-1/2">
-                <PecCard
-                  item={item}
-                  backgroundColor={backgroundColor}
-                  onLongPressManage={
-                    item.id.startsWith("custom-") ? () => onManageItem(item) : undefined
-                  }
-                />
-              </View>
-            ))}
-          </View>
+          {chunkPairs(pecs).map((row) => (
+            <View key={row.map((item) => item.id).join("-")} className="flex-row items-stretch">
+              {row.map((item) => (
+                <View key={item.id} className="w-1/2 self-stretch">
+                  <PecCard
+                    item={item}
+                    backgroundColor={backgroundColor}
+                    onLongPressManage={
+                      item.id.startsWith("custom-") ? () => onManageItem(item) : undefined
+                    }
+                  />
+                </View>
+              ))}
+            </View>
+          ))}
         </ScrollView>
       )}
     </View>

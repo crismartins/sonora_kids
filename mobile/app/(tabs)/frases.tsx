@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { View, Text, FlatList, Pressable, Platform } from "react-native";
+import { View, Text, FlatList, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
@@ -9,6 +9,7 @@ import { PillText } from "@/components/PillText";
 import { AddPhraseModal } from "@/components/AddPhraseModal";
 import { PhraseActionsModal } from "@/components/PhraseActionsModal";
 import { colors } from "@/constants/colors";
+import { tabBarClearance } from "@/constants/tabBar";
 import { PHRASES_MAIS_USADAS, PHRASES_TODAS } from "@/constants/phrases";
 import { useCategories } from "@/hooks/useCategories";
 import { useCustomPecs } from "@/hooks/useCustomPecs";
@@ -82,7 +83,7 @@ export default function FrasesScreen() {
     }
   }, [activeFilter, customPhrases]);
 
-  const tabBarHeight = Platform.OS === "web" ? 84 : 60 + insets.bottom;
+  const tabBarHeight = tabBarClearance(insets.bottom);
 
   const openManage = useCallback(
     (customId: string) => {
