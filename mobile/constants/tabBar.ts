@@ -7,7 +7,7 @@ export const FLOATING_TAB_BAR_HORIZONTAL = CARD_GRID_INSET;
 
 export function floatingTabBarBottom(bottomInset: number) {
   const inset = Platform.OS === "web" ? Math.max(bottomInset, 0) : bottomInset;
-  return inset + 0;
+  return inset - 15;
 }
 
 /** Space from the bottom of the screen up to the top of the floating tab bar. */
