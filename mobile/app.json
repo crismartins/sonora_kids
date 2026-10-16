@@ -39,8 +39,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "O Sonora Kids usa suas fotos para criar PECs personalizados.",
-          "cameraPermission": "O Sonora Kids usa a câmera para tirar a foto do PEC.",
+          "photosPermission": "O Sonora Kids usa suas fotos para o perfil e para criar PECs personalizados.",
+          "cameraPermission": "O Sonora Kids usa a câmera para a foto do perfil e dos PECs.",
           "microphonePermission": false
         }
       ]

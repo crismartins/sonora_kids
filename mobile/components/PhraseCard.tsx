@@ -12,6 +12,7 @@ import { PhraseItem } from "@/types";
 import { colors, getCategoryColor, getCategoryBgColor } from "@/constants/colors";
 import { PillText } from "@/components/PillText";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { recordWordUse } from "@/services/wordUsage";
 
 interface PhraseCardProps {
   phrase: PhraseItem[];
@@ -38,6 +39,7 @@ export function PhraseCard({ phrase, onManage }: PhraseCardProps) {
     );
     haptic();
     speak(phrase.map((item) => item.text).join(" "));
+    phrase.forEach((item) => recordWordUse(item.text, item.color));
   }, [haptic, phrase, scale, speak]);
 
   const handleLongPress = useCallback(() => {

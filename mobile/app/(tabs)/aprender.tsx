@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, ScrollView, Pressable, Image } from "react-native";
+import { router, type Href } from "expo-router";
 import { MaterialIcons, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/constants/colors";
@@ -9,26 +10,30 @@ import { PillText } from "@/components/PillText";
 const AVATAR = require("../../assets/images/avatar_default_v1.png");
 
 interface ActivityCardProps {
+  href: Href;
   icon: React.ReactNode;
   title: string;
   description: string;
   tagColor: string;
   bgColor: string;
   tag: string;
-  comingSoon?: boolean;
 }
 
 function ActivityCard({
+  href,
   icon,
   title,
   description,
   tagColor,
   bgColor,
   tag,
-  comingSoon,
 }: ActivityCardProps) {
   return (
-    <Pressable className="flex-row items-center gap-3 py-3 active:opacity-90">
+    <Pressable
+      accessibilityLabel={title}
+      onPress={() => router.push(href)}
+      className="flex-row items-center gap-3 py-3 active:opacity-90"
+    >
       <View
         className="h-12 w-12 shrink-0 items-center justify-center rounded-[14px]"
         style={{ backgroundColor: bgColor }}
@@ -46,7 +51,7 @@ function ActivityCard({
         style={{ backgroundColor: bgColor }}
       >
         <PillText size={14} style={{ color: tagColor }}>
-          {comingSoon ? "Em breve" : tag}
+          {tag}
         </PillText>
       </View>
     </Pressable>
@@ -86,43 +91,43 @@ export default function AprenderScreen() {
           Atividades
         </Text>
         <ActivityCard
+          href="/atividade/memoria"
           icon={<MaterialCommunityIcons name="cards-outline" size={26} color={colors.primary} />}
           title="Memória com PECS"
           description="Encontre os pares de palavras"
           tag="Jogo"
           bgColor="#E3F2FD"
           tagColor={colors.primary}
-          comingSoon
         />
         <View className="h-px bg-[#F0F0F0]" />
         <ActivityCard
+          href="/atividade/repita"
           icon={<Ionicons name="mic-outline" size={26} color="#00897B" />}
           title="Repita Comigo"
-          description="Pratique pronunciar palavras"
+          description="Ouça e toque na palavra"
           tag="Fala"
           bgColor="#E0F2F1"
           tagColor="#00897B"
-          comingSoon
         />
         <View className="h-px bg-[#F0F0F0]" />
         <ActivityCard
+          href="/atividade/frase"
           icon={<MaterialCommunityIcons name="puzzle-outline" size={26} color="#6A1B9A" />}
           title="Monte a Frase"
-          description="Arraste ícones e forme frases"
+          description="Toque as palavras na ordem"
           tag="Atividade"
           bgColor="#EDE7F6"
           tagColor="#6A1B9A"
-          comingSoon
         />
         <View className="h-px bg-[#F0F0F0]" />
         <ActivityCard
+          href="/atividade/historia"
           icon={<Ionicons name="book-outline" size={26} color="#EF6C00" />}
           title="História do Dia"
-          description="Histórias com imagens PECS"
+          description="Histórias para ouvir e ver"
           tag="Leitura"
           bgColor="#FBE9E7"
           tagColor="#EF6C00"
-          comingSoon
         />
       </View>
     </ScrollView>

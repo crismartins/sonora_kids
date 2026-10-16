@@ -407,6 +407,7 @@ function CategoryPage({
                   <PecCard
                     item={item}
                     backgroundColor={backgroundColor}
+                    colorName={colorName}
                     onLongPressManage={
                       item.id.startsWith("custom-") ? () => onManageItem(item) : undefined
                     }

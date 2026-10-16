@@ -14,16 +14,18 @@ import { PecItem } from "@/types";
 import { getCategoryBgColor } from "@/constants/colors";
 import { PillText } from "@/components/PillText";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { recordWordUse } from "@/services/wordUsage";
 
 interface PecCardProps {
   item: PecItem;
   backgroundColor: string;
+  colorName?: string;
   onLongPressManage?: () => void;
 }
 
 const FALLBACK_IMAGE = require("../assets/images/avatar_default_v1.png");
 
-export function PecCard({ item, backgroundColor, onLongPressManage }: PecCardProps) {
+export function PecCard({ item, backgroundColor, colorName = "blue", onLongPressManage }: PecCardProps) {
   const { settings, speak, stopSpeaking, haptic } = useAppSettings();
   const scale = useSharedValue(1);
   const longPressed = useRef(false);
@@ -44,7 +46,8 @@ export function PecCard({ item, backgroundColor, onLongPressManage }: PecCardPro
 
     haptic();
     speak(item.title);
-  }, [haptic, item.title, scale, speak]);
+    recordWordUse(item.title, colorName);
+  }, [colorName, haptic, item.title, scale, speak]);
 
   const handleLongPress = useCallback(() => {
     longPressed.current = true;
@@ -180,7 +183,8 @@ export function RoutinePecCard({
     );
     haptic();
     speak(title);
-  }, [editing, haptic, onCancelEditing, scale, speak, title]);
+    recordWordUse(title, color);
+  }, [color, editing, haptic, onCancelEditing, scale, speak, title]);
 
   return (
     <View className="m-[5px] self-stretch" style={{ flexGrow: 1 }}>

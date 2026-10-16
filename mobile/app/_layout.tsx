@@ -8,6 +8,7 @@ import { Quicksand_700Bold } from "@expo-google-fonts/quicksand";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AppSettingsProvider, useAppSettings } from "@/context/AppSettingsContext";
+import { ProfileProvider } from "@/context/ProfileContext";
 import { FONT_FAMILY } from "@/constants/typography";
 
 SplashScreen.preventAutoHideAsync();
@@ -68,8 +69,10 @@ export default function RootLayout() {
     <GestureHandlerRootView className="flex-1">
       <SafeAreaProvider>
         <AppSettingsProvider>
-          <StatusBar style="dark" />
-          <RootNavigator />
+          <ProfileProvider>
+            <StatusBar style="dark" />
+            <RootNavigator />
+          </ProfileProvider>
         </AppSettingsProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

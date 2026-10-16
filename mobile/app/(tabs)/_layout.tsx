@@ -7,6 +7,8 @@ import { colors } from "@/constants/colors";
 import { FLOATING_TAB_BAR_HEIGHT, FLOATING_TAB_BAR_HORIZONTAL, floatingTabBarBottom } from "@/constants/tabBar";
 import { FONT_FAMILY } from "@/constants/typography";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { useProfile } from "@/context/ProfileContext";
+import { profileAvatarSource } from "@/services/profile";
 
 const TAB_TITLES: Record<string, string> = {
   index: "Pecs",
@@ -14,8 +16,6 @@ const TAB_TITLES: Record<string, string> = {
   aprender: "Aprender",
   rotina: "Rotina",
 };
-
-const AVATAR = require("../../assets/images/avatar_default_v1.png");
 
 function HeaderLeft() {
   return (
@@ -29,9 +29,14 @@ function HeaderLeft() {
 }
 
 function HeaderRight() {
+  const { profile } = useProfile();
   return (
-    <Pressable onPress={() => router.push("/profile")} className="mr-4 h-9 w-9 overflow-hidden rounded-full bg-neutral">
-      <Image source={AVATAR} className="h-9 w-9" />
+    <Pressable
+      accessibilityLabel="Abrir perfil"
+      onPress={() => router.push("/profile")}
+      className="mr-4 h-9 w-9 overflow-hidden rounded-full bg-neutral"
+    >
+      <Image source={profileAvatarSource(profile)} className="h-9 w-9" />
     </Pressable>
   );
 }
