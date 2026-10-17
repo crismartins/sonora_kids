@@ -15,13 +15,7 @@ import { PillText } from "@/components/PillText";
 import { colors } from "@/constants/colors";
 import { tabBarClearance } from "@/constants/tabBar";
 import { customPecToItem } from "@/services/customPecs";
-import {
-  DAY_LABELS,
-  DAY_PERIODS,
-  DayPeriod,
-  PERIOD_LABELS,
-  RoutineItem,
-} from "@/services/routine";
+import { DAY_LABELS, DAY_PERIODS, DayPeriod, PERIOD_LABELS, RoutineItem } from "@/services/routine";
 import { PecItem } from "@/types";
 
 const DAY_CHIPS = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
@@ -94,9 +88,7 @@ export default function RotinaScreen() {
 
   const options = useMemo(() => {
     const catalog = dayCategory?.pECS.nodes ?? [];
-    const custom = customPecs
-      .filter((pec) => pec.categorySlug === DIA_A_DIA)
-      .map(customPecToItem);
+    const custom = customPecs.filter((pec) => pec.categorySlug === DIA_A_DIA).map(customPecToItem);
     const byId = new Map<string, RoutinePecOption>();
     for (const item of [...catalog, ...custom]) {
       byId.set(item.id, { id: item.id, title: item.title, image: pecImage(item) });
@@ -204,7 +196,7 @@ export default function RotinaScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <View className="border-b border-[#F0F0F0] bg-white">
+      <View className="bg-white">
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -259,8 +251,8 @@ export default function RotinaScreen() {
               accessibilityLabel={PERIOD_LABELS[period]}
               accessibilityState={{ selected: active }}
               onPress={() => selectPeriod(period)}
-              className={`flex-1 items-center justify-center gap-0.5 border-b-2 py-2 ${
-                active ? "border-primary bg-[#F7FBFF]" : "border-transparent"
+              className={`flex-1 items-center justify-center gap-0.5 py-2 ${
+                active ? "bg-[#F7FBFF]" : "border-transparent"
               }`}
             >
               <SolarIcon name={icon} size={22} color={tint} />
@@ -272,10 +264,7 @@ export default function RotinaScreen() {
         })}
       </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1 }}
-      >
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
         <View
           style={{
             flexGrow: 1,
@@ -284,30 +273,30 @@ export default function RotinaScreen() {
             paddingBottom: tabBarHeight + 16,
           }}
         >
-        {itemsFor(selectedDay, selectedPeriod).length > 0
-          ? chunkPairs(itemsFor(selectedDay, selectedPeriod)).map((row) => (
-              <View key={row.map((item) => item.id).join("-")} className="flex-row items-stretch">
-                {row.map((item) => (
-                  <View key={item.id} className="w-1/2 self-stretch">
-                    <RoutinePecCard
-                      id={item.id}
-                      title={item.title}
-                      color={dayColor}
-                      image={imageById.get(item.pecId)}
-                      editing={editing}
-                      onLongPress={beginEditing}
-                      onCancelEditing={cancelEditing}
-                      onRemoveFrame={(frame) => rememberRemoveFrame(item.id, frame)}
-                      onRemove={() => {
-                        haptic();
-                        setRemoving({ period: selectedPeriod, item });
-                      }}
-                    />
-                  </View>
-                ))}
-              </View>
-            ))
-          : null}
+          {itemsFor(selectedDay, selectedPeriod).length > 0
+            ? chunkPairs(itemsFor(selectedDay, selectedPeriod)).map((row) => (
+                <View key={row.map((item) => item.id).join("-")} className="flex-row items-stretch">
+                  {row.map((item) => (
+                    <View key={item.id} className="w-1/2 self-stretch">
+                      <RoutinePecCard
+                        id={item.id}
+                        title={item.title}
+                        color={dayColor}
+                        image={imageById.get(item.pecId)}
+                        editing={editing}
+                        onLongPress={beginEditing}
+                        onCancelEditing={cancelEditing}
+                        onRemoveFrame={(frame) => rememberRemoveFrame(item.id, frame)}
+                        onRemove={() => {
+                          haptic();
+                          setRemoving({ period: selectedPeriod, item });
+                        }}
+                      />
+                    </View>
+                  ))}
+                </View>
+              ))
+            : null}
         </View>
       </ScrollView>
 
@@ -327,12 +316,7 @@ export default function RotinaScreen() {
         <SolarIcon name="pen" size={26} color="#fff" />
       </Pressable>
 
-      <Modal
-        visible={editing && !removing}
-        transparent
-        animationType="none"
-        onRequestClose={cancelEditing}
-      >
+      <Modal visible={editing && !removing} transparent animationType="none" onRequestClose={cancelEditing}>
         <Pressable
           accessibilityLabel="Cancelar remoção"
           style={{ flex: 1 }}
@@ -351,11 +335,7 @@ export default function RotinaScreen() {
 
       <AddRoutineItemModal
         visible={addingPeriod != null && !creating}
-        title={
-          addingPeriod
-            ? `${PERIOD_LABELS[addingPeriod]} · ${DAY_LABELS[selectedDay]}`
-            : "Rotina"
-        }
+        title={addingPeriod ? `${PERIOD_LABELS[addingPeriod]} · ${DAY_LABELS[selectedDay]}` : "Rotina"}
         options={options}
         selectedIds={selectedIds}
         onClose={() => {
@@ -406,10 +386,7 @@ export default function RotinaScreen() {
               backgroundColor: "rgba(0,0,0,0.4)",
             }}
           />
-          <View
-            className="gap-3 rounded-t-[28px] bg-white px-5 pt-3"
-            style={{ paddingBottom: insets.bottom + 20 }}
-          >
+          <View className="gap-3 rounded-t-[28px] bg-white px-5 pt-3" style={{ paddingBottom: insets.bottom + 20 }}>
             <View className="mb-1 h-1.5 w-12 self-center rounded-full bg-[#E4F4FF]" />
             <Text className="text-center font-quicksand text-3xl text-dark">{removing?.item.title}</Text>
             <Text className="text-center font-quicksand text-xl text-neutral-dark">

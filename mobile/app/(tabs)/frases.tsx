@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { View, Text, FlatList, Pressable } from "react-native";
+import { View, Text, FlatList, Pressable, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { SolarIcon } from "@/components/SolarIcon";
@@ -53,18 +53,19 @@ export default function FrasesScreen() {
       pECS: {
         nodes: [
           ...category.pECS.nodes,
-          ...customPecs
-            .filter((pec) => pec.categorySlug === category.slug)
-            .map(customPecToItem),
+          ...customPecs.filter((pec) => pec.categorySlug === category.slug).map(customPecToItem),
         ],
       },
     }));
   }, [categories, customPecs]);
 
-  const handleSelectFilter = useCallback((tab: FilterTab) => {
-    setActiveFilter(tab);
-    haptic(Haptics.ImpactFeedbackStyle.Light);
-  }, [haptic]);
+  const handleSelectFilter = useCallback(
+    (tab: FilterTab) => {
+      setActiveFilter(tab);
+      haptic(Haptics.ImpactFeedbackStyle.Light);
+    },
+    [haptic],
+  );
 
   const phrases = useMemo(() => {
     const mine: ListedPhrase[] = customPhrases.map((phrase) => ({
@@ -95,19 +96,30 @@ export default function FrasesScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <View className="flex-row gap-2 border-b border-[#F0F0F0] bg-white px-4 py-2.5">
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 8,
+          paddingHorizontal: 16,
+          paddingVertical: 10,
+        }}
+      >
         {FILTER_TABS.map((tab) => {
           const isActive = tab === activeFilter;
           return (
             <Pressable
               key={tab}
               onPress={() => handleSelectFilter(tab)}
-              className={`h-10 flex-1 items-center justify-center rounded-full border-[1.5px] px-2 ${
-                isActive ? "border-primary bg-[#E3F2FD]" : "border-transparent bg-[#F5F5F5]"
+              className={`h-10 items-center justify-center rounded-full px-4 ${
+                isActive ? "bg-[#E3F2FD]" : "border-transparent bg-[#F5F5F5]"
               }`}
             >
               <PillText
                 size={15}
+                numberOfLines={1}
                 style={{
                   color: isActive ? colors.primary : colors.neutralDark,
                   letterSpacing: 0.3,
@@ -118,7 +130,7 @@ export default function FrasesScreen() {
             </Pressable>
           );
         })}
-      </View>
+      </ScrollView>
 
       {phrases.length === 0 ? (
         <View className="flex-1 items-center justify-center gap-2 px-10">
@@ -136,12 +148,7 @@ export default function FrasesScreen() {
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => {
             const customId = item.customId;
-            return (
-              <PhraseCard
-                phrase={item.items}
-                onManage={customId ? () => openManage(customId) : undefined}
-              />
-            );
+            return <PhraseCard phrase={item.items} onManage={customId ? () => openManage(customId) : undefined} />;
           }}
         />
       )}

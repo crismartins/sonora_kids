@@ -1,13 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  ScrollView,
-  Pressable,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-} from "react-native";
+import { View, Text, FlatList, ScrollView, Pressable, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { SolarIcon } from "@/components/SolarIcon";
@@ -125,9 +117,7 @@ export default function PecsScreen() {
       pECS: {
         nodes: [
           ...category.pECS.nodes,
-          ...customPecs
-            .filter((pec) => pec.categorySlug === category.slug)
-            .map(customPecToItem),
+          ...customPecs.filter((pec) => pec.categorySlug === category.slug).map(customPecToItem),
         ],
       },
     }));
@@ -139,13 +129,8 @@ export default function PecsScreen() {
     return (
       <View className="flex-1 items-center justify-center gap-3 bg-white">
         <SolarIcon name="cloud-cross" size={48} color={colors.neutralDark} />
-        <Text className="text-center font-quicksand text-xl text-neutral-dark">
-          Não foi possível carregar
-        </Text>
-        <Pressable
-          className="mt-2 rounded-full bg-primary px-6 py-2.5"
-          onPress={() => refetch()}
-        >
+        <Text className="text-center font-quicksand text-xl text-neutral-dark">Não foi possível carregar</Text>
+        <Pressable className="mt-2 rounded-full bg-primary px-6 py-2.5" onPress={() => refetch()}>
           <Text className="font-quicksand text-lg text-white">Tentar novamente</Text>
         </Pressable>
       </View>
@@ -154,7 +139,7 @@ export default function PecsScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <View className="border-b border-[#F0F0F0] bg-white">
+      <View className="bg-white">
         <ScrollView
           ref={chipScrollRef}
           horizontal
@@ -173,8 +158,7 @@ export default function PecsScreen() {
           {isLoading
             ? Array.from({ length: 5 }).map((_, i) => <SkeletonChip key={i} />)
             : categories?.map((cat, idx) => {
-                const catColorName =
-                  cat.categoriasDePec?.configuracoesCategorias?.cor ?? "blue";
+                const catColorName = cat.categoriasDePec?.configuracoesCategorias?.cor ?? "blue";
                 const catColor = getCategoryColor(catColorName);
                 const catBg = getCategoryBgColor(catColorName);
                 const isActive = idx === selectedIndex;
@@ -195,10 +179,10 @@ export default function PecsScreen() {
                       backgroundColor: settings.highContrast
                         ? isActive
                           ? catColor
-                          : "#FFFFFF"
+                          : catColor
                         : isActive
                           ? catBg
-                          : "#F5F5F5",
+                          : catBg,
                       borderWidth: settings.highContrast ? 2 : 0,
                       borderColor: catColor,
                       height: CATEGORY_PILL_SIZE,
@@ -208,7 +192,7 @@ export default function PecsScreen() {
                     }}
                   >
                     <View
-                      className="items-center justify-center rounded-full bg-white"
+                      className="items-center justify-center rounded-full bg-white/60"
                       style={{ width: CATEGORY_ICON_SIZE, height: CATEGORY_ICON_SIZE }}
                     >
                       {categoryIconBySlug[cat.slug] ? (
@@ -220,13 +204,13 @@ export default function PecsScreen() {
                       )}
                     </View>
                     {isActive ? (
-                        <PillText
-                          size={16}
-                          style={{
-                            color: settings.highContrast && isActive ? "#FFFFFF" : catColor,
-                            letterSpacing: 0.4,
-                          }}
-                        >
+                      <PillText
+                        size={16}
+                        style={{
+                          color: settings.highContrast && isActive ? "#FFFFFF" : catColor,
+                          letterSpacing: 0.4,
+                        }}
+                      >
                         {cat.name.toUpperCase()}
                       </PillText>
                     ) : null}
@@ -312,11 +296,7 @@ export default function PecsScreen() {
         <AddPecModal
           visible={addOpen || !!editingPec}
           categories={categories}
-          initialCategorySlug={
-            editingPec?.categorySlug ??
-            categories[selectedIndex]?.slug ??
-            categories[0].slug
-          }
+          initialCategorySlug={editingPec?.categorySlug ?? categories[selectedIndex]?.slug ?? categories[0].slug}
           initialPec={editingPec}
           onClose={() => {
             setAddOpen(false);
@@ -382,9 +362,7 @@ function CategoryPage({
       {pecs.length === 0 ? (
         <View className="flex-1 items-center justify-center gap-3 bg-white">
           <SolarIcon name="gallery" size={48} color={colors.neutralDark} />
-          <Text className="font-quicksand text-xl text-neutral-dark">
-            Nenhum item nesta categoria
-          </Text>
+          <Text className="font-quicksand text-xl text-neutral-dark">Nenhum item nesta categoria</Text>
         </View>
       ) : (
         <ScrollView
@@ -404,9 +382,7 @@ function CategoryPage({
                     item={item}
                     backgroundColor={backgroundColor}
                     colorName={colorName}
-                    onLongPressManage={
-                      item.id.startsWith("custom-") ? () => onManageItem(item) : undefined
-                    }
+                    onLongPressManage={item.id.startsWith("custom-") ? () => onManageItem(item) : undefined}
                   />
                 </View>
               ))}

@@ -60,10 +60,7 @@ function HeaderRight() {
           overflow: "hidden",
         }}
       >
-        <Image
-          source={profileAvatarSource(profile)}
-          style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }}
-        />
+        <Image source={profileAvatarSource(profile)} style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }} />
       </View>
     </Pressable>
   );
@@ -118,13 +115,9 @@ export default function TabLayout() {
           borderRadius: FLOATING_TAB_BAR_HEIGHT / 2,
           backgroundColor: "#FFFF",
           borderTopWidth: 0,
+          opacity: 0.95,
           paddingTop: 8,
           paddingBottom: 8,
-          borderWidth: 1,
-          borderColor: "#E4F4FF",
-          shadowColor: "#001D4A",
-          shadowOpacity: 0.1,
-          shadowRadius: 8,
           shadowOffset: { width: 0, height: 4 },
           elevation: 6,
           marginHorizontal: 16,
