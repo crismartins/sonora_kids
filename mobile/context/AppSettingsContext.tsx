@@ -1,8 +1,9 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { Platform } from "react-native";
+import { AppState, Platform } from "react-native";
 import * as Haptics from "expo-haptics";
 import * as Speech from "expo-speech";
 import { Voice } from "expo-speech";
+import { warmSilentModeCache, warnIfSilentModeBlocksSpeech } from "@/services/silentMode";
 import {
   AppSettings,
   DEFAULT_FONT_SCALE,
@@ -55,6 +56,14 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
   }, []);
 
   useEffect(() => {
+    warmSilentModeCache();
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") warmSilentModeCache();
+    });
+    return () => subscription.remove();
+  }, []);
+
+  useEffect(() => {
     let active = true;
     Speech.getAvailableVoicesAsync()
       .then((available) => {
@@ -82,6 +91,7 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
   }, []);
 
   const speak = useCallback((text: string, override?: Partial<AppSettings>) => {
+    if (text.trim()) warnIfSilentModeBlocksSpeech();
     const current = { ...settingsRef.current, ...override };
     const resolved = resolveSpeech(voicesRef.current, current);
     Speech.stop();

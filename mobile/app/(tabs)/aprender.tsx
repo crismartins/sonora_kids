@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, ScrollView, Pressable, Image } from "react-native";
 import { router, type Href } from "expo-router";
-import { MaterialIcons, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { SolarIcon } from "@/components/SolarIcon";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/constants/colors";
 import { tabBarClearance } from "@/constants/tabBar";
@@ -75,7 +75,7 @@ export default function AprenderScreen() {
     >
       <Pressable className="min-h-[140px] flex-row items-center justify-between rounded-3xl bg-primary p-6">
         <View className="flex-1 gap-2">
-          <MaterialIcons name="sports-esports" size={40} color="#fff" />
+          <SolarIcon name="gamepad" size={40} color="#fff" />
           <Text className="font-quicksand text-4xl text-white">
             APRENDA{"\n"}JOGANDO
           </Text>
@@ -92,7 +92,7 @@ export default function AprenderScreen() {
         </Text>
         <ActivityCard
           href="/atividade/memoria"
-          icon={<MaterialCommunityIcons name="cards-outline" size={26} color={colors.primary} />}
+          icon={<SolarIcon name="fallback" size={26} color={colors.primary} />}
           title="Memória com PECS"
           description="Encontre os pares de palavras"
           tag="Jogo"
@@ -102,7 +102,7 @@ export default function AprenderScreen() {
         <View className="h-px bg-[#F0F0F0]" />
         <ActivityCard
           href="/atividade/repita"
-          icon={<Ionicons name="mic-outline" size={26} color="#00897B" />}
+          icon={<SolarIcon name="microphone" size={26} color="#00897B" />}
           title="Repita Comigo"
           description="Ouça e toque na palavra"
           tag="Fala"
@@ -112,7 +112,7 @@ export default function AprenderScreen() {
         <View className="h-px bg-[#F0F0F0]" />
         <ActivityCard
           href="/atividade/frase"
-          icon={<MaterialCommunityIcons name="puzzle-outline" size={26} color="#6A1B9A" />}
+          icon={<SolarIcon name="fallback" size={26} color="#6A1B9A" />}
           title="Monte a Frase"
           description="Toque as palavras na ordem"
           tag="Atividade"
@@ -122,7 +122,7 @@ export default function AprenderScreen() {
         <View className="h-px bg-[#F0F0F0]" />
         <ActivityCard
           href="/atividade/historia"
-          icon={<Ionicons name="book-outline" size={26} color="#EF6C00" />}
+          icon={<SolarIcon name="book" size={26} color="#EF6C00" />}
           title="História do Dia"
           description="Histórias para ouvir e ver"
           tag="Leitura"

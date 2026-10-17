@@ -7,7 +7,7 @@ import Animated, {
   withTiming,
   withSpring,
 } from "react-native-reanimated";
-import { Ionicons } from "@expo/vector-icons";
+import { SolarIcon } from "@/components/SolarIcon";
 import { PhraseItem } from "@/types";
 import { colors, getCategoryColor, getCategoryBgColor } from "@/constants/colors";
 import { PillText } from "@/components/PillText";
@@ -86,7 +86,7 @@ export function PhraseCard({ phrase, onManage }: PhraseCardProps) {
           onPress={onManage}
           className="h-full items-center justify-center px-2"
         >
-          <Ionicons name="ellipsis-vertical" size={20} color={colors.neutralDark} />
+          <SolarIcon name="menu-dots-vertical" size={20} color={colors.neutralDark} />
         </Pressable>
       ) : null}
       <Pressable
@@ -94,7 +94,7 @@ export function PhraseCard({ phrase, onManage }: PhraseCardProps) {
         onPress={handlePress}
         className="items-center justify-center px-4 py-[18px]"
       >
-        <Ionicons name="volume-high" size={20} color={colors.primary} />
+        <SolarIcon name="volume-loud" size={20} color={colors.primary} />
       </Pressable>
     </Animated.View>
   );

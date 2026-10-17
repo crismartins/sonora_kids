@@ -1,7 +1,7 @@
 import { useCallback, useRef } from "react";
 import { Tabs, router } from "expo-router";
-import { Pressable, Image } from "react-native";
-import { MaterialCommunityIcons, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Pressable, Image, View } from "react-native";
+import { SolarIcon } from "@/components/SolarIcon";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/constants/colors";
 import { FLOATING_TAB_BAR_HEIGHT, FLOATING_TAB_BAR_HORIZONTAL, floatingTabBarBottom } from "@/constants/tabBar";
@@ -17,13 +17,28 @@ const TAB_TITLES: Record<string, string> = {
   rotina: "Rotina",
 };
 
+const PEC_CARD_TEXT_SIZE = 20;
+const HEADER_TITLE_SIZE = PEC_CARD_TEXT_SIZE + 2;
+const AVATAR_SIZE = 32;
+const AVATAR_RADIUS = 12;
+const AVATAR_BORDER = 3;
+const AVATAR_RING = "#D7EEF8";
+
 function HeaderLeft() {
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Abrir configurações"
       onPress={() => router.push("/settings")}
-      className="ml-4 h-9 w-9 items-center justify-center rounded-[10px] bg-[#E3F2FD]"
+      hitSlop={12}
+      style={{
+        width: 24,
+        height: 24,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
     >
-      <Ionicons name="settings-outline" size={20} color={colors.primary} />
+      <SolarIcon name="settings" size={24} color={colors.neutralDark} />
     </Pressable>
   );
 }
@@ -32,11 +47,24 @@ function HeaderRight() {
   const { profile } = useProfile();
   return (
     <Pressable
+      accessibilityRole="button"
       accessibilityLabel="Abrir perfil"
       onPress={() => router.push("/profile")}
-      className="mr-4 h-9 w-9 overflow-hidden rounded-full bg-neutral"
+      hitSlop={8}
     >
-      <Image source={profileAvatarSource(profile)} className="h-9 w-9" />
+      <View
+        style={{
+          borderWidth: AVATAR_BORDER,
+          borderColor: AVATAR_RING,
+          borderRadius: AVATAR_RADIUS + AVATAR_BORDER,
+          overflow: "hidden",
+        }}
+      >
+        <Image
+          source={profileAvatarSource(profile)}
+          style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }}
+        />
+      </View>
     </Pressable>
   );
 }
@@ -65,14 +93,17 @@ export default function TabLayout() {
       screenListeners={screenListeners}
       screenOptions={{
         headerStyle: { backgroundColor: "#FFFFFF" },
+        headerTitleAlign: "center",
         headerTitleStyle: {
           fontFamily: FONT_FAMILY,
           fontWeight: "700",
-          fontSize: Math.round(22 * fontScale),
+          fontSize: Math.round(HEADER_TITLE_SIZE * fontScale),
           color: colors.dark,
         },
         headerShadowVisible: false,
         headerTintColor: colors.dark,
+        headerLeftContainerStyle: { paddingLeft: 16 },
+        headerRightContainerStyle: { paddingRight: 16 },
         headerLeft: () => <HeaderLeft />,
         headerRight: () => <HeaderRight />,
         tabBarActiveTintColor: colors.primary,
@@ -111,7 +142,7 @@ export default function TabLayout() {
         options={{
           title: "Pecs",
           tabBarLabel: "PECS",
-          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="card-multiple-outline" size={24} color={color} />,
+          tabBarIcon: ({ color }) => <SolarIcon name="widget" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -119,7 +150,7 @@ export default function TabLayout() {
         options={{
           title: "Frases",
           tabBarLabel: "FRASES",
-          tabBarIcon: ({ color }) => <Ionicons name="chatbubbles-outline" size={24} color={color} />,
+          tabBarIcon: ({ color }) => <SolarIcon name="chat-round-dots" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -127,7 +158,7 @@ export default function TabLayout() {
         options={{
           title: "Aprender",
           tabBarLabel: "APRENDER",
-          tabBarIcon: ({ color }) => <MaterialIcons name="sports-esports" size={24} color={color} />,
+          tabBarIcon: ({ color }) => <SolarIcon name="gamepad" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -135,7 +166,7 @@ export default function TabLayout() {
         options={{
           title: "Rotina",
           tabBarLabel: "ROTINA",
-          tabBarIcon: ({ color }) => <Ionicons name="time-outline" size={24} color={color} />,
+          tabBarIcon: ({ color }) => <SolarIcon name="clock" size={24} color={color} />,
         }}
       />
     </Tabs>

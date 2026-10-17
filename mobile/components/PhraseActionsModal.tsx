@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Modal, Pressable, ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { SolarIcon } from "@/components/SolarIcon";
 import { CustomPhrase } from "@/services/customPhrases";
 import { colors } from "@/constants/colors";
 
@@ -70,7 +70,7 @@ export function PhraseActionsModal({ phrase, onClose, onEdit, onDelete }: Phrase
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <>
-                    <Ionicons name="trash" size={20} color="#fff" />
+                    <SolarIcon name="trash" size={20} color="#fff" />
                     <Text className="font-quicksand text-2xl text-white">Excluir</Text>
                   </>
                 )}
@@ -90,7 +90,7 @@ export function PhraseActionsModal({ phrase, onClose, onEdit, onDelete }: Phrase
                 onPress={() => phrase && onEdit(phrase)}
                 className="h-14 flex-row items-center justify-center gap-2 rounded-full bg-[#F0F8FF]"
               >
-                <Ionicons name="pencil" size={20} color={colors.primary} />
+                <SolarIcon name="pen" size={20} color={colors.primary} />
                 <Text className="font-quicksand text-2xl text-primary">Editar</Text>
               </Pressable>
               <Pressable
@@ -98,7 +98,7 @@ export function PhraseActionsModal({ phrase, onClose, onEdit, onDelete }: Phrase
                 onPress={() => setConfirming(true)}
                 className="h-14 flex-row items-center justify-center gap-2 rounded-full bg-[#FDECEC]"
               >
-                <Ionicons name="trash" size={20} color="#D32F2F" />
+                <SolarIcon name="trash" size={20} color="#D32F2F" />
                 <Text className="font-quicksand text-2xl text-[#D32F2F]">Excluir</Text>
               </Pressable>
               <Pressable

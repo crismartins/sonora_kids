@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { SolarIcon } from "@/components/SolarIcon";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
@@ -58,13 +58,13 @@ function StoryList({ onOpen }: { onOpen: (story: Story) => void }) {
             }}
           >
             <View className="h-14 w-14 items-center justify-center rounded-2xl bg-white">
-              <Ionicons name={story.icon} size={30} color={color} />
+              <SolarIcon name={story.icon} size={30} color={color} />
             </View>
             <View className="flex-1 gap-0.5">
               <Text className="font-quicksand text-[22px] text-dark">{story.title}</Text>
               <Text className="font-quicksand text-base text-neutral-dark">{story.summary}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={22} color={color} />
+            <SolarIcon name="alt-arrow-right" size={22} color={color} />
           </Pressable>
         );
       })}
@@ -130,11 +130,11 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
           }}
         >
           <View className="mb-8 h-32 w-32 items-center justify-center rounded-full bg-white">
-            <Ionicons name={current.icon} size={68} color={color} />
+            <SolarIcon name={current.icon} size={68} color={color} />
           </View>
           <Text className="text-center font-quicksand text-4xl text-dark">{current.text}</Text>
           <View className="mt-6 flex-row items-center gap-2">
-            <Ionicons name="volume-high" size={20} color={colors.primary} />
+            <SolarIcon name="volume-loud" size={20} color={colors.primary} />
             <Text className="font-quicksand text-base text-primary">Toque para ouvir</Text>
           </View>
         </Pressable>
@@ -147,7 +147,7 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
             className="h-12 w-12 items-center justify-center rounded-full bg-neutral active:opacity-80"
             style={{ opacity: page === 0 ? 0.35 : 1 }}
           >
-            <Ionicons name="chevron-back" size={26} color={colors.primary} />
+            <SolarIcon name="alt-arrow-left" size={26} color={colors.primary} />
           </Pressable>
 
           <View className="flex-row items-center gap-2">
@@ -168,8 +168,8 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
             onPress={() => go(page + 1)}
             className="h-12 w-12 items-center justify-center rounded-full bg-primary active:opacity-90"
           >
-            <Ionicons
-              name={page === story.pages.length - 1 ? "checkmark" : "chevron-forward"}
+            <SolarIcon
+              name={page === story.pages.length - 1 ? "check" : "alt-arrow-right"}
               size={26}
               color="#FFFFFF"
             />

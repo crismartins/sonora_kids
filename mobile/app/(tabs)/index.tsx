@@ -5,13 +5,12 @@ import {
   FlatList,
   ScrollView,
   Pressable,
-  Image,
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import { Ionicons } from "@expo/vector-icons";
+import { SolarIcon } from "@/components/SolarIcon";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { useCategories } from "@/hooks/useCategories";
 import { useCustomPecs } from "@/hooks/useCustomPecs";
@@ -23,6 +22,7 @@ import { PillText } from "@/components/PillText";
 import { SkeletonPecCard, SkeletonChip } from "@/components/SkeletonCard";
 import { colors, getCategoryColor, getCategoryBgColor } from "@/constants/colors";
 import { tabBarClearance } from "@/constants/tabBar";
+import { CategoryIcon } from "@/components/CategoryIcon";
 import { categoryIconBySlug } from "@/constants/categoryIcons";
 import { Category, PecItem } from "@/types";
 
@@ -138,7 +138,7 @@ export default function PecsScreen() {
   if (error) {
     return (
       <View className="flex-1 items-center justify-center gap-3 bg-white">
-        <Ionicons name="cloud-offline-outline" size={48} color={colors.neutralDark} />
+        <SolarIcon name="cloud-cross" size={48} color={colors.neutralDark} />
         <Text className="text-center font-quicksand text-xl text-neutral-dark">
           Não foi possível carregar
         </Text>
@@ -178,7 +178,6 @@ export default function PecsScreen() {
                 const catColor = getCategoryColor(catColorName);
                 const catBg = getCategoryBgColor(catColorName);
                 const isActive = idx === selectedIndex;
-                const iconSource = categoryIconBySlug[cat.slug];
                 return (
                   <Pressable
                     key={cat.slug}
@@ -212,11 +211,8 @@ export default function PecsScreen() {
                       className="items-center justify-center rounded-full bg-white"
                       style={{ width: CATEGORY_ICON_SIZE, height: CATEGORY_ICON_SIZE }}
                     >
-                      {iconSource ? (
-                        <Image
-                          source={iconSource}
-                          style={{ width: CATEGORY_ICON_SIZE, height: CATEGORY_ICON_SIZE }}
-                        />
+                      {categoryIconBySlug[cat.slug] ? (
+                        <CategoryIcon slug={cat.slug} size={CATEGORY_ICON_SIZE} />
                       ) : (
                         <PillText size={18} style={{ color: catColor }}>
                           {cat.name.slice(0, 1)}
@@ -308,7 +304,7 @@ export default function PecsScreen() {
             elevation: 6,
           }}
         >
-          <Ionicons name="add" size={32} color="#fff" />
+          <SolarIcon name="add" size={32} color="#fff" />
         </Pressable>
       ) : null}
 
@@ -385,7 +381,7 @@ function CategoryPage({
     <View style={{ width, height }}>
       {pecs.length === 0 ? (
         <View className="flex-1 items-center justify-center gap-3 bg-white">
-          <Ionicons name="images-outline" size={48} color={colors.neutralDark} />
+          <SolarIcon name="gallery" size={48} color={colors.neutralDark} />
           <Text className="font-quicksand text-xl text-neutral-dark">
             Nenhum item nesta categoria
           </Text>

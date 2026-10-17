@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Pressable, Modal, ImageSourcePropType } from "r
 import { useNavigation } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import { Ionicons } from "@expo/vector-icons";
+import { SolarIcon, SolarIconName } from "@/components/SolarIcon";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { useCategories } from "@/hooks/useCategories";
 import { useCustomPecs } from "@/hooks/useCustomPecs";
@@ -27,10 +27,10 @@ import { PecItem } from "@/types";
 const DAY_CHIPS = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
 const DIA_A_DIA = "dia-a-dia";
 
-const PERIOD_TABS: { period: DayPeriod; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { period: "manha", icon: "sunny-outline" },
-  { period: "tarde", icon: "partly-sunny-outline" },
-  { period: "noite", icon: "moon-outline" },
+const PERIOD_TABS: { period: DayPeriod; icon: SolarIconName }[] = [
+  { period: "manha", icon: "sun" },
+  { period: "tarde", icon: "cloud-sun" },
+  { period: "noite", icon: "moon" },
 ];
 
 function chunkPairs<T>(items: T[]): T[][] {
@@ -263,7 +263,7 @@ export default function RotinaScreen() {
                 active ? "border-primary bg-[#F7FBFF]" : "border-transparent"
               }`}
             >
-              <Ionicons name={icon} size={22} color={tint} />
+              <SolarIcon name={icon} size={22} color={tint} />
               <PillText size={16} style={{ color: tint }}>
                 {PERIOD_LABELS[period]}
               </PillText>
@@ -324,7 +324,7 @@ export default function RotinaScreen() {
           elevation: 6,
         }}
       >
-        <Ionicons name="pencil" size={26} color="#fff" />
+        <SolarIcon name="pen" size={26} color="#fff" />
       </Pressable>
 
       <Modal

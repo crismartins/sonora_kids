@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Modal, Pressable, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { SolarIcon } from "@/components/SolarIcon";
 import { Voice } from "expo-speech";
 import { colors } from "@/constants/colors";
 import {
@@ -55,7 +55,7 @@ export function VoicePickerModal({
             onPress={onClose}
             className="h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]"
           >
-            <Ionicons name="close" size={22} color={colors.dark} />
+            <SolarIcon name="close" size={22} color={colors.dark} />
           </Pressable>
           <Text className="font-quicksand text-3xl text-dark">Voz</Text>
           <View className="w-10" />
@@ -147,7 +147,7 @@ export function VoicePickerModal({
                     }`}
                   >
                     <View className="h-9 w-9 items-center justify-center rounded-full bg-[#F0F8FF]">
-                      <Ionicons name="volume-medium" size={18} color={colors.primary} />
+                      <SolarIcon name="volume" size={18} color={colors.primary} />
                     </View>
                     <View className="flex-1">
                       <Text className="font-quicksand text-xl text-dark">{voice.name}</Text>
@@ -156,7 +156,7 @@ export function VoicePickerModal({
                       </Text>
                     </View>
                     {selected ? (
-                      <Ionicons name="checkmark-circle" size={22} color={colors.primary} />
+                      <SolarIcon name="check-circle" size={22} color={colors.primary} />
                     ) : null}
                   </Pressable>
                 );

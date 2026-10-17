@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo } from "react";
 import { View, Text, FlatList, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import { Ionicons } from "@expo/vector-icons";
+import { SolarIcon } from "@/components/SolarIcon";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { PhraseCard } from "@/components/PhraseCard";
 import { PillText } from "@/components/PillText";
@@ -159,7 +159,7 @@ export default function FrasesScreen() {
           elevation: 6,
         }}
       >
-        <Ionicons name="add" size={32} color="#fff" />
+        <SolarIcon name="add" size={32} color="#fff" />
       </Pressable>
 
       {catalog ? (

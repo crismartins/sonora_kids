@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Modal, Pressable, ScrollView, Image, ImageSourcePropType } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { SolarIcon } from "@/components/SolarIcon";
 import { colors, getCategoryBgColor } from "@/constants/colors";
 import { PillText } from "@/components/PillText";
 
@@ -57,7 +57,7 @@ export function AddRoutineItemModal({
             onPress={onClose}
             className="h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]"
           >
-            <Ionicons name="close" size={22} color={colors.dark} />
+            <SolarIcon name="close" size={22} color={colors.dark} />
           </Pressable>
           <Text className="font-quicksand text-3xl text-dark">{title}</Text>
           <View className="w-10" />
@@ -103,7 +103,7 @@ export function AddRoutineItemModal({
                           </View>
                           {selected ? (
                             <View className="absolute right-3 top-3">
-                              <Ionicons name="checkmark-circle" size={22} color={colors.primary} />
+                              <SolarIcon name="check-circle" size={22} color={colors.primary} />
                             </View>
                           ) : null}
                         </Pressable>
@@ -141,7 +141,7 @@ export function AddRoutineItemModal({
                 elevation: 6,
               }}
             >
-              <Ionicons name="add" size={32} color="#fff" />
+              <SolarIcon name="add" size={32} color="#fff" />
             </Pressable>
           </View>
           <Pressable

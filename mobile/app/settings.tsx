@@ -12,8 +12,9 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { router } from "expo-router";
-import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
+import { OnboardingSlider } from "@/components/OnboardingSlider";
+import { SolarIcon } from "@/components/SolarIcon";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors } from "@/constants/colors";
 import { useAppSettings } from "@/context/AppSettingsContext";
@@ -88,7 +89,7 @@ function Row({
           thumbColor={value ? colors.primary : "#9E9E9E"}
         />
       ) : (
-        <Ionicons name="chevron-forward" size={18} color="#BDBDBD" />
+        <SolarIcon name="alt-arrow-right" size={18} color="#BDBDBD" />
       )}
     </Pressable>
   );
@@ -118,6 +119,7 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { settings, voices, updateSettings, resetSettings, speak, haptic } = useAppSettings();
   const [guideOpen, setGuideOpen] = useState(false);
+  const [introOpen, setIntroOpen] = useState(false);
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [rateOpen, setRateOpen] = useState(false);
   const [suggestionOpen, setSuggestionOpen] = useState(false);
@@ -197,29 +199,35 @@ export default function SettingsScreen() {
     >
       <Section title="Primeiros Passos">
         <Row
-          icon={<MaterialIcons name="flag" size={20} color={colors.primary} />}
+          icon={<SolarIcon name="flag" size={20} color={colors.primary} />}
           label="Guia de início"
           description="Como usar PECs, frases e a voz"
           onPress={() => setGuideOpen(true)}
+        />
+        <Row
+          icon={<SolarIcon name="book" size={20} color={colors.primary} />}
+          label="Ver introdução"
+          description="Reveja as telas iniciais do app"
+          onPress={() => setIntroOpen(true)}
           isLast
         />
       </Section>
 
       <Section title="Comunicação">
         <Row
-          icon={<Ionicons name="mic-outline" size={20} color={colors.primary} />}
+          icon={<SolarIcon name="microphone" size={20} color={colors.primary} />}
           label="Idioma da voz"
           description={languageLabel}
           onPress={() => setVoiceOpen(true)}
         />
         <Row
-          icon={<Ionicons name="person-outline" size={20} color={colors.primary} />}
+          icon={<SolarIcon name="user" size={20} color={colors.primary} />}
           label="Voz"
           description={voiceSummary(voices, settings)}
           onPress={() => setVoiceOpen(true)}
         />
         <Row
-          icon={<Ionicons name="volume-high-outline" size={20} color={colors.primary} />}
+          icon={<SolarIcon name="volume-loud" size={20} color={colors.primary} />}
           label="Falar automaticamente"
           description="Fala ao selecionar categoria ou tela"
           toggle
@@ -227,7 +235,7 @@ export default function SettingsScreen() {
           onToggle={(value) => updateSettings({ autoSpeakCategories: value })}
         />
         <Row
-          icon={<MaterialCommunityIcons name="speedometer" size={20} color={colors.primary} />}
+          icon={<SolarIcon name="speedometer" size={20} color={colors.primary} />}
           label="Velocidade da fala"
           description={SPEECH_RATE_LABELS[settings.speechRate]}
           onPress={() => setRateOpen(true)}
@@ -237,7 +245,7 @@ export default function SettingsScreen() {
 
       <Section title="Acessibilidade">
         <Row
-          icon={<MaterialIcons name="vibration" size={20} color="#00897B" />}
+          icon={<SolarIcon name="vibration" size={20} color="#00897B" />}
           label="Vibração (haptics)"
           toggle
           value={settings.haptics}
@@ -249,7 +257,7 @@ export default function SettingsScreen() {
           }}
         />
         <Row
-          icon={<MaterialIcons name="text-fields" size={20} color="#00897B" />}
+          icon={<SolarIcon name="text-field" size={20} color="#00897B" />}
           label="Texto grande"
           description="Aumenta o texto em todo o app"
           toggle
@@ -257,7 +265,7 @@ export default function SettingsScreen() {
           onToggle={(value) => updateSettings({ largeText: value })}
         />
         <Row
-          icon={<Ionicons name="contrast-outline" size={20} color="#00897B" />}
+          icon={<SolarIcon name="fallback" size={20} color="#00897B" />}
           label="Alto contraste"
           description="Deixa as palavras mais fáceis de ler"
           toggle
@@ -269,7 +277,7 @@ export default function SettingsScreen() {
 
       <Section title="Conectar">
         <Row
-          icon={<Ionicons name="mic-circle-outline" size={20} color="#6A1B9A" />}
+          icon={<SolarIcon name="microphone" size={20} color="#6A1B9A" />}
           label="Conecta à Alexa"
           description="Ainda não disponível"
           onPress={() =>
@@ -280,7 +288,7 @@ export default function SettingsScreen() {
           }
         />
         <Row
-          icon={<Ionicons name="chatbubble-outline" size={20} color="#6A1B9A" />}
+          icon={<SolarIcon name="chat-round" size={20} color="#6A1B9A" />}
           label="Envie-nos Sugestões"
           description="Guarde uma ideia para melhorar o app"
           onPress={() => {
@@ -293,12 +301,12 @@ export default function SettingsScreen() {
 
       <Section title="Conta">
         <Row
-          icon={<Ionicons name="person-outline" size={20} color={colors.neutralDark} />}
+          icon={<SolarIcon name="user" size={20} color={colors.neutralDark} />}
           label="Editar perfil"
           onPress={() => router.push("/profile")}
         />
         <Row
-          icon={<Ionicons name="cloud-download-outline" size={20} color={colors.neutralDark} />}
+          icon={<SolarIcon name="cloud-download" size={20} color={colors.neutralDark} />}
           label="Sincronizar dados"
           description="Salvo neste aparelho"
           onPress={() =>
@@ -309,7 +317,7 @@ export default function SettingsScreen() {
           }
         />
         <Row
-          icon={<Ionicons name="trash-outline" size={20} color="#D32F2F" />}
+          icon={<SolarIcon name="trash" size={20} color="#D32F2F" />}
           label="Redefinir configurações"
           destructive
           onPress={confirmReset}
@@ -320,6 +328,18 @@ export default function SettingsScreen() {
       <Text className="mb-1 mt-3 text-center font-quicksand text-base text-[#BDBDBD]">
         App Versão 1.0
       </Text>
+
+      <Modal
+        visible={introOpen}
+        animationType="fade"
+        presentationStyle="fullScreen"
+        statusBarTranslucent
+        onRequestClose={() => setIntroOpen(false)}
+      >
+        <SafeAreaProvider style={{ flex: 1 }}>
+          {introOpen ? <OnboardingSlider onDone={() => setIntroOpen(false)} /> : null}
+        </SafeAreaProvider>
+      </Modal>
 
       <VoicePickerModal
         visible={voiceOpen}
@@ -431,7 +451,7 @@ export default function SettingsScreen() {
               onPress={() => setSuggestionOpen(false)}
               className="h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]"
             >
-              <Ionicons name="close" size={22} color={colors.dark} />
+              <SolarIcon name="close" size={22} color={colors.dark} />
             </Pressable>
             <Text className="font-quicksand text-3xl text-dark">Sugestão</Text>
             <View className="w-10" />

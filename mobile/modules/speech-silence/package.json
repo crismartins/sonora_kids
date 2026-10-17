@@ -1,0 +1,15 @@
+{
+  "name": "speech-silence",
+  "version": "1.0.0",
+  "description": "Detects the iOS silent switch, which mutes system speech.",
+  "main": "index.ts",
+  "types": "index.ts",
+  "license": "MIT",
+  "author": "Sonora Kids",
+  "homepage": "https://expo.dev",
+  "peerDependencies": {
+    "expo": "*",
+    "react": "*",
+    "react-native": "*"
+  }
+}

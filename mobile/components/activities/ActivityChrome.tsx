@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { SolarIcon } from "@/components/SolarIcon";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/constants/colors";
 import { useAppSettings } from "@/context/AppSettingsContext";
@@ -35,7 +35,7 @@ export function ActivityChrome({
           onPress={() => (onBack ? onBack() : router.back())}
           className="h-11 w-11 items-center justify-center rounded-full active:opacity-70"
         >
-          <Ionicons name="chevron-back" size={28} color={colors.dark} />
+          <SolarIcon name="alt-arrow-left" size={28} color={colors.dark} />
         </Pressable>
         <Text className="flex-1 text-center font-quicksand text-[22px] text-dark" numberOfLines={1}>
           {title}
@@ -75,7 +75,7 @@ export function ActivityDone({
       style={{ paddingBottom: insets.bottom + 24 }}
     >
       <View className="mb-5 h-28 w-28 items-center justify-center rounded-full bg-light">
-        <Ionicons name="star" size={64} color={colors.primary} />
+        <SolarIcon name="star" size={64} color={colors.primary} />
       </View>
       <Text className="text-center font-quicksand text-4xl text-dark">{title}</Text>
       <Text className="mt-2 text-center font-quicksand text-xl text-neutral-dark">{detail}</Text>

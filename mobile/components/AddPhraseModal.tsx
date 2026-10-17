@@ -5,13 +5,13 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  Image,
   ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { SolarIcon } from "@/components/SolarIcon";
 import { Category, PhraseItem } from "@/types";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
+import { CategoryIcon } from "@/components/CategoryIcon";
 import { categoryIconBySlug } from "@/constants/categoryIcons";
 import { CustomPhrase } from "@/services/customPhrases";
 import { PillText } from "@/components/PillText";
@@ -104,7 +104,7 @@ export function AddPhraseModal({
             onPress={onClose}
             className="h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]"
           >
-            <Ionicons name="close" size={22} color={colors.dark} />
+            <SolarIcon name="close" size={22} color={colors.dark} />
           </Pressable>
           <Text className="font-quicksand text-3xl text-dark">
             {initialPhrase ? "Editar frase" : "Nova frase"}
@@ -138,7 +138,7 @@ export function AddPhraseModal({
                   <PillText size={18} style={{ color: getCategoryColor(item.color) }}>
                     {item.text}
                   </PillText>
-                  <Ionicons name="close" size={14} color={getCategoryColor(item.color)} />
+                  <SolarIcon name="close" size={14} color={getCategoryColor(item.color)} />
                 </Pressable>
               ))
             )}
@@ -169,7 +169,7 @@ export function AddPhraseModal({
                         backgroundColor: selected ? getCategoryBgColor(colorName) : "#F5F5F5",
                       }}
                     >
-                      {icon ? <Image source={icon} style={{ width: 24, height: 24 }} /> : null}
+                      {icon ? <CategoryIcon slug={category.slug} size={24} /> : null}
                       <Text
                         className="font-quicksand text-lg"
                         style={{

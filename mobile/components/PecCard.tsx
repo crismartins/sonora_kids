@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { View, Image, Pressable, ImageSourcePropType } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { SolarIcon } from "@/components/SolarIcon";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -238,7 +238,7 @@ export function RoutinePecCard({
               elevation: 3,
             }}
           >
-            <Ionicons name="close" size={18} color="#D32F2F" />
+            <SolarIcon name="close" size={18} color="#D32F2F" />
           </Pressable>
         </View>
       ) : null}

@@ -1,6 +1,5 @@
 import { ImageSourcePropType } from "react-native";
 
-/** Local category chip icons (from original Flutter assets). */
 export const categoryIconBySlug: Record<string, ImageSourcePropType> = {
   "boas-maneiras": require("../assets/images/categories/bye.png"),
   sentimentos: require("../assets/images/categories/sentimentos.png"),

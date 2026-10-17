@@ -7,7 +7,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import { Ionicons } from "@expo/vector-icons";
+import { SolarIcon } from "@/components/SolarIcon";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
@@ -213,7 +213,7 @@ export default function FraseScreen() {
                 onPress={() => speak(spoken)}
                 className="h-14 flex-row items-center justify-center gap-2 rounded-full bg-neutral active:opacity-80"
               >
-                <Ionicons name="volume-high" size={24} color={colors.primary} />
+                <SolarIcon name="volume-loud" size={24} color={colors.primary} />
                 <Text className="font-quicksand text-xl text-primary">Ouvir a frase</Text>
               </Pressable>
             )}

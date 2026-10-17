@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, Text, Pressable, Platform } from "react-native";
 import * as Haptics from "expo-haptics";
-import { Ionicons } from "@expo/vector-icons";
+import { SolarIcon } from "@/components/SolarIcon";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
@@ -186,11 +186,11 @@ function MemoryTile({
           {card.title}
         </Text>
       ) : (
-        <Ionicons name="star" size={36} color="#FFFFFF" />
+        <SolarIcon name="star" size={36} color="#FFFFFF" />
       )}
       {card.matched ? (
         <View className="absolute right-2 top-2 h-6 w-6 items-center justify-center rounded-full bg-white">
-          <Ionicons name="checkmark" size={16} color={color} />
+          <SolarIcon name="check" size={16} color={color} />
         </View>
       ) : null}
     </Pressable>

@@ -13,10 +13,11 @@ import {
   Linking,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { SolarIcon } from "@/components/SolarIcon";
 import * as ImagePicker from "expo-image-picker";
 import { Category } from "@/types";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
+import { CategoryIcon } from "@/components/CategoryIcon";
 import { categoryIconBySlug } from "@/constants/categoryIcons";
 import { CustomPec, NewCustomPec } from "@/services/customPecs";
 
@@ -173,7 +174,7 @@ export function AddPecModal({
             onPress={onClose}
             className="h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]"
           >
-            <Ionicons name="close" size={22} color={colors.dark} />
+            <SolarIcon name="close" size={22} color={colors.dark} />
           </Pressable>
           <Text className="font-quicksand text-3xl text-dark">
             {initialPec ? "Editar PEC" : "Novo PEC"}
@@ -219,9 +220,7 @@ export function AddPecModal({
                         backgroundColor: selected ? getCategoryBgColor(colorName) : "#F5F5F5",
                       }}
                     >
-                      {icon ? (
-                        <Image source={icon} style={{ width: 24, height: 24 }} />
-                      ) : null}
+                      {icon ? <CategoryIcon slug={category.slug} size={24} /> : null}
                       <Text
                         className="font-quicksand text-lg"
                         style={{ color: selected ? getCategoryColor(colorName) : colors.neutralDark }}
@@ -243,7 +242,7 @@ export function AddPecModal({
                 onPress={takePhoto}
                 className="h-11 flex-row items-center justify-center gap-2 rounded-full bg-[#F0F8FF] px-4"
               >
-                <Ionicons name="camera" size={18} color={colors.primary} />
+                <SolarIcon name="camera" size={18} color={colors.primary} />
                 <Text className="font-quicksand text-xl text-primary">Tirar foto</Text>
               </Pressable>
               <Pressable
@@ -251,7 +250,7 @@ export function AddPecModal({
                 onPress={pickFromDevice}
                 className="h-11 flex-row items-center justify-center gap-2 rounded-full bg-[#F0F8FF] px-4"
               >
-                <Ionicons name="image" size={18} color={colors.primary} />
+                <SolarIcon name="gallery" size={18} color={colors.primary} />
                 <Text className="font-quicksand text-xl text-primary">Do dispositivo</Text>
               </Pressable>
               <Pressable
@@ -259,7 +258,7 @@ export function AddPecModal({
                 onPress={openGoogleImages}
                 className="h-11 flex-row items-center justify-center gap-2 rounded-full bg-[#F0F8FF] px-4"
               >
-                <Ionicons name="search" size={18} color={colors.primary} />
+                <SolarIcon name="magnifier" size={18} color={colors.primary} />
                 <Text className="font-quicksand text-xl text-primary">Buscar no Google</Text>
               </Pressable>
             </View>

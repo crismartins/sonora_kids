@@ -11,7 +11,7 @@ import {
   Linking,
   KeyboardAvoidingView,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { SolarIcon } from "@/components/SolarIcon";
 import { useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
@@ -207,10 +207,10 @@ export default function ProfileScreen() {
           </View>
           <View className="flex-row justify-center gap-3">
             <AvatarChoiceButton label="Tirar foto" selected={false} onPress={takePhoto}>
-              <Ionicons name="camera-outline" size={26} color={colors.primary} />
+              <SolarIcon name="camera" size={26} color={colors.primary} />
             </AvatarChoiceButton>
             <AvatarChoiceButton label="Galeria" selected={false} onPress={pickFromGallery}>
-              <Ionicons name="images-outline" size={26} color={colors.primary} />
+              <SolarIcon name="gallery" size={26} color={colors.primary} />
             </AvatarChoiceButton>
           </View>
         </View>
@@ -265,7 +265,7 @@ export default function ProfileScreen() {
             <ActivityIndicator color="#fff" />
           ) : (
             <>
-              <Ionicons name={saved ? "checkmark" : "checkmark-circle-outline"} size={20} color="#fff" />
+              <SolarIcon name={saved ? "check" : "check-circle"} size={20} color="#fff" />
               <Text className="font-quicksand text-[22px] text-white">
                 {saved ? "Salvo" : "Salvar"}
               </Text>
