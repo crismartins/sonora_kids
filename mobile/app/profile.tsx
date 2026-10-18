@@ -7,11 +7,11 @@ import {
   Pressable,
   Platform,
   TextInput,
-  ActivityIndicator,
   Linking,
   KeyboardAvoidingView,
 } from "react-native";
 import { SolarIcon } from "@/components/SolarIcon";
+import { Button } from "@/components/Button";
 import { useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
@@ -228,7 +228,7 @@ export default function ProfileScreen() {
               placeholder="Como a criança é chamada"
               placeholderTextColor={colors.neutralDark}
               maxLength={24}
-              className="rounded-2xl border border-[#E4F4FF] bg-[#FDFEFF] px-4 text-center text-primary"
+              className="rounded-2xl border border-neutral bg-neutral-light px-4 text-center text-primary"
               style={{ fontFamily: FONT_FAMILY, fontSize: 28, height: 64, color: colors.primary }}
             />
           </View>
@@ -244,34 +244,26 @@ export default function ProfileScreen() {
               placeholder="Nome completo"
               placeholderTextColor={colors.neutralDark}
               maxLength={60}
-              className="rounded-2xl border border-[#E4F4FF] bg-[#FDFEFF] px-4 text-center text-dark"
+              className="rounded-2xl border border-neutral bg-neutral-light px-4 text-center text-dark"
               style={{ fontFamily: FONT_FAMILY, fontSize: 18, height: 56, color: colors.dark }}
             />
           </View>
         </View>
 
         {error ? (
-          <Text className="w-full text-center font-quicksand text-lg text-[#D32F2F]">{error}</Text>
+          <Text className="w-full text-center font-quicksand text-lg text-danger">{error}</Text>
         ) : null}
 
-        <Pressable
+        <Button
+          label={saved ? "Salvo" : "Salvar"}
+          icon={saved ? "check" : "check-circle"}
+          shape="rounded"
+          loading={saving}
+          disabled={!dirty}
           accessibilityLabel="Salvar perfil"
+          className="w-full"
           onPress={handleSave}
-          disabled={saving || !dirty}
-          className="w-full flex-row items-center justify-center gap-2 rounded-2xl bg-primary py-4"
-          style={{ opacity: saving || !dirty ? 0.55 : 1 }}
-        >
-          {saving ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <>
-              <SolarIcon name={saved ? "check" : "check-circle"} size={20} color="#fff" />
-              <Text className="font-quicksand text-[22px] text-white">
-                {saved ? "Salvo" : "Salvar"}
-              </Text>
-            </>
-          )}
-        </Pressable>
+        />
 
         <View className="w-full gap-3.5 rounded-3xl bg-primary p-5">
           <Text className="font-quicksand text-[26px] text-white">Palavras mais usadas</Text>
@@ -288,7 +280,7 @@ export default function ProfileScreen() {
                   style={{ backgroundColor: getCategoryBgColor(word.color) }}
                 >
                   <View className="h-5 min-w-[26px] items-center justify-center rounded-full bg-white/85 px-1.5">
-                    <PillText size={14} style={{ color: "#001D4A" }}>
+                    <PillText size={14} style={{ color: colors.dark }}>
                       {word.count}
                     </PillText>
                   </View>
@@ -324,7 +316,7 @@ function AvatarChoiceButton({
       className="w-[76px] items-center gap-1.5"
     >
       <View
-        className="h-[76px] w-[76px] items-center justify-center overflow-hidden rounded-2xl bg-[#F5F5F5]"
+        className="h-[76px] w-[76px] items-center justify-center overflow-hidden rounded-2xl bg-muted"
         style={{
           borderWidth: selected ? 3 : 0,
           borderColor: colors.primary,

@@ -15,6 +15,7 @@ import { router } from "expo-router";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { OnboardingSlider } from "@/components/OnboardingSlider";
 import { SolarIcon } from "@/components/SolarIcon";
+import { Button, IconButton } from "@/components/Button";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors } from "@/constants/colors";
 import { useAppSettings } from "@/context/AppSettingsContext";
@@ -58,19 +59,19 @@ function Row({
       onPress={toggle ? undefined : onPress}
       accessibilityLabel={label}
       className={`flex-row items-center gap-3 bg-white px-3.5 py-[13px] ${
-        !isLast ? "border-b border-[#F5F5F5]" : ""
-      } ${!toggle ? "active:bg-[#FAFAFA]" : ""}`}
+        !isLast ? "border-b border-muted" : ""
+      } ${!toggle ? "active:bg-canvas" : ""}`}
     >
       <View
         className="h-9 w-9 shrink-0 items-center justify-center rounded-[10px]"
-        style={{ backgroundColor: destructive ? "#FFEBEE" : "#F0F8FF" }}
+        style={{ backgroundColor: destructive ? "#FFEBEE" : colors.primarySoft }}
       >
         {icon}
       </View>
       <View className="flex-1 gap-px">
         <Text
           className={`font-quicksand text-xl ${
-            destructive ? "text-[#D32F2F]" : "text-dark"
+            destructive ? "text-danger" : "text-dark"
           }`}
         >
           {label}
@@ -101,7 +102,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       <Text className="px-5 pb-[5px] pt-[18px] font-quicksand text-[17px] uppercase tracking-wide text-neutral-dark">
         {title}
       </Text>
-      <View className="mx-4 overflow-hidden rounded-2xl border border-[#F0F0F0] bg-white">
+      <View className="mx-4 overflow-hidden rounded-2xl border border-line bg-white">
         {children}
       </View>
     </View>
@@ -317,7 +318,7 @@ export default function SettingsScreen() {
           }
         />
         <Row
-          icon={<SolarIcon name="trash" size={20} color="#D32F2F" />}
+          icon={<SolarIcon name="trash" size={20} color={colors.danger} />}
           label="Redefinir configurações"
           destructive
           onPress={confirmReset}
@@ -371,7 +372,7 @@ export default function SettingsScreen() {
             className="rounded-t-[28px] bg-white px-5 pt-3"
             style={{ paddingBottom: insets.bottom + 20 }}
           >
-            <View className="mb-4 h-1.5 w-12 self-center rounded-full bg-[#E4F4FF]" />
+            <View className="mb-4 h-1.5 w-12 self-center rounded-full bg-neutral" />
             <Text className="mb-4 text-center font-quicksand text-3xl text-dark">
               Velocidade da fala
             </Text>
@@ -379,17 +380,12 @@ export default function SettingsScreen() {
               {(Object.keys(SPEECH_RATE_LABELS) as SpeechRate[]).map((rate) => {
                 const selected = settings.speechRate === rate;
                 return (
-                  <Pressable
+                  <Button
                     key={rate}
+                    label={SPEECH_RATE_LABELS[rate]}
+                    variant={selected ? "primary" : "soft"}
                     onPress={() => chooseRate(rate)}
-                    className={`h-14 items-center justify-center rounded-full ${
-                      selected ? "bg-primary" : "bg-[#F0F8FF]"
-                    }`}
-                  >
-                    <Text className={`font-quicksand text-2xl ${selected ? "text-white" : "text-primary"}`}>
-                      {SPEECH_RATE_LABELS[rate]}
-                    </Text>
-                  </Pressable>
+                  />
                 );
               })}
             </View>
@@ -415,23 +411,18 @@ export default function SettingsScreen() {
             className="rounded-t-[28px] bg-white px-5 pt-3"
             style={{ paddingBottom: insets.bottom + 20 }}
           >
-            <View className="mb-4 h-1.5 w-12 self-center rounded-full bg-[#E4F4FF]" />
+            <View className="mb-4 h-1.5 w-12 self-center rounded-full bg-neutral" />
             <Text className="mb-4 text-center font-quicksand text-3xl text-dark">Guia de início</Text>
             <View className="gap-3">
               {GUIDE_STEPS.map((step, index) => (
                 <View key={step} className="flex-row gap-3">
-                  <View className="h-8 w-8 items-center justify-center rounded-full bg-[#E3F2FD]">
+                  <View className="h-8 w-8 items-center justify-center rounded-full bg-primary-wash">
                     <Text className="font-quicksand text-xl text-primary">{index + 1}</Text>
                   </View>
                   <Text className="flex-1 font-quicksand text-xl text-dark">{step}</Text>
                 </View>
               ))}
-              <Pressable
-                onPress={() => setGuideOpen(false)}
-                className="mt-2 h-14 items-center justify-center rounded-full bg-primary"
-              >
-                <Text className="font-quicksand text-2xl text-white">Entendi</Text>
-              </Pressable>
+              <Button label="Entendi" className="mt-2" onPress={() => setGuideOpen(false)} />
             </View>
           </View>
         </View>
@@ -443,16 +434,14 @@ export default function SettingsScreen() {
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           <View
-            className="flex-row items-center justify-between border-b border-[#F0F0F0] px-4 pb-3"
+            className="flex-row items-center justify-between border-b border-line px-4 pb-3"
             style={{ paddingTop: insets.top + 12 }}
           >
-            <Pressable
+            <IconButton
+              icon="close"
               accessibilityLabel="Fechar"
               onPress={() => setSuggestionOpen(false)}
-              className="h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]"
-            >
-              <SolarIcon name="close" size={22} color={colors.dark} />
-            </Pressable>
+            />
             <Text className="font-quicksand text-3xl text-dark">Sugestão</Text>
             <View className="w-10" />
           </View>
@@ -472,15 +461,10 @@ export default function SettingsScreen() {
                   placeholder="Escreva aqui"
                   placeholderTextColor={colors.neutralDark}
                   multiline
-                  className="min-h-[140px] rounded-2xl border border-[#E4F4FF] bg-[#FDFEFF] px-4 py-3 text-dark"
+                  className="min-h-[140px] rounded-2xl border border-neutral bg-neutral-light px-4 py-3 text-dark"
                   style={{ fontSize: 18, textAlignVertical: "top" }}
                 />
-                <Pressable
-                  onPress={sendSuggestion}
-                  className="h-14 items-center justify-center rounded-full bg-primary"
-                >
-                  <Text className="font-quicksand text-2xl text-white">Guardar sugestão</Text>
-                </Pressable>
+                <Button label="Guardar sugestão" onPress={sendSuggestion} />
               </>
             )}
           </View>

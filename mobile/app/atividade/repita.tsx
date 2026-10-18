@@ -8,6 +8,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { SolarIcon } from "@/components/SolarIcon";
+import { Button } from "@/components/Button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
@@ -138,14 +139,15 @@ export default function RepitaScreen() {
             ))}
           </View>
 
-          <Pressable
-            accessibilityLabel="Ouvir de novo"
+          <Button
+            label="Ouvir de novo"
+            icon="volume-loud"
+            iconSize={24}
+            variant="neutral"
+            labelSize="md"
+            className="mt-6"
             onPress={() => speak(round.target.title)}
-            className="mt-6 h-14 flex-row items-center justify-center gap-2 rounded-full bg-neutral active:opacity-80"
-          >
-            <SolarIcon name="volume-loud" size={24} color={colors.primary} />
-            <Text className="font-quicksand text-xl text-primary">Ouvir de novo</Text>
-          </Pressable>
+          />
         </ScrollView>
       )}
     </ActivityChrome>

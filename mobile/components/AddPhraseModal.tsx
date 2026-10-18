@@ -5,10 +5,10 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SolarIcon } from "@/components/SolarIcon";
+import { Button, IconButton } from "@/components/Button";
 import { Category, PhraseItem } from "@/types";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { CategoryIcon } from "@/components/CategoryIcon";
@@ -96,23 +96,17 @@ export function AddPhraseModal({
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <View className="flex-1 bg-white">
         <View
-          className="flex-row items-center justify-between border-b border-[#F0F0F0] px-4 pb-3"
+          className="flex-row items-center justify-between border-b border-line px-4 pb-3"
           style={{ paddingTop: insets.top + 12 }}
         >
-          <Pressable
-            accessibilityLabel="Fechar"
-            onPress={onClose}
-            className="h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]"
-          >
-            <SolarIcon name="close" size={22} color={colors.dark} />
-          </Pressable>
+          <IconButton icon="close" accessibilityLabel="Fechar" onPress={onClose} />
           <Text className="font-quicksand text-3xl text-dark">
             {initialPhrase ? "Editar frase" : "Nova frase"}
           </Text>
           <View className="w-10" />
         </View>
 
-        <View className="gap-2 border-b border-[#F0F0F0] px-5 py-4">
+        <View className="gap-2 border-b border-line px-5 py-4">
           <View className="flex-row items-center justify-between">
             <Text className="font-quicksand text-xl text-dark">Frase</Text>
             {items.length > 0 ? (
@@ -121,7 +115,7 @@ export function AddPhraseModal({
               </Pressable>
             ) : null}
           </View>
-          <View className="min-h-[64px] flex-row flex-wrap gap-1 rounded-2xl border border-neutral bg-[#FDFEFF] p-2.5">
+          <View className="min-h-[64px] flex-row flex-wrap gap-1 rounded-2xl border border-neutral bg-neutral-light p-2.5">
             {items.length === 0 ? (
               <Text className="font-quicksand text-xl text-neutral-dark">
                 Toque nos PECs para montar a frase
@@ -166,7 +160,7 @@ export function AddPhraseModal({
                       onPress={() => setCategorySlug(category.slug)}
                       className="h-11 flex-row items-center gap-1.5 rounded-full px-3"
                       style={{
-                        backgroundColor: selected ? getCategoryBgColor(colorName) : "#F5F5F5",
+                        backgroundColor: selected ? getCategoryBgColor(colorName) : colors.muted,
                       }}
                     >
                       {icon ? <CategoryIcon slug={category.slug} size={24} /> : null}
@@ -201,22 +195,13 @@ export function AddPhraseModal({
             ))}
           </View>
 
-          {error ? <Text className="font-quicksand text-xl text-[#D32F2F]">{error}</Text> : null}
+          {error ? <Text className="font-quicksand text-xl text-danger">{error}</Text> : null}
 
-          <Pressable
+          <Button
+            label={initialPhrase ? "Salvar alterações" : "Salvar frase"}
+            loading={saving}
             onPress={handleSave}
-            disabled={saving}
-            className="h-14 items-center justify-center rounded-full bg-primary"
-            style={{ opacity: saving ? 0.7 : 1 }}
-          >
-            {saving ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text className="font-quicksand text-2xl text-white">
-                {initialPhrase ? "Salvar alterações" : "Salvar frase"}
-              </Text>
-            )}
-          </Pressable>
+          />
         </ScrollView>
       </View>
     </Modal>

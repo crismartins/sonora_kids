@@ -28,7 +28,7 @@ const AVATAR_2 = require("../assets/images/avatar_default_v2.png");
 
 const BODY_COLOR = "#4A5D73";
 const DOT_IDLE = "#D5E2EE";
-const SPEAKER_BG = "#E3F2FD";
+const SPEAKER_BG = colors.primaryWash;
 
 const LIBRARY_SIZE =
   Math.floor(

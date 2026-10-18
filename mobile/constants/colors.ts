@@ -2,11 +2,19 @@ export const colors = {
   primary: "#2567FF",
   primaryLight: "#107EFF",
   primaryDark: "#2B40FA",
+  primarySoft: "#F0F8FF",
+  primaryWash: "#E3F2FD",
   dark: "#001D4A",
   light: "#CEE5FF",
   neutral: "#E4F4FF",
   neutralLight: "#FDFEFF",
   neutralDark: "#89ACC7",
+  muted: "#F5F5F5",
+  line: "#F0F0F0",
+  canvas: "#FAFAFA",
+  danger: "#D32F2F",
+  dangerSoft: "#FDECEC",
+  white: "#FFFFFF",
 };
 
 export const categoryColorMap: Record<string, string> = {

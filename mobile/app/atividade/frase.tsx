@@ -7,7 +7,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import { SolarIcon } from "@/components/SolarIcon";
+import { Button } from "@/components/Button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
@@ -140,7 +140,7 @@ export default function FraseScreen() {
           <Pressable
             accessibilityLabel={`Ouvir ${spoken}`}
             onPress={() => speak(spoken)}
-            className="mb-4 min-h-[72px] flex-row flex-wrap items-center justify-center gap-2 rounded-[22px] bg-[#FAFAFA] px-3 py-3"
+            className="mb-4 min-h-[72px] flex-row flex-wrap items-center justify-center gap-2 rounded-[22px] bg-canvas px-3 py-3"
           >
             {phrase.map((item, index) => (
               <WordPill
@@ -198,24 +198,20 @@ export default function FraseScreen() {
 
           <View className="mt-auto pt-8">
             {solved ? (
-              <Pressable
-                accessibilityLabel={roundIndex + 1 >= rounds.length ? "Concluir" : "Próxima frase"}
+              <Button
+                label={roundIndex + 1 >= rounds.length ? "Concluir" : "Próxima frase"}
+                labelSize="md"
                 onPress={nextRound}
-                className="h-14 items-center justify-center rounded-full bg-primary active:opacity-90"
-              >
-                <Text className="font-quicksand text-xl text-white">
-                  {roundIndex + 1 >= rounds.length ? "Concluir" : "Próxima frase"}
-                </Text>
-              </Pressable>
+              />
             ) : (
-              <Pressable
-                accessibilityLabel="Ouvir a frase"
+              <Button
+                label="Ouvir a frase"
+                icon="volume-loud"
+                iconSize={24}
+                variant="neutral"
+                labelSize="md"
                 onPress={() => speak(spoken)}
-                className="h-14 flex-row items-center justify-center gap-2 rounded-full bg-neutral active:opacity-80"
-              >
-                <SolarIcon name="volume-loud" size={24} color={colors.primary} />
-                <Text className="font-quicksand text-xl text-primary">Ouvir a frase</Text>
-              </Pressable>
+              />
             )}
           </View>
         </ScrollView>

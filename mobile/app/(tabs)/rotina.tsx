@@ -4,6 +4,7 @@ import { useNavigation } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { SolarIcon, SolarIconName } from "@/components/SolarIcon";
+import { Button, FloatingButton } from "@/components/Button";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { useCategories } from "@/hooks/useCategories";
 import { useCustomPecs } from "@/hooks/useCustomPecs";
@@ -223,7 +224,7 @@ export default function RotinaScreen() {
                   speak(DAY_LABELS[index]);
                 }}
                 className={`h-10 items-center justify-center rounded-full px-3.5 ${
-                  isActive ? "bg-[#E3F2FD]" : "bg-[#F5F5F5]"
+                  isActive ? "bg-primary-wash" : "bg-muted"
                 }`}
               >
                 <PillText
@@ -241,7 +242,7 @@ export default function RotinaScreen() {
         </ScrollView>
       </View>
 
-      <View className="flex-row border-b border-[#F0F0F0] bg-white">
+      <View className="flex-row border-b border-line bg-white">
         {PERIOD_TABS.map(({ period, icon }) => {
           const active = period === selectedPeriod;
           const tint = active ? colors.primary : colors.neutralDark;
@@ -300,21 +301,13 @@ export default function RotinaScreen() {
         </View>
       </ScrollView>
 
-      <Pressable
+      <FloatingButton
+        icon="pen"
+        iconSize={26}
         accessibilityLabel={`Editar ${PERIOD_LABELS[selectedPeriod]}`}
         onPress={() => openPeriod(selectedPeriod)}
-        className="absolute right-5 h-16 w-16 items-center justify-center rounded-full bg-primary"
-        style={{
-          bottom: tabBarHeight + 12,
-          shadowColor: "#001D4A",
-          shadowOpacity: 0.22,
-          shadowRadius: 8,
-          shadowOffset: { width: 0, height: 4 },
-          elevation: 6,
-        }}
-      >
-        <SolarIcon name="pen" size={26} color="#fff" />
-      </Pressable>
+        bottom={tabBarHeight + 12}
+      />
 
       <Modal visible={editing && !removing} transparent animationType="none" onRequestClose={cancelEditing}>
         <Pressable
@@ -387,32 +380,29 @@ export default function RotinaScreen() {
             }}
           />
           <View className="gap-3 rounded-t-[28px] bg-white px-5 pt-3" style={{ paddingBottom: insets.bottom + 20 }}>
-            <View className="mb-1 h-1.5 w-12 self-center rounded-full bg-[#E4F4FF]" />
+            <View className="mb-1 h-1.5 w-12 self-center rounded-full bg-neutral" />
             <Text className="text-center font-quicksand text-3xl text-dark">{removing?.item.title}</Text>
             <Text className="text-center font-quicksand text-xl text-neutral-dark">
               Tirar de {removing ? PERIOD_LABELS[removing.period] : ""}? O PEC continua em Dia a Dia.
             </Text>
-            <Pressable
+            <Button
+              label="Tirar da rotina"
+              variant="danger"
               accessibilityLabel="Tirar da rotina"
               onPress={async () => {
                 if (!removing) return;
                 await removeItem(selectedDay, removing.period, removing.item.id);
                 setRemoving(null);
               }}
-              className="h-14 items-center justify-center rounded-full bg-[#D32F2F]"
-            >
-              <Text className="font-quicksand text-2xl text-white">Tirar da rotina</Text>
-            </Pressable>
-            <Pressable
-              accessibilityLabel="Cancelar"
+            />
+            <Button
+              label="Cancelar"
+              variant="muted"
               onPress={() => {
                 setRemoving(null);
                 cancelEditing();
               }}
-              className="h-14 items-center justify-center rounded-full bg-[#F5F5F5]"
-            >
-              <Text className="font-quicksand text-2xl text-dark">Cancelar</Text>
-            </Pressable>
+            />
           </View>
         </View>
       </Modal>

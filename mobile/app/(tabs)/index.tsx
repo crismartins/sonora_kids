@@ -3,6 +3,7 @@ import { View, Text, FlatList, ScrollView, Pressable, NativeSyntheticEvent, Nati
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { SolarIcon } from "@/components/SolarIcon";
+import { Button, FloatingButton } from "@/components/Button";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { useCategories } from "@/hooks/useCategories";
 import { useCustomPecs } from "@/hooks/useCustomPecs";
@@ -130,9 +131,7 @@ export default function PecsScreen() {
       <View className="flex-1 items-center justify-center gap-3 bg-white">
         <SolarIcon name="cloud-cross" size={48} color={colors.neutralDark} />
         <Text className="text-center font-quicksand text-xl text-neutral-dark">Não foi possível carregar</Text>
-        <Pressable className="mt-2 rounded-full bg-primary px-6 py-2.5" onPress={() => refetch()}>
-          <Text className="font-quicksand text-lg text-white">Tentar novamente</Text>
-        </Pressable>
+        <Button label="Tentar novamente" size="md" className="mt-2 px-6" onPress={() => refetch()} />
       </View>
     );
   }
@@ -275,21 +274,12 @@ export default function PecsScreen() {
       </View>
 
       {!isLoading && categories ? (
-        <Pressable
+        <FloatingButton
+          icon="widget-add"
           accessibilityLabel="Adicionar PEC"
           onPress={() => setAddOpen(true)}
-          className="absolute right-5 h-16 w-16 items-center justify-center rounded-full bg-primary"
-          style={{
-            bottom: tabBarHeight + 12,
-            shadowColor: "#001D4A",
-            shadowOpacity: 0.22,
-            shadowRadius: 8,
-            shadowOffset: { width: 0, height: 4 },
-            elevation: 6,
-          }}
-        >
-          <SolarIcon name="widget-add" size={32} color="#fff" />
-        </Pressable>
+          bottom={tabBarHeight + 12}
+        />
       ) : null}
 
       {categories ? (

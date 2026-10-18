@@ -86,7 +86,7 @@ export default function AprenderScreen() {
         />
       </Pressable>
 
-      <View className="rounded-[20px] border border-[#F0F0F0] bg-[#FAFAFA] p-4">
+      <View className="rounded-[20px] border border-line bg-canvas p-4">
         <Text className="mb-2 font-quicksand text-[22px] uppercase tracking-wide text-neutral-dark">
           Atividades
         </Text>
@@ -96,10 +96,10 @@ export default function AprenderScreen() {
           title="Memória com PECS"
           description="Encontre os pares de palavras"
           tag="Jogo"
-          bgColor="#E3F2FD"
+          bgColor={colors.primaryWash}
           tagColor={colors.primary}
         />
-        <View className="h-px bg-[#F0F0F0]" />
+        <View className="h-px bg-line" />
         <ActivityCard
           href="/atividade/repita"
           icon={<SolarIcon name="microphone" size={26} color="#00897B" />}
@@ -109,7 +109,7 @@ export default function AprenderScreen() {
           bgColor="#E0F2F1"
           tagColor="#00897B"
         />
-        <View className="h-px bg-[#F0F0F0]" />
+        <View className="h-px bg-line" />
         <ActivityCard
           href="/atividade/frase"
           icon={<SolarIcon name="fallback" size={26} color="#6A1B9A" />}
@@ -119,7 +119,7 @@ export default function AprenderScreen() {
           bgColor="#EDE7F6"
           tagColor="#6A1B9A"
         />
-        <View className="h-px bg-[#F0F0F0]" />
+        <View className="h-px bg-line" />
         <ActivityCard
           href="/atividade/historia"
           icon={<SolarIcon name="book" size={26} color="#EF6C00" />}

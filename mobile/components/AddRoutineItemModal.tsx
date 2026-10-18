@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Modal, Pressable, ScrollView, Image, ImageSourcePropType } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SolarIcon } from "@/components/SolarIcon";
+import { Button, FloatingButton, IconButton } from "@/components/Button";
 import { colors, getCategoryBgColor } from "@/constants/colors";
 import { PillText } from "@/components/PillText";
 
@@ -49,16 +50,10 @@ export function AddRoutineItemModal({
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <View className="flex-1 bg-white">
         <View
-          className="flex-row items-center justify-between border-b border-[#F0F0F0] px-4 pb-3"
+          className="flex-row items-center justify-between border-b border-line px-4 pb-3"
           style={{ paddingTop: insets.top + 12 }}
         >
-          <Pressable
-            accessibilityLabel="Fechar"
-            onPress={onClose}
-            className="h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]"
-          >
-            <SolarIcon name="close" size={22} color={colors.dark} />
-          </Pressable>
+          <IconButton icon="close" accessibilityLabel="Fechar" onPress={onClose} />
           <Text className="font-quicksand text-3xl text-dark">{title}</Text>
           <View className="w-10" />
         </View>
@@ -95,7 +90,7 @@ export function AddRoutineItemModal({
                             />
                           </View>
                           <View className="max-w-full items-center justify-center px-3 py-1">
-                            <PillText size={20} numberOfLines={2} style={{ color: "#001D4A" }}>
+                            <PillText size={20} numberOfLines={2} style={{ color: colors.dark }}>
                               {option.title}
                             </PillText>
                           </View>
@@ -127,35 +122,9 @@ export function AddRoutineItemModal({
           }}
         >
           <View className="items-end" pointerEvents="box-none">
-            <Pressable
-              accessibilityLabel="Criar PEC"
-              onPress={onCreate}
-              className="h-16 w-16 items-center justify-center rounded-full bg-primary"
-              style={{
-                shadowColor: "#001D4A",
-                shadowOpacity: 0.22,
-                shadowRadius: 8,
-                shadowOffset: { width: 0, height: 4 },
-                elevation: 6,
-              }}
-            >
-              <SolarIcon name="widget-add" size={32} color="#fff" />
-            </Pressable>
+            <FloatingButton icon="widget-add" accessibilityLabel="Criar PEC" onPress={onCreate} />
           </View>
-          <Pressable
-            accessibilityLabel="Confirmar"
-            onPress={onConfirm}
-            className="h-14 w-full items-center justify-center rounded-full bg-primary"
-            style={{
-              shadowColor: "#001D4A",
-              shadowOpacity: 0.22,
-              shadowRadius: 8,
-              shadowOffset: { width: 0, height: 4 },
-              elevation: 6,
-            }}
-          >
-            <Text className="font-quicksand text-2xl text-white">Confirmar</Text>
-          </Pressable>
+          <Button label="Confirmar" elevated className="w-full" onPress={onConfirm} />
         </View>
       </View>
     </Modal>

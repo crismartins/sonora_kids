@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Modal, Pressable, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SolarIcon } from "@/components/SolarIcon";
+import { Button, IconButton } from "@/components/Button";
 import { Voice } from "expo-speech";
 import { colors } from "@/constants/colors";
 import {
@@ -47,16 +48,10 @@ export function VoicePickerModal({
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <View className="flex-1 bg-white">
         <View
-          className="flex-row items-center justify-between border-b border-[#F0F0F0] px-4 pb-3"
+          className="flex-row items-center justify-between border-b border-line px-4 pb-3"
           style={{ paddingTop: insets.top + 12 }}
         >
-          <Pressable
-            accessibilityLabel="Fechar"
-            onPress={onClose}
-            className="h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]"
-          >
-            <SolarIcon name="close" size={22} color={colors.dark} />
-          </Pressable>
+          <IconButton icon="close" accessibilityLabel="Fechar" onPress={onClose} />
           <Text className="font-quicksand text-3xl text-dark">Voz</Text>
           <View className="w-10" />
         </View>
@@ -74,20 +69,14 @@ export function VoicePickerModal({
               {(["feminine", "masculine"] as const).map((option) => {
                 const selected = !voiceId && gender === option;
                 return (
-                  <Pressable
+                  <Button
                     key={option}
+                    label={genderLabel(option)}
+                    variant={selected ? "primary" : "soft"}
                     accessibilityLabel={genderLabel(option)}
+                    className="flex-1"
                     onPress={() => onSelectGender(option)}
-                    className={`h-14 flex-1 items-center justify-center rounded-full ${
-                      selected ? "bg-primary" : "bg-[#F0F8FF]"
-                    }`}
-                  >
-                    <Text
-                      className={`font-quicksand text-2xl ${selected ? "text-white" : "text-primary"}`}
-                    >
-                      {genderLabel(option)}
-                    </Text>
-                  </Pressable>
+                  />
                 );
               })}
             </View>
@@ -112,7 +101,7 @@ export function VoicePickerModal({
                       key={code}
                       onPress={() => onSelectLanguage(code)}
                       className={`h-12 flex-1 items-center justify-center rounded-full px-2 ${
-                        selected ? "bg-[#E3F2FD]" : "bg-[#F5F5F5]"
+                        selected ? "bg-primary-wash" : "bg-muted"
                       }`}
                     >
                       <Text
@@ -143,10 +132,10 @@ export function VoicePickerModal({
                     accessibilityLabel={voice.name}
                     onPress={() => onSelectVoice(voice)}
                     className={`flex-row items-center gap-3 rounded-2xl border px-3.5 py-3 ${
-                      selected ? "border-primary bg-[#E3F2FD]" : "border-[#F0F0F0] bg-white"
+                      selected ? "border-primary bg-primary-wash" : "border-line bg-white"
                     }`}
                   >
-                    <View className="h-9 w-9 items-center justify-center rounded-full bg-[#F0F8FF]">
+                    <View className="h-9 w-9 items-center justify-center rounded-full bg-primary-soft">
                       <SolarIcon name="volume" size={18} color={colors.primary} />
                     </View>
                     <View className="flex-1">

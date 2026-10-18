@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
 import { SolarIcon } from "@/components/SolarIcon";
+import { Button } from "@/components/Button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/constants/colors";
 import { useAppSettings } from "@/context/AppSettingsContext";
@@ -79,21 +80,15 @@ export function ActivityDone({
       </View>
       <Text className="text-center font-quicksand text-4xl text-dark">{title}</Text>
       <Text className="mt-2 text-center font-quicksand text-xl text-neutral-dark">{detail}</Text>
-      <Pressable
-        accessibilityLabel={againLabel}
-        onPress={onAgain}
-        className="mt-8 h-14 w-full items-center justify-center rounded-full bg-primary active:opacity-90"
-      >
-        <Text className="font-quicksand text-xl text-white">{againLabel}</Text>
-      </Pressable>
+      <Button label={againLabel} labelSize="md" className="mt-8 w-full" onPress={onAgain} />
       {secondaryLabel && onSecondary ? (
-        <Pressable
-          accessibilityLabel={secondaryLabel}
+        <Button
+          label={secondaryLabel}
+          variant="ghost"
+          labelSize="md"
+          className="mt-3 w-full"
           onPress={onSecondary}
-          className="mt-3 h-12 w-full items-center justify-center rounded-full active:opacity-70"
-        >
-          <Text className="font-quicksand text-lg text-primary">{secondaryLabel}</Text>
-        </Pressable>
+        />
       ) : null}
     </View>
   );

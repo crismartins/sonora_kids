@@ -11,7 +11,7 @@ import Animated, {
   cancelAnimation,
 } from "react-native-reanimated";
 import { PecItem } from "@/types";
-import { getCategoryBgColor } from "@/constants/colors";
+import { colors, getCategoryBgColor } from "@/constants/colors";
 import { PillText } from "@/components/PillText";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { recordWordUse } from "@/services/wordUsage";
@@ -78,7 +78,7 @@ export function PecCard({ item, backgroundColor, colorName = "blue", onLongPress
             backgroundColor: settings.highContrast ? "#FFFFFF" : backgroundColor,
             borderRadius: 20,
             borderWidth: settings.highContrast ? 2 : 0,
-            borderColor: "#001D4A",
+            borderColor: colors.dark,
             minHeight: 150,
             padding: 12,
             alignItems: "center",
@@ -96,7 +96,7 @@ export function PecCard({ item, backgroundColor, colorName = "blue", onLongPress
           />
         </View>
         <View className="max-w-full items-center justify-center px-3 py-1">
-          <PillText size={20} numberOfLines={2} style={{ color: "#001D4A" }}>
+          <PillText size={20} numberOfLines={2} style={{ color: colors.dark }}>
             {item.title}
           </PillText>
         </View>
@@ -204,7 +204,7 @@ export function RoutinePecCard({
               alignSelf: "stretch",
               backgroundColor: bg,
               borderWidth: settings.highContrast ? 2 : 0,
-              borderColor: "#001D4A",
+              borderColor: colors.dark,
               justifyContent: "flex-start",
             },
             animatedStyle,
@@ -218,7 +218,7 @@ export function RoutinePecCard({
             />
           </View>
           <View className="max-w-full items-center justify-center px-3 py-1">
-            <PillText size={20} numberOfLines={2} style={{ color: "#001D4A" }}>
+            <PillText size={20} numberOfLines={2} style={{ color: colors.dark }}>
               {title}
             </PillText>
           </View>
@@ -231,14 +231,14 @@ export function RoutinePecCard({
             onPress={onRemove}
             className="h-8 w-8 items-center justify-center rounded-full bg-white"
             style={{
-              shadowColor: "#001D4A",
+              shadowColor: colors.dark,
               shadowOpacity: 0.16,
               shadowRadius: 4,
               shadowOffset: { width: 0, height: 1 },
               elevation: 3,
             }}
           >
-            <SolarIcon name="close" size={18} color="#D32F2F" />
+            <SolarIcon name="close" size={18} color={colors.danger} />
           </Pressable>
         </View>
       ) : null}

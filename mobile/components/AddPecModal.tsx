@@ -9,11 +9,10 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
   Linking,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SolarIcon } from "@/components/SolarIcon";
+import { Button, IconButton } from "@/components/Button";
 import * as ImagePicker from "expo-image-picker";
 import { Category } from "@/types";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
@@ -166,16 +165,10 @@ export function AddPecModal({
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <View
-          className="flex-row items-center justify-between border-b border-[#F0F0F0] px-4 pb-3"
+          className="flex-row items-center justify-between border-b border-line px-4 pb-3"
           style={{ paddingTop: insets.top + 12 }}
         >
-          <Pressable
-            accessibilityLabel="Fechar"
-            onPress={onClose}
-            className="h-10 w-10 items-center justify-center rounded-full bg-[#F5F5F5]"
-          >
-            <SolarIcon name="close" size={22} color={colors.dark} />
-          </Pressable>
+          <IconButton icon="close" accessibilityLabel="Fechar" onPress={onClose} />
           <Text className="font-quicksand text-3xl text-dark">
             {initialPec ? "Editar PEC" : "Novo PEC"}
           </Text>
@@ -197,7 +190,7 @@ export function AddPecModal({
               onChangeText={setTitle}
               placeholder="Ex: Bola"
               placeholderTextColor={colors.neutralDark}
-              className="rounded-2xl border border-[#E4F4FF] bg-[#FDFEFF] px-4 text-dark"
+              className="rounded-2xl border border-neutral bg-neutral-light px-4 text-dark"
               style={{ fontSize: 18, height: 56 }}
             />
           </View>
@@ -217,7 +210,7 @@ export function AddPecModal({
                       onPress={() => setCategorySlug(category.slug)}
                       className="h-11 flex-row items-center gap-1.5 rounded-full px-3"
                       style={{
-                        backgroundColor: selected ? getCategoryBgColor(colorName) : "#F5F5F5",
+                        backgroundColor: selected ? getCategoryBgColor(colorName) : colors.muted,
                       }}
                     >
                       {icon ? <CategoryIcon slug={category.slug} size={24} /> : null}
@@ -237,30 +230,22 @@ export function AddPecModal({
           <View className="gap-2">
             <Text className="font-quicksand text-xl text-dark">Imagem</Text>
             <View className="flex-row flex-wrap gap-2">
-              <Pressable
-                accessibilityLabel="Tirar foto"
-                onPress={takePhoto}
-                className="h-11 flex-row items-center justify-center gap-2 rounded-full bg-[#F0F8FF] px-4"
-              >
-                <SolarIcon name="camera" size={18} color={colors.primary} />
-                <Text className="font-quicksand text-xl text-primary">Tirar foto</Text>
-              </Pressable>
-              <Pressable
+              <Button label="Tirar foto" icon="camera" variant="soft" size="md" onPress={takePhoto} />
+              <Button
+                label="Do dispositivo"
+                icon="gallery"
+                variant="soft"
+                size="md"
                 accessibilityLabel="Escolher foto do dispositivo"
                 onPress={pickFromDevice}
-                className="h-11 flex-row items-center justify-center gap-2 rounded-full bg-[#F0F8FF] px-4"
-              >
-                <SolarIcon name="gallery" size={18} color={colors.primary} />
-                <Text className="font-quicksand text-xl text-primary">Do dispositivo</Text>
-              </Pressable>
-              <Pressable
-                accessibilityLabel="Buscar no Google"
+              />
+              <Button
+                label="Buscar no Google"
+                icon="magnifier"
+                variant="soft"
+                size="md"
                 onPress={openGoogleImages}
-                className="h-11 flex-row items-center justify-center gap-2 rounded-full bg-[#F0F8FF] px-4"
-              >
-                <SolarIcon name="magnifier" size={18} color={colors.primary} />
-                <Text className="font-quicksand text-xl text-primary">Buscar no Google</Text>
-              </Pressable>
+              />
             </View>
             <Text className="font-quicksand text-lg text-neutral-dark">
               No Google, segure a foto e escolha salvar no dispositivo. Depois, toque em Do dispositivo e selecione essa imagem.
@@ -269,35 +254,26 @@ export function AddPecModal({
               <Image
                 source={{ uri: previewUri }}
                 onError={() => setPreviewFailed(true)}
-                className="h-36 w-36 rounded-3xl bg-[#F5F5F5]"
+                className="h-36 w-36 rounded-3xl bg-muted"
                 resizeMode="cover"
               />
             ) : null}
             {previewFailed ? (
-              <Text className="font-quicksand text-lg text-[#D32F2F]">
+              <Text className="font-quicksand text-lg text-danger">
                 Não consegui abrir essa imagem. Escolha outra foto do dispositivo.
               </Text>
             ) : null}
           </View>
 
           {error ? (
-            <Text className="font-quicksand text-xl text-[#D32F2F]">{error}</Text>
+            <Text className="font-quicksand text-xl text-danger">{error}</Text>
           ) : null}
 
-          <Pressable
+          <Button
+            label={initialPec ? "Salvar alterações" : "Salvar PEC"}
+            loading={saving}
             onPress={handleSave}
-            disabled={saving}
-            className="h-14 items-center justify-center rounded-full bg-primary"
-            style={{ opacity: saving ? 0.7 : 1 }}
-          >
-            {saving ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text className="font-quicksand text-2xl text-white">
-                {initialPec ? "Salvar alterações" : "Salvar PEC"}
-              </Text>
-            )}
-          </Pressable>
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </Modal>

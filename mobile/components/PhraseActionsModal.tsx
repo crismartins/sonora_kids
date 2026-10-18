@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Modal, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, Modal, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SolarIcon } from "@/components/SolarIcon";
+import { Button } from "@/components/Button";
 import { CustomPhrase } from "@/services/customPhrases";
-import { colors } from "@/constants/colors";
 
 interface PhraseActionsModalProps {
   phrase: CustomPhrase | null;
@@ -49,62 +48,40 @@ export function PhraseActionsModal({ phrase, onClose, onEdit, onDelete }: Phrase
           }}
         />
         <View className="rounded-t-[28px] bg-white px-5 pt-3" style={{ paddingBottom: insets.bottom + 20 }}>
-          <View className="mb-4 h-1.5 w-12 self-center rounded-full bg-[#E4F4FF]" />
+          <View className="mb-4 h-1.5 w-12 self-center rounded-full bg-neutral" />
           <Text className="mb-4 text-center font-quicksand text-3xl text-dark">{label}</Text>
           {confirming ? (
             <View className="gap-3">
               <Text className="text-center font-quicksand text-xl text-neutral-dark">
                 Excluir esta frase? Ela sai do aparelho.
               </Text>
-              <Pressable
+              <Button
+                label="Excluir"
+                icon="trash"
+                variant="danger"
+                loading={deleting}
                 accessibilityLabel="Confirmar exclusão"
                 onPress={handleDelete}
-                disabled={deleting}
-                className="h-14 flex-row items-center justify-center gap-2 rounded-full bg-[#D32F2F]"
-                style={{ opacity: deleting ? 0.7 : 1 }}
-              >
-                {deleting ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <>
-                    <SolarIcon name="trash" size={20} color="#fff" />
-                    <Text className="font-quicksand text-2xl text-white">Excluir</Text>
-                  </>
-                )}
-              </Pressable>
-              <Pressable
-                accessibilityLabel="Voltar"
-                onPress={() => setConfirming(false)}
-                className="h-14 items-center justify-center rounded-full bg-[#F5F5F5]"
-              >
-                <Text className="font-quicksand text-2xl text-dark">Voltar</Text>
-              </Pressable>
+              />
+              <Button label="Voltar" variant="muted" onPress={() => setConfirming(false)} />
             </View>
           ) : (
             <View className="gap-3">
-              <Pressable
+              <Button
+                label="Editar"
+                icon="pen"
+                variant="soft"
                 accessibilityLabel="Editar frase"
                 onPress={() => phrase && onEdit(phrase)}
-                className="h-16 w-16 flex-row items-center justify-center gap-2 rounded-full bg-[#F0F8FF]"
-              >
-                <SolarIcon name="pen" size={20} color={colors.primary} />
-                <Text className="font-quicksand text-2xl text-primary">Editar</Text>
-              </Pressable>
-              <Pressable
+              />
+              <Button
+                label="Excluir"
+                icon="trash"
+                variant="dangerSoft"
                 accessibilityLabel="Excluir frase"
                 onPress={() => setConfirming(true)}
-                className="h-14 flex-row items-center justify-center gap-2 rounded-full bg-[#FDECEC]"
-              >
-                <SolarIcon name="trash" size={20} color="#D32F2F" />
-                <Text className="font-quicksand text-2xl text-[#D32F2F]">Excluir</Text>
-              </Pressable>
-              <Pressable
-                accessibilityLabel="Cancelar"
-                onPress={onClose}
-                className="h-14 items-center justify-center rounded-full bg-[#F5F5F5]"
-              >
-                <Text className="font-quicksand text-2xl text-dark">Cancelar</Text>
-              </Pressable>
+              />
+              <Button label="Cancelar" variant="muted" onPress={onClose} />
             </View>
           )}
         </View>

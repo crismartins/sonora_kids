@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo } from "react";
 import { View, Text, FlatList, Pressable, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import { SolarIcon } from "@/components/SolarIcon";
+import { FloatingButton } from "@/components/Button";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { PhraseCard } from "@/components/PhraseCard";
 import { PillText } from "@/components/PillText";
@@ -115,7 +115,7 @@ export default function FrasesScreen() {
                 key={tab}
                 onPress={() => handleSelectFilter(tab)}
                 className={`h-10 items-center justify-center rounded-full px-4 ${
-                  isActive ? "bg-[#E3F2FD]" : "border-transparent bg-[#F5F5F5]"
+                  isActive ? "bg-primary-wash" : "border-transparent bg-muted"
                 }`}
               >
                 <PillText
@@ -155,21 +155,12 @@ export default function FrasesScreen() {
         />
       )}
 
-      <Pressable
+      <FloatingButton
+        icon="chat-square-add"
         accessibilityLabel="Adicionar frase"
         onPress={() => setAddOpen(true)}
-        className="absolute right-5 h-16 w-16 items-center justify-center rounded-full bg-primary"
-        style={{
-          bottom: tabBarHeight + 12,
-          shadowColor: "#001D4A",
-          shadowOpacity: 0.22,
-          shadowRadius: 8,
-          shadowOffset: { width: 0, height: 4 },
-          elevation: 6,
-        }}
-      >
-        <SolarIcon name="chat-square-add" size={32} color="#fff" />
-      </Pressable>
+        bottom={tabBarHeight + 12}
+      />
 
       {catalog ? (
         <AddPhraseModal

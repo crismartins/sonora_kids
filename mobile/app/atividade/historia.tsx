@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { SolarIcon } from "@/components/SolarIcon";
+import { IconButton } from "@/components/Button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
@@ -140,15 +141,14 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
         </Pressable>
 
         <View className="mt-4 h-14 flex-row items-center justify-between">
-          <Pressable
+          <IconButton
+            icon="alt-arrow-left"
+            variant="neutral"
+            size="md"
             accessibilityLabel="Página anterior"
             disabled={page === 0}
             onPress={() => go(page - 1)}
-            className="h-12 w-12 items-center justify-center rounded-full bg-neutral active:opacity-80"
-            style={{ opacity: page === 0 ? 0.35 : 1 }}
-          >
-            <SolarIcon name="alt-arrow-left" size={26} color={colors.primary} />
-          </Pressable>
+          />
 
           <View className="flex-row items-center gap-2">
             {story.pages.map((item, index) => (
@@ -163,17 +163,13 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
             ))}
           </View>
 
-          <Pressable
+          <IconButton
+            icon={page === story.pages.length - 1 ? "check" : "alt-arrow-right"}
+            variant="primary"
+            size="md"
             accessibilityLabel={page === story.pages.length - 1 ? "Terminar história" : "Próxima página"}
             onPress={() => go(page + 1)}
-            className="h-12 w-12 items-center justify-center rounded-full bg-primary active:opacity-90"
-          >
-            <SolarIcon
-              name={page === story.pages.length - 1 ? "check" : "alt-arrow-right"}
-              size={26}
-              color="#FFFFFF"
-            />
-          </Pressable>
+          />
         </View>
       </View>
     </ActivityChrome>

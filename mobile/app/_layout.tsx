@@ -12,6 +12,7 @@ import { SilentModeToast } from "@/components/SilentModeToast";
 import { AppSettingsProvider, useAppSettings } from "@/context/AppSettingsContext";
 import { ProfileProvider } from "@/context/ProfileContext";
 import { FONT_FAMILY } from "@/constants/typography";
+import { colors } from "@/constants/colors";
 import { loadOnboardingSeen } from "@/services/onboarding";
 
 SplashScreen.preventAutoHideAsync();
@@ -34,8 +35,8 @@ function RootNavigator() {
           headerShown: true,
           title: "Perfil",
           headerTitleStyle,
-          headerTintColor: "#001D4A",
-          headerStyle: { backgroundColor: "#FDFEFF" },
+          headerTintColor: colors.dark,
+          headerStyle: { backgroundColor: colors.neutralLight },
         }}
       />
       <Stack.Screen
@@ -45,8 +46,8 @@ function RootNavigator() {
           headerShown: true,
           title: "Configurações",
           headerTitleStyle,
-          headerTintColor: "#001D4A",
-          headerStyle: { backgroundColor: "#FDFEFF" },
+          headerTintColor: colors.dark,
+          headerStyle: { backgroundColor: colors.neutralLight },
         }}
       />
     </Stack>
