@@ -70,9 +70,7 @@ export function AddRoutineItemModal({
           }}
         >
           {options.length === 0 ? (
-            <Text className="text-center font-quicksand text-xl text-neutral-dark">
-              Nenhum PEC de Dia a Dia ainda.
-            </Text>
+            <Text className="text-center font-quicksand text-xl text-neutral-dark">Nenhum PEC de Dia a Dia ainda.</Text>
           ) : (
             <>
               {chunkPairs(options).map((row) => (
@@ -132,7 +130,7 @@ export function AddRoutineItemModal({
             <Pressable
               accessibilityLabel="Criar PEC"
               onPress={onCreate}
-              className="h-14 w-14 items-center justify-center rounded-full bg-primary"
+              className="h-16 w-16 items-center justify-center rounded-full bg-primary"
               style={{
                 shadowColor: "#001D4A",
                 shadowOpacity: 0.22,
@@ -141,7 +139,7 @@ export function AddRoutineItemModal({
                 elevation: 6,
               }}
             >
-              <SolarIcon name="add" size={32} color="#fff" />
+              <SolarIcon name="widget-add" size={32} color="#fff" />
             </Pressable>
           </View>
           <Pressable

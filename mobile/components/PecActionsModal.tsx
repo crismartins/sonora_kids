@@ -40,14 +40,9 @@ export function PecActionsModal({ pec, onClose, onEdit, onDelete }: PecActionsMo
           onPress={onClose}
           style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "rgba(0,0,0,0.4)" }}
         />
-        <View
-          className="rounded-t-[28px] bg-white px-5 pt-3"
-          style={{ paddingBottom: insets.bottom + 20 }}
-        >
+        <View className="rounded-t-[28px] bg-white px-5 pt-3" style={{ paddingBottom: insets.bottom + 20 }}>
           <View className="mb-4 h-1.5 w-12 self-center rounded-full bg-[#E4F4FF]" />
-          <Text className="mb-4 text-center font-quicksand text-3xl text-dark">
-            {pec?.title}
-          </Text>
+          <Text className="mb-4 text-center font-quicksand text-3xl text-dark">{pec?.title}</Text>
           {confirming ? (
             <View className="gap-3">
               <Text className="text-center font-quicksand text-xl text-neutral-dark">
@@ -82,7 +77,7 @@ export function PecActionsModal({ pec, onClose, onEdit, onDelete }: PecActionsMo
               <Pressable
                 accessibilityLabel="Editar PEC"
                 onPress={() => pec && onEdit(pec)}
-                className="h-14 flex-row items-center justify-center gap-2 rounded-full bg-[#F0F8FF]"
+                className="h-16 w-16 flex-row items-center justify-center gap-2 rounded-full bg-[#F0F8FF]"
               >
                 <SolarIcon name="pen" size={20} color={colors.primary} />
                 <Text className="font-quicksand text-2xl text-primary">Editar</Text>

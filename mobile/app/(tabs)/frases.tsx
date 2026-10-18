@@ -96,41 +96,43 @@ export default function FrasesScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 8,
-          paddingHorizontal: 16,
-          paddingVertical: 10,
-        }}
-      >
-        {FILTER_TABS.map((tab) => {
-          const isActive = tab === activeFilter;
-          return (
-            <Pressable
-              key={tab}
-              onPress={() => handleSelectFilter(tab)}
-              className={`h-10 items-center justify-center rounded-full px-4 ${
-                isActive ? "bg-[#E3F2FD]" : "border-transparent bg-[#F5F5F5]"
-              }`}
-            >
-              <PillText
-                size={15}
-                numberOfLines={1}
-                style={{
-                  color: isActive ? colors.primary : colors.neutralDark,
-                  letterSpacing: 0.3,
-                }}
+      <View className="bg-white">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+            paddingHorizontal: 16,
+            paddingVertical: 10,
+          }}
+        >
+          {FILTER_TABS.map((tab) => {
+            const isActive = tab === activeFilter;
+            return (
+              <Pressable
+                key={tab}
+                onPress={() => handleSelectFilter(tab)}
+                className={`h-10 items-center justify-center rounded-full px-4 ${
+                  isActive ? "bg-[#E3F2FD]" : "border-transparent bg-[#F5F5F5]"
+                }`}
               >
-                {tab}
-              </PillText>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+                <PillText
+                  size={15}
+                  numberOfLines={1}
+                  style={{
+                    color: isActive ? colors.primary : colors.neutralDark,
+                    letterSpacing: 0.3,
+                  }}
+                >
+                  {tab}
+                </PillText>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      </View>
 
       {phrases.length === 0 ? (
         <View className="flex-1 items-center justify-center gap-2 px-10">
@@ -156,7 +158,7 @@ export default function FrasesScreen() {
       <Pressable
         accessibilityLabel="Adicionar frase"
         onPress={() => setAddOpen(true)}
-        className="absolute right-5 h-14 w-14 items-center justify-center rounded-full bg-primary"
+        className="absolute right-5 h-16 w-16 items-center justify-center rounded-full bg-primary"
         style={{
           bottom: tabBarHeight + 12,
           shadowColor: "#001D4A",
@@ -166,7 +168,7 @@ export default function FrasesScreen() {
           elevation: 6,
         }}
       >
-        <SolarIcon name="add" size={32} color="#fff" />
+        <SolarIcon name="chat-square-add" size={32} color="#fff" />
       </Pressable>
 
       {catalog ? (

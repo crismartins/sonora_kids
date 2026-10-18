@@ -1,6 +1,8 @@
 import { ComponentType } from "react";
 import { ColorValue } from "react-native";
 import { AddIcon } from "@solar-icons/react-native/bold-duotone/add";
+import { WidgetAddIcon } from "@solar-icons/react-native/bold-duotone/widget-add";
+import { ChatSquareAddIcon } from "@solar-icons/react-native/bold-duotone/chat-square-add";
 import { AltArrowLeftIcon } from "@solar-icons/react-native/bold-duotone/alt-arrow-left";
 import { AltArrowRightIcon } from "@solar-icons/react-native/bold-duotone/alt-arrow-right";
 import { BedIcon } from "@solar-icons/react-native/bold-duotone/bed";
@@ -8,7 +10,7 @@ import { BookIcon } from "@solar-icons/react-native/bold-duotone/book";
 import { BoxIcon } from "@solar-icons/react-native/bold-duotone/box";
 import { CameraIcon } from "@solar-icons/react-native/bold-duotone/camera";
 import { ChatRoundIcon } from "@solar-icons/react-native/bold-duotone/chat-round";
-import { ChatRoundDotsIcon } from "@solar-icons/react-native/bold-duotone/chat-round-dots";
+import { ChatSquareLineIcon } from "@solar-icons/react-native/bold-duotone/chat-square-line";
 import { CheckCircleIcon } from "@solar-icons/react-native/bold-duotone/check-circle";
 import { CheckReadIcon } from "@solar-icons/react-native/bold-duotone/check-read";
 import { ChefHatIcon } from "@solar-icons/react-native/bold-duotone/chef-hat";
@@ -58,6 +60,8 @@ function asColor(value: ColorValue | undefined) {
 
 const ICONS = {
   add: AddIcon,
+  "widget-add": WidgetAddIcon,
+  "chat-square-add": ChatSquareAddIcon,
   "alt-arrow-left": AltArrowLeftIcon,
   "alt-arrow-right": AltArrowRightIcon,
   bed: BedIcon,
@@ -65,7 +69,7 @@ const ICONS = {
   box: BoxIcon,
   camera: CameraIcon,
   "chat-round": ChatRoundIcon,
-  "chat-round-dots": ChatRoundDotsIcon,
+  "chat-square-line": ChatSquareLineIcon,
   check: CheckReadIcon,
   "check-circle": CheckCircleIcon,
   "chef-hat": ChefHatIcon,
@@ -114,13 +118,7 @@ type SolarIconProps = {
   secondaryOpacity?: number;
 };
 
-export function SolarIcon({
-  name,
-  size,
-  color,
-  secondaryColor,
-  secondaryOpacity = 0.4,
-}: SolarIconProps) {
+export function SolarIcon({ name, size, color, secondaryColor, secondaryOpacity = 0.4 }: SolarIconProps) {
   const Icon = ICONS[name] ?? ICONS.fallback;
   const tint = asColor(color);
   return (

@@ -48,10 +48,7 @@ export function PhraseActionsModal({ phrase, onClose, onEdit, onDelete }: Phrase
             backgroundColor: "rgba(0,0,0,0.4)",
           }}
         />
-        <View
-          className="rounded-t-[28px] bg-white px-5 pt-3"
-          style={{ paddingBottom: insets.bottom + 20 }}
-        >
+        <View className="rounded-t-[28px] bg-white px-5 pt-3" style={{ paddingBottom: insets.bottom + 20 }}>
           <View className="mb-4 h-1.5 w-12 self-center rounded-full bg-[#E4F4FF]" />
           <Text className="mb-4 text-center font-quicksand text-3xl text-dark">{label}</Text>
           {confirming ? (
@@ -88,7 +85,7 @@ export function PhraseActionsModal({ phrase, onClose, onEdit, onDelete }: Phrase
               <Pressable
                 accessibilityLabel="Editar frase"
                 onPress={() => phrase && onEdit(phrase)}
-                className="h-14 flex-row items-center justify-center gap-2 rounded-full bg-[#F0F8FF]"
+                className="h-16 w-16 flex-row items-center justify-center gap-2 rounded-full bg-[#F0F8FF]"
               >
                 <SolarIcon name="pen" size={20} color={colors.primary} />
                 <Text className="font-quicksand text-2xl text-primary">Editar</Text>

@@ -278,7 +278,7 @@ export default function PecsScreen() {
         <Pressable
           accessibilityLabel="Adicionar PEC"
           onPress={() => setAddOpen(true)}
-          className="absolute right-5 h-14 w-14 items-center justify-center rounded-full bg-primary"
+          className="absolute right-5 h-16 w-16 items-center justify-center rounded-full bg-primary"
           style={{
             bottom: tabBarHeight + 12,
             shadowColor: "#001D4A",
@@ -288,7 +288,7 @@ export default function PecsScreen() {
             elevation: 6,
           }}
         >
-          <SolarIcon name="add" size={32} color="#fff" />
+          <SolarIcon name="widget-add" size={32} color="#fff" />
         </Pressable>
       ) : null}
 

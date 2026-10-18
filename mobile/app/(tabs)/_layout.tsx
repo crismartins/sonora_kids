@@ -143,7 +143,7 @@ export default function TabLayout() {
         options={{
           title: "Frases",
           tabBarLabel: "FRASES",
-          tabBarIcon: ({ color }) => <SolarIcon name="chat-round-dots" size={24} color={color} />,
+          tabBarIcon: ({ color }) => <SolarIcon name="chat-square-line" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -151,7 +151,7 @@ export default function TabLayout() {
         options={{
           title: "Aprender",
           tabBarLabel: "APRENDER",
-          tabBarIcon: ({ color }) => <SolarIcon name="gamepad" size={24} color={color} />,
+          tabBarIcon: ({ color }) => <SolarIcon name="square-academic-cap" size={24} color={color} />,
         }}
       />
       <Tabs.Screen

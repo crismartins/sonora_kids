@@ -222,8 +222,8 @@ export default function RotinaScreen() {
                   haptic(Haptics.ImpactFeedbackStyle.Light);
                   speak(DAY_LABELS[index]);
                 }}
-                className={`h-10 items-center justify-center rounded-full border-[1.5px] px-3.5 ${
-                  isActive ? "border-primary bg-[#E3F2FD]" : "border-transparent bg-[#F5F5F5]"
+                className={`h-10 items-center justify-center rounded-full px-3.5 ${
+                  isActive ? "bg-[#E3F2FD]" : "bg-[#F5F5F5]"
                 }`}
               >
                 <PillText
@@ -303,7 +303,7 @@ export default function RotinaScreen() {
       <Pressable
         accessibilityLabel={`Editar ${PERIOD_LABELS[selectedPeriod]}`}
         onPress={() => openPeriod(selectedPeriod)}
-        className="absolute right-5 h-14 w-14 items-center justify-center rounded-full bg-primary"
+        className="absolute right-5 h-16 w-16 items-center justify-center rounded-full bg-primary"
         style={{
           bottom: tabBarHeight + 12,
           shadowColor: "#001D4A",
