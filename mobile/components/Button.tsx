@@ -25,8 +25,8 @@ const VARIANT: Record<ButtonVariant, { box: string; label: string; icon: string 
 };
 
 const SIZE: Record<ButtonSize, { box: string; label: string; icon: number }> = {
-  md: { box: "h-11 px-4", label: "text-xl", icon: 18 },
-  lg: { box: "h-14 px-4", label: "text-2xl", icon: 20 },
+  md: { box: "h-16 px-4", label: "text-lg", icon: 18 },
+  lg: { box: "h-20 px-4", label: "text-xl", icon: 20 },
 };
 
 const SHAPE: Record<ButtonShape, string> = {
@@ -56,7 +56,7 @@ export function Button({
   variant = "primary",
   size = "lg",
   labelSize,
-  shape = "pill",
+  shape = "rounded",
   icon,
   iconSize,
   loading = false,

@@ -71,12 +71,7 @@ export default function ProfileScreen() {
     return () => clearTimeout(timer);
   }, [saved]);
 
-  const previewSource =
-    avatar === "photo" && photoUri
-      ? { uri: photoUri }
-      : avatar === "v2"
-        ? AVATAR_V2
-        : AVATAR_V1;
+  const previewSource = avatar === "photo" && photoUri ? { uri: photoUri } : avatar === "v2" ? AVATAR_V2 : AVATAR_V1;
 
   const dirty =
     nickname.trim() !== profile.nickname ||
@@ -159,10 +154,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-white"
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+    <KeyboardAvoidingView className="flex-1 bg-white" behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <ScrollView
         className="flex-1 bg-white"
         keyboardShouldPersistTaps="handled"
@@ -181,18 +173,10 @@ export default function ProfileScreen() {
 
         <View className="w-full gap-3">
           <View className="flex-row justify-center gap-3">
-            <AvatarChoiceButton
-              label="Avatar 1"
-              selected={avatar === "v1"}
-              onPress={() => choosePreset("v1")}
-            >
+            <AvatarChoiceButton label="Avatar 1" selected={avatar === "v1"} onPress={() => choosePreset("v1")}>
               <Image source={AVATAR_V1} className="h-full w-full" />
             </AvatarChoiceButton>
-            <AvatarChoiceButton
-              label="Avatar 2"
-              selected={avatar === "v2"}
-              onPress={() => choosePreset("v2")}
-            >
+            <AvatarChoiceButton label="Avatar 2" selected={avatar === "v2"} onPress={() => choosePreset("v2")}>
               <Image source={AVATAR_V2} className="h-full w-full" />
             </AvatarChoiceButton>
             {photoUri ? (
@@ -250,13 +234,12 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {error ? (
-          <Text className="w-full text-center font-quicksand text-lg text-danger">{error}</Text>
-        ) : null}
+        {error ? <Text className="w-full text-center font-quicksand text-lg text-danger">{error}</Text> : null}
 
         <Button
           label={saved ? "Salvo" : "Salvar"}
           icon={saved ? "check" : "check-circle"}
+          variant="primary"
           shape="rounded"
           loading={saving}
           disabled={!dirty}
