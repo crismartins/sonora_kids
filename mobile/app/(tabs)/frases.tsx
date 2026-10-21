@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { View, Text, FlatList, Pressable, ScrollView } from "react-native";
+import { View, Text, FlatList, Pressable, ScrollView, ImageSourcePropType } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { FloatingButton } from "@/components/Button";
@@ -16,7 +16,7 @@ import { useCustomPecs } from "@/hooks/useCustomPecs";
 import { useCustomPhrases } from "@/hooks/useCustomPhrases";
 import { customPecToItem } from "@/services/customPecs";
 import { CustomPhrase } from "@/services/customPhrases";
-import { PhraseItem } from "@/types";
+import { PecItem, PhraseItem } from "@/types";
 
 const FILTER_TABS = ["MAIS USADAS", "TODAS", "MINHAS FRASES"] as const;
 type FilterTab = (typeof FILTER_TABS)[number];
@@ -32,6 +32,13 @@ function catalogRows(collection: PhraseItem[][], prefix: string): ListedPhrase[]
     key: `${prefix}-${index}`,
     items,
   }));
+}
+
+function pecImageSource(pec: PecItem): ImageSourcePropType | undefined {
+  if (pec.localImage) return pec.localImage;
+  const uri = pec.featuredImage?.node?.sourceUrl;
+  if (!uri) return undefined;
+  return { uri };
 }
 
 export default function FrasesScreen() {
@@ -66,6 +73,18 @@ export default function FrasesScreen() {
     },
     [haptic],
   );
+
+  const pecImages = useMemo(() => {
+    const map = new Map<string, ImageSourcePropType>();
+    for (const category of catalog ?? []) {
+      for (const pec of category.pECS.nodes) {
+        const source = pecImageSource(pec);
+        if (!source) continue;
+        map.set(pec.title.trim().toLocaleLowerCase("pt-BR"), source);
+      }
+    }
+    return map;
+  }, [catalog]);
 
   const phrases = useMemo(() => {
     const mine: ListedPhrase[] = customPhrases.map((phrase) => ({
@@ -146,11 +165,17 @@ export default function FrasesScreen() {
         <FlatList
           data={phrases}
           keyExtractor={(item) => item.key}
-          contentContainerStyle={{ paddingTop: 12, paddingBottom: tabBarHeight + 88 }}
+          contentContainerStyle={{ paddingTop: 8, paddingBottom: tabBarHeight + 88 }}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => {
             const customId = item.customId;
-            return <PhraseCard phrase={item.items} onManage={customId ? () => openManage(customId) : undefined} />;
+            return (
+              <PhraseCard
+                phrase={item.items}
+                images={pecImages}
+                onManage={customId ? () => openManage(customId) : undefined}
+              />
+            );
           }}
         />
       )}
