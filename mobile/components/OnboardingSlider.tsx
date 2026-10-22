@@ -144,7 +144,6 @@ function TokenChip({
     >
       {leading}
       <Text style={{ fontFamily: FONT_FAMILY, fontSize: 16, color: colors.dark }}>{label}</Text>
-      <SolarIcon name="close" size={14} color="#8AA0B4" />
     </View>
   );
 }
