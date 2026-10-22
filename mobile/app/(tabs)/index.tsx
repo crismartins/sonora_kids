@@ -20,7 +20,7 @@ import { categoryIconBySlug } from "@/constants/categoryIcons";
 import { Category, PecItem } from "@/types";
 
 const CATEGORY_ICON_SIZE = 33;
-const CATEGORY_PILL_SIZE = 60;
+const CATEGORY_PILL_SIZE = 52;
 
 export default function PecsScreen() {
   const insets = useSafeAreaInsets();
@@ -182,12 +182,11 @@ export default function PecsScreen() {
                         : isActive
                           ? catBg
                           : catBg,
-                      borderWidth: settings.highContrast ? 2 : 0,
                       borderColor: catColor,
                       height: CATEGORY_PILL_SIZE,
                       width: isActive ? undefined : CATEGORY_PILL_SIZE,
-                      paddingHorizontal: isActive ? 18 : 0,
-                      gap: isActive ? 9 : 0,
+                      paddingHorizontal: isActive ? 12 : 0,
+                      gap: isActive ? 8 : 0,
                     }}
                   >
                     <View

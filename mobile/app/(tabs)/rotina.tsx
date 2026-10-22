@@ -4,6 +4,7 @@ import { useNavigation } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { SolarIcon, SolarIconName } from "@/components/SolarIcon";
+import { BottomSheet } from "@/components/AppModal";
 import { Button, FloatingButton } from "@/components/Button";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { useCategories } from "@/hooks/useCategories";
@@ -354,58 +355,38 @@ export default function RotinaScreen() {
         />
       ) : null}
 
-      <Modal
+      <BottomSheet
         visible={!!removing}
-        transparent
-        animationType="fade"
-        onRequestClose={() => {
+        title={removing?.item.title}
+        onClose={() => {
           setRemoving(null);
           cancelEditing();
         }}
       >
-        <View className="flex-1 justify-end">
-          <Pressable
-            accessibilityLabel="Fechar"
+        <View className="gap-3">
+          <Text className="text-center font-quicksand text-xl text-neutral-dark">
+            Tirar de {removing ? PERIOD_LABELS[removing.period] : ""}? O PEC continua em Dia a Dia.
+          </Text>
+          <Button
+            label="Tirar da rotina"
+            variant="danger"
+            accessibilityLabel="Tirar da rotina"
+            onPress={async () => {
+              if (!removing) return;
+              await removeItem(selectedDay, removing.period, removing.item.id);
+              setRemoving(null);
+            }}
+          />
+          <Button
+            label="Cancelar"
+            variant="muted"
             onPress={() => {
               setRemoving(null);
               cancelEditing();
             }}
-            style={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              bottom: 0,
-              left: 0,
-              backgroundColor: "rgba(0,0,0,0.4)",
-            }}
           />
-          <View className="gap-3 rounded-t-[28px] bg-white px-5 pt-3" style={{ paddingBottom: insets.bottom + 20 }}>
-            <View className="mb-1 h-1.5 w-12 self-center rounded-full bg-neutral" />
-            <Text className="text-center font-quicksand text-3xl text-dark">{removing?.item.title}</Text>
-            <Text className="text-center font-quicksand text-xl text-neutral-dark">
-              Tirar de {removing ? PERIOD_LABELS[removing.period] : ""}? O PEC continua em Dia a Dia.
-            </Text>
-            <Button
-              label="Tirar da rotina"
-              variant="danger"
-              accessibilityLabel="Tirar da rotina"
-              onPress={async () => {
-                if (!removing) return;
-                await removeItem(selectedDay, removing.period, removing.item.id);
-                setRemoving(null);
-              }}
-            />
-            <Button
-              label="Cancelar"
-              variant="muted"
-              onPress={() => {
-                setRemoving(null);
-                cancelEditing();
-              }}
-            />
-          </View>
         </View>
-      </Modal>
+      </BottomSheet>
     </View>
   );
 }

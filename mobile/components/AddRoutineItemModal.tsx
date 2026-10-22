@@ -1,8 +1,9 @@
 import React from "react";
-import { View, Text, Modal, Pressable, ScrollView, Image, ImageSourcePropType } from "react-native";
+import { View, Text, Pressable, ScrollView, Image, ImageSourcePropType } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SolarIcon } from "@/components/SolarIcon";
-import { Button, FloatingButton, IconButton } from "@/components/Button";
+import { ScreenModal } from "@/components/AppModal";
+import { Button, FloatingButton } from "@/components/Button";
 import { colors, getCategoryBgColor } from "@/constants/colors";
 import { PillText } from "@/components/PillText";
 
@@ -47,17 +48,7 @@ export function AddRoutineItemModal({
   const background = getCategoryBgColor("deepPurple");
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View className="flex-1 bg-white">
-        <View
-          className="flex-row items-center justify-between border-b border-line px-4 pb-3"
-          style={{ paddingTop: insets.top + 12 }}
-        >
-          <IconButton icon="close" accessibilityLabel="Fechar" onPress={onClose} />
-          <Text className="font-quicksand text-3xl text-dark">{title}</Text>
-          <View className="w-10" />
-        </View>
-
+    <ScreenModal visible={visible} title={title} onClose={onClose}>
         <ScrollView
           contentContainerStyle={{
             padding: 16,
@@ -126,7 +117,6 @@ export function AddRoutineItemModal({
           </View>
           <Button label="Confirmar" elevated className="w-full" onPress={onConfirm} />
         </View>
-      </View>
-    </Modal>
+    </ScreenModal>
   );
 }

@@ -1,14 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  Modal,
-  Pressable,
-  ScrollView,
-} from "react-native";
+import { View, Text, Pressable, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SolarIcon } from "@/components/SolarIcon";
-import { Button, IconButton } from "@/components/Button";
+import { ScreenModal } from "@/components/AppModal";
+import { Button } from "@/components/Button";
 import { Category, PhraseItem } from "@/types";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { CategoryIcon } from "@/components/CategoryIcon";
@@ -93,19 +88,7 @@ export function AddPhraseModal({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View className="flex-1 bg-white">
-        <View
-          className="flex-row items-center justify-between border-b border-line px-4 pb-3"
-          style={{ paddingTop: insets.top + 12 }}
-        >
-          <IconButton icon="close" accessibilityLabel="Fechar" onPress={onClose} />
-          <Text className="font-quicksand text-3xl text-dark">
-            {initialPhrase ? "Editar frase" : "Nova frase"}
-          </Text>
-          <View className="w-10" />
-        </View>
-
+    <ScreenModal visible={visible} title={initialPhrase ? "Editar frase" : "Nova frase"} onClose={onClose}>
         <View className="gap-2 border-b border-line px-5 py-4">
           <View className="flex-row items-center justify-between">
             <Text className="font-quicksand text-xl text-dark">Frase</Text>
@@ -203,7 +186,6 @@ export function AddPhraseModal({
             onPress={handleSave}
           />
         </ScrollView>
-      </View>
-    </Modal>
+    </ScreenModal>
   );
 }

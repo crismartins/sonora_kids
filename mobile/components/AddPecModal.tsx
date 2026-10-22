@@ -2,17 +2,16 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Modal,
   TextInput,
   Pressable,
   ScrollView,
   Image,
-  KeyboardAvoidingView,
   Platform,
   Linking,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, IconButton } from "@/components/Button";
+import { ScreenModal } from "@/components/AppModal";
+import { Button } from "@/components/Button";
 import * as ImagePicker from "expo-image-picker";
 import { Category } from "@/types";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
@@ -159,22 +158,12 @@ export function AddPecModal({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView
-        className="flex-1 bg-white"
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <View
-          className="flex-row items-center justify-between border-b border-line px-4 pb-3"
-          style={{ paddingTop: insets.top + 12 }}
-        >
-          <IconButton icon="close" accessibilityLabel="Fechar" onPress={onClose} />
-          <Text className="font-quicksand text-3xl text-dark">
-            {initialPec ? "Editar PEC" : "Novo PEC"}
-          </Text>
-          <View className="w-10" />
-        </View>
-
+    <ScreenModal
+      visible={visible}
+      title={initialPec ? "Editar PEC" : "Novo PEC"}
+      onClose={onClose}
+      avoidKeyboard
+    >
         <ScrollView
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
@@ -275,7 +264,6 @@ export function AddPecModal({
             onPress={handleSave}
           />
         </ScrollView>
-      </KeyboardAvoidingView>
-    </Modal>
+    </ScreenModal>
   );
 }

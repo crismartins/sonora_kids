@@ -3,8 +3,7 @@ import { ColorValue } from "react-native";
 import { AddIcon } from "@solar-icons/react-native/bold-duotone/add";
 import { WidgetAddIcon } from "@solar-icons/react-native/bold-duotone/widget-add";
 import { ChatSquareAddIcon } from "@solar-icons/react-native/bold-duotone/chat-square-add";
-import { AltArrowLeftIcon } from "@solar-icons/react-native/bold-duotone/alt-arrow-left";
-import { AltArrowRightIcon } from "@solar-icons/react-native/bold-duotone/alt-arrow-right";
+import { RoundArrowRightIcon } from "@solar-icons/react-native/bold-duotone/round-arrow-right";
 import { BedIcon } from "@solar-icons/react-native/bold-duotone/bed";
 import { BookIcon } from "@solar-icons/react-native/bold-duotone/book";
 import { BoxIcon } from "@solar-icons/react-native/bold-duotone/box";
@@ -15,7 +14,7 @@ import { CheckCircleIcon } from "@solar-icons/react-native/bold-duotone/check-ci
 import { CheckReadIcon } from "@solar-icons/react-native/bold-duotone/check-read";
 import { ChefHatIcon } from "@solar-icons/react-native/bold-duotone/chef-hat";
 import { ClockCircleIcon } from "@solar-icons/react-native/bold-duotone/clock-circle";
-import { CloseIcon } from "@solar-icons/react-native/bold-duotone/close";
+import { CloseCircleIcon } from "@solar-icons/react-native/bold-duotone/close-circle";
 import { CloudCrossIcon } from "@solar-icons/react-native/bold-duotone/cloud-cross";
 import { CloudDownloadIcon } from "@solar-icons/react-native/bold-duotone/cloud-download";
 import { CloudSunIcon } from "@solar-icons/react-native/bold-duotone/cloud-sun";
@@ -46,6 +45,7 @@ import { VolumeLoudIcon } from "@solar-icons/react-native/bold-duotone/volume-lo
 import { VolumeSmallIcon } from "@solar-icons/react-native/bold-duotone/volume-small";
 import { WaterdropIcon } from "@solar-icons/react-native/bold-duotone/waterdrop";
 import { WidgetIcon } from "@solar-icons/react-native/bold-duotone/widget";
+import { RoundArrowLeftIcon } from "@solar-icons/react-native/bold-duotone/round-arrow-left";
 
 type IconComponent = ComponentType<{
   size?: number;
@@ -61,20 +61,20 @@ function asColor(value: ColorValue | undefined) {
 const ICONS = {
   add: AddIcon,
   "widget-add": WidgetAddIcon,
-  "chat-square-add": ChatSquareAddIcon,
-  "alt-arrow-left": AltArrowLeftIcon,
-  "alt-arrow-right": AltArrowRightIcon,
+  "close-circle": CloseCircleIcon,
+  "arrow-left": RoundArrowLeftIcon,
+  "arrow-right": RoundArrowRightIcon,
   bed: BedIcon,
   book: BookIcon,
   box: BoxIcon,
   camera: CameraIcon,
   "chat-round": ChatRoundIcon,
   "chat-square-line": ChatSquareLineIcon,
+  "chat-square-add": ChatSquareAddIcon,
   check: CheckReadIcon,
   "check-circle": CheckCircleIcon,
   "chef-hat": ChefHatIcon,
   clock: ClockCircleIcon,
-  close: CloseIcon,
   "cloud-cross": CloudCrossIcon,
   "cloud-download": CloudDownloadIcon,
   "cloud-sun": CloudSunIcon,

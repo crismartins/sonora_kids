@@ -91,13 +91,14 @@ export function Button({
   );
 }
 
-type IconButtonVariant = "muted" | "primary" | "neutral";
+type IconButtonVariant = "muted" | "primary" | "neutral" | "ghost";
 type IconButtonSize = "sm" | "md";
 
 const ICON_VARIANT: Record<IconButtonVariant, { box: string; icon: string }> = {
   muted: { box: "bg-muted", icon: colors.dark },
   primary: { box: "bg-primary active:opacity-90", icon: colors.white },
   neutral: { box: "bg-neutral active:opacity-80", icon: colors.primary },
+  ghost: { box: "bg-transparent", icon: colors.neutralDark },
 };
 
 const ICON_SIZE: Record<IconButtonSize, { box: string; icon: number }> = {

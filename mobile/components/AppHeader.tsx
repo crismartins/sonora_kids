@@ -22,11 +22,7 @@ export function AppHeader({ title }: { title: string }) {
 
   return (
     <View className="bg-white" style={{ paddingTop: insets.top }}>
-      <View
-        pointerEvents="box-none"
-        className="items-center justify-center px-16"
-        style={{ height: BAR_HEIGHT }}
-      >
+      <View pointerEvents="box-none" className="items-center justify-center px-16" style={{ height: BAR_HEIGHT }}>
         <Text
           numberOfLines={1}
           className="text-dark"
@@ -45,7 +41,7 @@ export function AppHeader({ title }: { title: string }) {
           hitSlop={12}
           className="absolute left-4 h-6 w-6 items-center justify-center"
         >
-          <SolarIcon name="settings" size={24} color={colors.neutralDark} />
+          <SolarIcon name="settings" size={28} color={colors.neutralDark} />
         </Pressable>
         <Pressable
           accessibilityRole="button"

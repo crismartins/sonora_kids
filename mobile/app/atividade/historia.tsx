@@ -37,9 +37,7 @@ function StoryList({ onOpen }: { onOpen: (story: Story) => void }) {
       }}
       showsVerticalScrollIndicator={false}
     >
-      <Text className="px-1 pb-1 font-quicksand text-lg text-neutral-dark">
-        Toque para ouvir a história
-      </Text>
+      <Text className="px-1 pb-1 font-quicksand text-lg text-neutral-dark">Toque para ouvir a história</Text>
       {STORIES.map((story) => {
         const color = getCategoryColor(story.colorName);
         const background = settings.highContrast ? "#FFFFFF" : getCategoryBgColor(story.colorName);
@@ -65,7 +63,7 @@ function StoryList({ onOpen }: { onOpen: (story: Story) => void }) {
               <Text className="font-quicksand text-[22px] text-dark">{story.title}</Text>
               <Text className="font-quicksand text-base text-neutral-dark">{story.summary}</Text>
             </View>
-            <SolarIcon name="alt-arrow-right" size={22} color={color} />
+            <SolarIcon name="arrow-right" size={22} color={color} />
           </Pressable>
         );
       })}
@@ -80,9 +78,7 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
   const [finished, setFinished] = useState(false);
   const current = story.pages[page];
   const color = getCategoryColor(current?.colorName ?? "blue");
-  const background = settings.highContrast
-    ? "#FFFFFF"
-    : getCategoryBgColor(current?.colorName ?? "blue");
+  const background = settings.highContrast ? "#FFFFFF" : getCategoryBgColor(current?.colorName ?? "blue");
 
   useEffect(() => {
     if (!current || finished) return;
@@ -142,7 +138,7 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
 
         <View className="mt-4 h-14 flex-row items-center justify-between">
           <IconButton
-            icon="alt-arrow-left"
+            icon="arrow-left"
             variant="neutral"
             size="md"
             accessibilityLabel="Página anterior"
@@ -164,7 +160,7 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
           </View>
 
           <IconButton
-            icon={page === story.pages.length - 1 ? "check" : "alt-arrow-right"}
+            icon={page === story.pages.length - 1 ? "check" : "arrow-right"}
             variant="primary"
             size="md"
             accessibilityLabel={page === story.pages.length - 1 ? "Terminar história" : "Próxima página"}

@@ -36,7 +36,7 @@ export function ActivityChrome({
           onPress={() => (onBack ? onBack() : router.back())}
           className="h-11 w-11 items-center justify-center rounded-full active:opacity-70"
         >
-          <SolarIcon name="alt-arrow-left" size={28} color={colors.dark} />
+          <SolarIcon name="arrow-left" size={28} color={colors.dark} />
         </Pressable>
         <Text className="flex-1 text-center font-quicksand text-[22px] text-dark" numberOfLines={1}>
           {title}
@@ -71,10 +71,7 @@ export function ActivityDone({
   }, [speak, title]);
 
   return (
-    <View
-      className="flex-1 items-center justify-center px-8"
-      style={{ paddingBottom: insets.bottom + 24 }}
-    >
+    <View className="flex-1 items-center justify-center px-8" style={{ paddingBottom: insets.bottom + 24 }}>
       <View className="mb-5 h-28 w-28 items-center justify-center rounded-full bg-light">
         <SolarIcon name="star" size={64} color={colors.primary} />
       </View>
@@ -82,13 +79,7 @@ export function ActivityDone({
       <Text className="mt-2 text-center font-quicksand text-xl text-neutral-dark">{detail}</Text>
       <Button label={againLabel} labelSize="md" className="mt-8 w-full" onPress={onAgain} />
       {secondaryLabel && onSecondary ? (
-        <Button
-          label={secondaryLabel}
-          variant="ghost"
-          labelSize="md"
-          className="mt-3 w-full"
-          onPress={onSecondary}
-        />
+        <Button label={secondaryLabel} variant="ghost" labelSize="md" className="mt-3 w-full" onPress={onSecondary} />
       ) : null}
     </View>
   );

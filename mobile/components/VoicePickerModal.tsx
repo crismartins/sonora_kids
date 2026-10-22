@@ -1,8 +1,9 @@
 import React from "react";
-import { View, Text, Modal, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SolarIcon } from "@/components/SolarIcon";
-import { Button, IconButton } from "@/components/Button";
+import { ScreenModal } from "@/components/AppModal";
+import { Button } from "@/components/Button";
 import { Voice } from "expo-speech";
 import { colors } from "@/constants/colors";
 import {
@@ -45,17 +46,7 @@ export function VoicePickerModal({
   );
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View className="flex-1 bg-white">
-        <View
-          className="flex-row items-center justify-between border-b border-line px-4 pb-3"
-          style={{ paddingTop: insets.top + 12 }}
-        >
-          <IconButton icon="close" accessibilityLabel="Fechar" onPress={onClose} />
-          <Text className="font-quicksand text-3xl text-dark">Voz</Text>
-          <View className="w-10" />
-        </View>
-
+    <ScreenModal visible={visible} title="Voz" onClose={onClose}>
         <ScrollView
           contentContainerStyle={{
             padding: 20,
@@ -153,8 +144,7 @@ export function VoicePickerModal({
             )}
           </View>
         </ScrollView>
-      </View>
-    </Modal>
+    </ScreenModal>
   );
 }
 

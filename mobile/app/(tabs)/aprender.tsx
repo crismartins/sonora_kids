@@ -7,8 +7,6 @@ import { colors } from "@/constants/colors";
 import { tabBarClearance } from "@/constants/tabBar";
 import { PillText } from "@/components/PillText";
 
-const AVATAR = require("../../assets/images/avatar_default_v1.png");
-
 interface ActivityCardProps {
   href: Href;
   icon: React.ReactNode;
@@ -19,15 +17,7 @@ interface ActivityCardProps {
   tag: string;
 }
 
-function ActivityCard({
-  href,
-  icon,
-  title,
-  description,
-  tagColor,
-  bgColor,
-  tag,
-}: ActivityCardProps) {
+function ActivityCard({ href, icon, title, description, tagColor, bgColor, tag }: ActivityCardProps) {
   return (
     <Pressable
       accessibilityLabel={title}
@@ -42,14 +32,9 @@ function ActivityCard({
       </View>
       <View className="flex-1 gap-0.5">
         <Text className="font-quicksand text-[21px] text-dark">{title}</Text>
-        <Text className="font-quicksand text-base text-neutral-dark">
-          {description}
-        </Text>
+        <Text className="font-quicksand text-base text-neutral-dark">{description}</Text>
       </View>
-      <View
-        className="h-7 items-center justify-center rounded-full px-2.5"
-        style={{ backgroundColor: bgColor }}
-      >
+      <View className="h-7 items-center justify-center rounded-full px-2.5" style={{ backgroundColor: bgColor }}>
         <PillText size={14} style={{ color: tagColor }}>
           {tag}
         </PillText>
@@ -73,23 +58,7 @@ export default function AprenderScreen() {
       }}
       showsVerticalScrollIndicator={false}
     >
-      <Pressable className="min-h-[140px] flex-row items-center justify-between rounded-3xl bg-primary p-6">
-        <View className="flex-1 gap-2">
-          <SolarIcon name="gamepad" size={40} color="#fff" />
-          <Text className="font-quicksand text-4xl text-white">
-            APRENDA{"\n"}JOGANDO
-          </Text>
-        </View>
-        <Image
-          source={AVATAR}
-          className="h-20 w-20 rounded-full border-[3px] border-white/40"
-        />
-      </Pressable>
-
       <View className="rounded-[20px] border border-line bg-canvas p-4">
-        <Text className="mb-2 font-quicksand text-[22px] uppercase tracking-wide text-neutral-dark">
-          Atividades
-        </Text>
         <ActivityCard
           href="/atividade/memoria"
           icon={<SolarIcon name="fallback" size={26} color={colors.primary} />}
