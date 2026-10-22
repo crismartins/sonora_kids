@@ -22,6 +22,7 @@ import { FONT_FAMILY } from "@/constants/typography";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { MOCK_CATEGORIES } from "@/data/categories";
 import { markOnboardingSeen } from "@/services/onboarding";
+import { IconButton } from "./Button";
 
 const AVATAR = require("../assets/images/avatar_default_v1.png");
 const AVATAR_2 = require("../assets/images/avatar_default_v2.png");
@@ -31,9 +32,7 @@ const DOT_IDLE = "#D5E2EE";
 const SPEAKER_BG = colors.primaryWash;
 
 const LIBRARY_SIZE =
-  Math.floor(
-    MOCK_CATEGORIES.reduce((total, category) => total + category.pECS.nodes.length, 0) / 10,
-  ) * 10;
+  Math.floor(MOCK_CATEGORIES.reduce((total, category) => total + category.pECS.nodes.length, 0) / 10) * 10;
 
 const SLIDES = [
   {
@@ -209,11 +208,7 @@ function PhraseArt({ width }: { width: number }) {
             leading={<Image source={AVATAR} style={{ width: 26, height: 26, borderRadius: 13 }} />}
           />
         </View>
-        <TokenChip
-          label="Bolo"
-          backgroundColor="#E7F8EE"
-          leading={<CakeArt size={24} />}
-        />
+        <TokenChip label="Bolo" backgroundColor="#E7F8EE" leading={<CakeArt size={24} />} />
       </View>
     </View>
   );
@@ -243,15 +238,7 @@ function LearnArt() {
   );
 }
 
-function RoutineCard({
-  title,
-  source,
-  width,
-}: {
-  title: string;
-  source: ImageSourcePropType;
-  width: number;
-}) {
+function RoutineCard({ title, source, width }: { title: string; source: ImageSourcePropType; width: number }) {
   return (
     <View
       style={{
@@ -262,11 +249,7 @@ function RoutineCard({
         padding: 10,
       }}
     >
-      <Image
-        source={source}
-        style={{ width: "100%", aspectRatio: 1, borderRadius: 12 }}
-        resizeMode="cover"
-      />
+      <Image source={source} style={{ width: "100%", aspectRatio: 1, borderRadius: 12 }} resizeMode="cover" />
       <Text style={{ marginTop: 8, fontFamily: FONT_FAMILY, fontSize: 16, color: colors.dark }}>{title}</Text>
     </View>
   );
@@ -361,11 +344,14 @@ export function OnboardingSlider({ onDone }: { onDone: () => void }) {
     onDone();
   }, [haptic, onDone, stopSpeaking]);
 
-  const scrollTo = useCallback((next: number) => {
-    const clamped = Math.max(0, Math.min(SLIDES.length - 1, next));
-    pagerRef.current?.scrollTo({ x: clamped * width, animated: true });
-    setIndex(clamped);
-  }, [width]);
+  const scrollTo = useCallback(
+    (next: number) => {
+      const clamped = Math.max(0, Math.min(SLIDES.length - 1, next));
+      pagerRef.current?.scrollTo({ x: clamped * width, animated: true });
+      setIndex(clamped);
+    },
+    [width],
+  );
 
   useEffect(() => {
     pagerRef.current?.scrollTo({ x: indexRef.current * width, animated: false });
@@ -389,11 +375,14 @@ export function OnboardingSlider({ onDone }: { onDone: () => void }) {
     if (previous !== index) stopSpeaking();
   }, [index, stopSpeaking]);
 
-  const syncIndex = useCallback((offsetX: number) => {
-    if (!width) return;
-    const next = Math.max(0, Math.min(SLIDES.length - 1, Math.round(offsetX / width)));
-    setIndex((current) => (current === next ? current : next));
-  }, [width]);
+  const syncIndex = useCallback(
+    (offsetX: number) => {
+      if (!width) return;
+      const next = Math.max(0, Math.min(SLIDES.length - 1, Math.round(offsetX / width)));
+      setIndex((current) => (current === next ? current : next));
+    },
+    [width],
+  );
 
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -503,7 +492,7 @@ export function OnboardingSlider({ onDone }: { onDone: () => void }) {
       </View>
 
       <View style={{ paddingHorizontal: 24, paddingTop: 4, paddingBottom: Math.max(insets.bottom, 16) }}>
-        <View style={{ height: 56, justifyContent: "center" }}>
+        <View style={{ height: 56, justifyContent: "center", alignItems: "flex-end" }}>
           <View
             style={[
               StyleSheet.absoluteFill,
@@ -525,24 +514,13 @@ export function OnboardingSlider({ onDone }: { onDone: () => void }) {
               ))}
             </View>
           </View>
-          <Pressable
-            accessibilityRole="button"
+          <IconButton
+            icon="volume-loud"
+            size="lg"
+            variant="neutral"
             accessibilityLabel="Ouvir esta etapa"
             onPress={speakCurrent}
-            style={({ pressed }) => ({
-              zIndex: 1,
-              alignSelf: "flex-end",
-              width: 56,
-              height: 56,
-              borderRadius: 28,
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: SPEAKER_BG,
-              opacity: pressed ? 0.7 : 1,
-            })}
-          >
-            <SolarIcon name="volume-loud" size={26} color={colors.primary} />
-          </Pressable>
+          />
         </View>
       </View>
     </Animated.View>

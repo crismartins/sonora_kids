@@ -92,7 +92,7 @@ export function Button({
 }
 
 type IconButtonVariant = "muted" | "primary" | "neutral" | "ghost";
-type IconButtonSize = "sm" | "md";
+type IconButtonSize = "sm" | "md" | "lg";
 
 const ICON_VARIANT: Record<IconButtonVariant, { box: string; icon: string }> = {
   muted: { box: "bg-muted", icon: colors.dark },
@@ -104,6 +104,7 @@ const ICON_VARIANT: Record<IconButtonVariant, { box: string; icon: string }> = {
 const ICON_SIZE: Record<IconButtonSize, { box: string; icon: number }> = {
   sm: { box: "h-10 w-10", icon: 22 },
   md: { box: "h-12 w-12", icon: 26 },
+  lg: { box: "h-16 w-16", icon: 32 },
 };
 
 type IconButtonProps = {
