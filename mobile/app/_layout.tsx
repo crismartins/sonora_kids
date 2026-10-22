@@ -1,7 +1,8 @@
 import "../global.css";
 import { useEffect, useState } from "react";
+import { StatusBar } from "react-native";
 import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import * as SystemUI from "expo-system-ui";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { Quicksand_700Bold } from "@expo-google-fonts/quicksand";
@@ -16,17 +17,23 @@ import { colors } from "@/constants/colors";
 import { loadOnboardingSeen } from "@/services/onboarding";
 
 SplashScreen.preventAutoHideAsync();
+SystemUI.setBackgroundColorAsync(colors.white);
 
 function RootNavigator() {
   const { fontScale } = useAppSettings();
   const headerTitleStyle = {
     fontFamily: FONT_FAMILY,
-    fontWeight: "700" as const,
     fontSize: Math.round(22 * fontScale),
   };
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.white },
+        statusBarStyle: "dark",
+      }}
+    >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen
         name="profile"
@@ -36,7 +43,7 @@ function RootNavigator() {
           title: "Perfil",
           headerTitleStyle,
           headerTintColor: colors.dark,
-          headerStyle: { backgroundColor: colors.neutralLight },
+          headerStyle: { backgroundColor: colors.white },
         }}
       />
       <Stack.Screen
@@ -47,7 +54,7 @@ function RootNavigator() {
           title: "Configurações",
           headerTitleStyle,
           headerTintColor: colors.dark,
-          headerStyle: { backgroundColor: colors.neutralLight },
+          headerStyle: { backgroundColor: colors.white },
         }}
       />
     </Stack>
@@ -59,7 +66,7 @@ function AppShell({ initialOnboardingSeen }: { initialOnboardingSeen: boolean })
 
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
       <RootNavigator />
       {onboardingSeen ? null : <OnboardingSlider onDone={() => setOnboardingSeen(true)} />}
       <SilentModeToast />
@@ -98,7 +105,7 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView className="flex-1">
+    <GestureHandlerRootView className="flex-1 bg-white">
       <SafeAreaProvider>
         <AppSettingsProvider>
           <ProfileProvider>

@@ -25,10 +25,9 @@ export function AppHeader({ title }: { title: string }) {
       <View pointerEvents="box-none" className="items-center justify-center px-16" style={{ height: BAR_HEIGHT }}>
         <Text
           numberOfLines={1}
-          className="text-dark"
+          className="font-quicksand text-dark"
           style={{
             fontFamily: FONT_FAMILY,
-            fontWeight: "700",
             fontSize: Math.round(HEADER_TITLE_SIZE * fontScale),
           }}
         >

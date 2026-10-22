@@ -6,6 +6,7 @@ export const CARD_GRID_INSET = 15;
 export const FLOATING_TAB_BAR_HORIZONTAL = CARD_GRID_INSET;
 
 export function floatingTabBarBottom(bottomInset: number) {
+  if (Platform.OS === "android") return bottomInset + 16;
   const inset = Platform.OS === "web" ? Math.max(bottomInset, 0) : bottomInset;
   return inset - 15;
 }

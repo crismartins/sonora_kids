@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react";
 import { Tabs, usePathname } from "expo-router";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import { AppHeader } from "@/components/AppHeader";
 import { SolarIcon } from "@/components/SolarIcon";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -59,18 +59,19 @@ export default function TabLayout() {
             bottom: tabBarBottom,
             height: FLOATING_TAB_BAR_HEIGHT,
             borderRadius: FLOATING_TAB_BAR_HEIGHT / 2,
-            backgroundColor: "#FFFF",
+            backgroundColor: colors.white,
             borderTopWidth: 0,
+            borderWidth: 0,
             opacity: 0.95,
             paddingTop: 8,
             paddingBottom: 8,
-            shadowOffset: { width: 0, height: 4 },
-            elevation: 6,
             marginHorizontal: 16,
+            ...(Platform.OS === "android"
+              ? { elevation: 0, shadowOpacity: 0, borderColor: "transparent" }
+              : { shadowOffset: { width: 0, height: 4 }, elevation: 6 }),
           },
           tabBarLabelStyle: {
             fontFamily: FONT_FAMILY,
-            fontWeight: "700",
             fontSize: Math.round(11 * fontScale),
           },
           tabBarItemStyle: { paddingVertical: 4 },
