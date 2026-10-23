@@ -21,11 +21,13 @@ interface PecCardProps {
   backgroundColor: string;
   colorName?: string;
   onLongPressManage?: () => void;
+  onPress?: () => void;
+  compact?: boolean;
 }
 
 const FALLBACK_IMAGE = require("../assets/images/avatar_default_v1.png");
 
-export function PecCard({ item, backgroundColor, colorName = "blue", onLongPressManage }: PecCardProps) {
+export function PecCard({ item, backgroundColor, colorName = "blue", onLongPressManage, onPress, compact = false }: PecCardProps) {
   const { settings, speak, stopSpeaking, haptic } = useAppSettings();
   const scale = useSharedValue(1);
   const longPressed = useRef(false);
@@ -44,10 +46,14 @@ export function PecCard({ item, backgroundColor, colorName = "blue", onLongPress
       withSpring(1, { damping: 10, stiffness: 200 })
     );
 
+    if (onPress) {
+      onPress();
+      return;
+    }
     haptic();
     speak(item.title);
     recordWordUse(item.title, colorName);
-  }, [colorName, haptic, item.title, scale, speak]);
+  }, [colorName, haptic, item.title, onPress, scale, speak]);
 
   const handleLongPress = useCallback(() => {
     longPressed.current = true;
@@ -66,28 +72,28 @@ export function PecCard({ item, backgroundColor, colorName = "blue", onLongPress
       onPress={handlePress}
       onLongPress={onLongPressManage ? handleLongPress : undefined}
       delayLongPress={450}
-      className="m-[5px] self-stretch"
-      style={{ flexGrow: 1 }}
+      className={compact ? undefined : "m-[5px] self-stretch"}
+      style={compact ? { width: 120 } : { flexGrow: 1 }}
     >
       <Animated.View
-        className="min-h-[150px] items-center justify-start self-stretch rounded-[20px] p-3"
+        className="items-center justify-start self-stretch"
         style={[
           {
-            flexGrow: 1,
+            flexGrow: compact ? undefined : 1,
             alignSelf: "stretch",
             backgroundColor: settings.highContrast ? "#FFFFFF" : backgroundColor,
-            borderRadius: 20,
+            borderRadius: compact ? 16 : 20,
             borderWidth: settings.highContrast ? 2 : 0,
             borderColor: colors.dark,
-            minHeight: 150,
-            padding: 12,
+            minHeight: compact ? 132 : 150,
+            padding: compact ? 8 : 12,
             alignItems: "center",
             justifyContent: "flex-start",
           },
           animatedStyle,
         ]}
       >
-        <View className="mb-2.5 aspect-square w-full self-stretch overflow-hidden rounded-2xl bg-white">
+        <View className={`aspect-square w-full self-stretch overflow-hidden bg-white ${compact ? "mb-1.5 rounded-xl" : "mb-2.5 rounded-2xl"}`}>
           <Image
             source={imageSource}
             className="h-full w-full"
@@ -96,7 +102,7 @@ export function PecCard({ item, backgroundColor, colorName = "blue", onLongPress
           />
         </View>
         <View className="max-w-full items-center justify-center px-3 py-1">
-          <PillText size={20} numberOfLines={2} style={{ color: colors.dark }}>
+          <PillText size={compact ? 14 : 20} numberOfLines={2} style={{ color: colors.dark }}>
             {item.title}
           </PillText>
         </View>

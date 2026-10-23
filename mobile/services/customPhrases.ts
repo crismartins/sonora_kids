@@ -37,16 +37,22 @@ export async function saveCustomPhrases(phrases: CustomPhrase[]): Promise<void> 
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(phrases));
 }
 
+function storedItem(item: PhraseItem): PhraseItem {
+  const next: PhraseItem = { text: item.text.trim(), color: item.color };
+  if (typeof item.image === "string" && item.image) next.image = item.image;
+  return next;
+}
+
 export function createCustomPhrase(items: PhraseItem[]): CustomPhrase {
   return {
     id: `phrase-${Date.now()}`,
-    items: items.map((item) => ({ text: item.text.trim(), color: item.color })),
+    items: items.map(storedItem),
   };
 }
 
 export function replaceCustomPhrase(current: CustomPhrase, items: PhraseItem[]): CustomPhrase {
   return {
     ...current,
-    items: items.map((item) => ({ text: item.text.trim(), color: item.color })),
+    items: items.map(storedItem),
   };
 }

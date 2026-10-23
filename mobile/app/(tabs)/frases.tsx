@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { View, Text, FlatList, Pressable, ScrollView, ImageSourcePropType } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
@@ -6,7 +6,7 @@ import { FloatingButton } from "@/components/Button";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { PhraseCard } from "@/components/PhraseCard";
 import { PillText } from "@/components/PillText";
-import { AddPhraseModal } from "@/components/AddPhraseModal";
+import { openPhraseForm } from "@/components/AddPhraseModal";
 import { PhraseActionsModal } from "@/components/PhraseActionsModal";
 import { colors } from "@/constants/colors";
 import { tabBarClearance } from "@/constants/tabBar";
@@ -48,9 +48,9 @@ export default function FrasesScreen() {
   const { pecs: customPecs } = useCustomPecs();
   const { phrases: customPhrases, addPhrase, updatePhrase, deletePhrase } = useCustomPhrases();
   const [activeFilter, setActiveFilter] = useState<FilterTab>("MAIS USADAS");
-  const [addOpen, setAddOpen] = useState(false);
   const [menuPhrase, setMenuPhrase] = useState<CustomPhrase | null>(null);
   const [editingPhrase, setEditingPhrase] = useState<CustomPhrase | null>(null);
+  const phraseFormOpen = useRef(false);
 
   const catalog = useMemo(() => {
     if (!categories) return undefined;
@@ -104,6 +104,31 @@ export default function FrasesScreen() {
   }, [activeFilter, customPhrases]);
 
   const tabBarHeight = tabBarClearance(insets.bottom);
+
+  useEffect(() => {
+    if (!editingPhrase || !catalog || phraseFormOpen.current) return;
+    phraseFormOpen.current = true;
+    const phrase = editingPhrase;
+    let opened = false;
+    const timer = setTimeout(() => {
+      opened = true;
+      openPhraseForm({
+        categories: catalog,
+        initialPhrase: phrase,
+        onSubmit: async (items) => {
+          await updatePhrase(phrase.id, items);
+        },
+        onClose: () => {
+          phraseFormOpen.current = false;
+          setEditingPhrase(null);
+        },
+      });
+    }, 280);
+    return () => {
+      clearTimeout(timer);
+      if (!opened) phraseFormOpen.current = false;
+    };
+  }, [editingPhrase, catalog, updatePhrase]);
 
   const openManage = useCallback(
     (customId: string) => {
@@ -183,31 +208,18 @@ export default function FrasesScreen() {
       <FloatingButton
         icon="chat-square-add"
         accessibilityLabel="Adicionar frase"
-        onPress={() => setAddOpen(true)}
-        bottom={tabBarHeight + 12}
-      />
-
-      {catalog ? (
-        <AddPhraseModal
-          visible={addOpen || !!editingPhrase}
-          categories={catalog}
-          initialPhrase={editingPhrase}
-          onClose={() => {
-            setAddOpen(false);
-            setEditingPhrase(null);
-          }}
-          onSubmit={async (items) => {
-            if (editingPhrase) {
-              await updatePhrase(editingPhrase.id, items);
-            } else {
+        onPress={() => {
+          if (!catalog) return;
+          openPhraseForm({
+            categories: catalog,
+            onSubmit: async (items) => {
               await addPhrase(items);
               setActiveFilter("MINHAS FRASES");
-            }
-            setAddOpen(false);
-            setEditingPhrase(null);
-          }}
-        />
-      ) : null}
+            },
+          });
+        }}
+        bottom={tabBarHeight + 12}
+      />
 
       <PhraseActionsModal
         phrase={menuPhrase}

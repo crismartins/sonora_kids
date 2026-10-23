@@ -9,7 +9,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { useCustomPecs } from "@/hooks/useCustomPecs";
 import { CustomPec, customPecToItem } from "@/services/customPecs";
 import { PecCard } from "@/components/PecCard";
-import { AddPecModal } from "@/components/AddPecModal";
+import { openPecForm } from "@/components/AddPecModal";
 import { PecActionsModal } from "@/components/PecActionsModal";
 import { PillText } from "@/components/PillText";
 import { SkeletonPecCard, SkeletonChip } from "@/components/SkeletonCard";
@@ -28,9 +28,9 @@ export default function PecsScreen() {
   const { data: categories, isLoading, error, refetch } = useCategories();
   const { pecs: customPecs, addPec, updatePec, deletePec } = useCustomPecs();
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [addOpen, setAddOpen] = useState(false);
   const [menuPec, setMenuPec] = useState<CustomPec | null>(null);
   const [editingPec, setEditingPec] = useState<CustomPec | null>(null);
+  const pecFormOpen = useRef(false);
   const [pageSize, setPageSize] = useState({ width: 0, height: 0 });
   const chipScrollRef = useRef<ScrollView>(null);
   const pagerRef = useRef<ScrollView>(null);
@@ -70,6 +70,34 @@ export default function PecsScreen() {
     },
     [categories, haptic, settings.autoSpeakCategories, speak, stopSpeaking],
   );
+
+  useEffect(() => {
+    if (!editingPec || !categories || pecFormOpen.current) return;
+    pecFormOpen.current = true;
+    const pec = editingPec;
+    let opened = false;
+    const timer = setTimeout(() => {
+      opened = true;
+      openPecForm({
+        categories,
+        initialCategorySlug: pec.categorySlug,
+        initialPec: pec,
+        onSubmit: async (input) => {
+          await updatePec(pec.id, input);
+          const index = categories.findIndex((category) => category.slug === input.categorySlug);
+          if (index >= 0) selectCategory(index, "chip");
+        },
+        onClose: () => {
+          pecFormOpen.current = false;
+          setEditingPec(null);
+        },
+      });
+    }, 280);
+    return () => {
+      clearTimeout(timer);
+      if (!opened) pecFormOpen.current = false;
+    };
+  }, [editingPec, categories, updatePec, selectCategory]);
 
   const syncCategoryFromOffset = useCallback(
     (offsetX: number) => {
@@ -276,32 +304,19 @@ export default function PecsScreen() {
         <FloatingButton
           icon="widget-add"
           accessibilityLabel="Adicionar PEC"
-          onPress={() => setAddOpen(true)}
+          onPress={() => {
+            if (!categories?.length) return;
+            openPecForm({
+              categories,
+              initialCategorySlug: categories[selectedIndex]?.slug ?? categories[0].slug,
+              onSubmit: async (input) => {
+                await addPec(input);
+                const index = categories.findIndex((category) => category.slug === input.categorySlug);
+                if (index >= 0) selectCategory(index, "chip");
+              },
+            });
+          }}
           bottom={tabBarHeight + 12}
-        />
-      ) : null}
-
-      {categories ? (
-        <AddPecModal
-          visible={addOpen || !!editingPec}
-          categories={categories}
-          initialCategorySlug={editingPec?.categorySlug ?? categories[selectedIndex]?.slug ?? categories[0].slug}
-          initialPec={editingPec}
-          onClose={() => {
-            setAddOpen(false);
-            setEditingPec(null);
-          }}
-          onSubmit={async (input) => {
-            if (editingPec) {
-              await updatePec(editingPec.id, input);
-            } else {
-              await addPec(input);
-            }
-            const index = categories.findIndex((category) => category.slug === input.categorySlug);
-            setAddOpen(false);
-            setEditingPec(null);
-            if (index >= 0) selectCategory(index, "chip");
-          }}
         />
       ) : null}
 

@@ -11,8 +11,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { useCustomPecs } from "@/hooks/useCustomPecs";
 import { useRoutine } from "@/hooks/useRoutine";
 import { RoutinePecCard } from "@/components/PecCard";
-import { AddRoutineItemModal, RoutinePecOption } from "@/components/AddRoutineItemModal";
-import { AddPecModal } from "@/components/AddPecModal";
+import { openRoutineForm, RoutinePecOption, RoutinePick } from "@/components/AddRoutineItemModal";
 import { PillText } from "@/components/PillText";
 import { colors } from "@/constants/colors";
 import { tabBarClearance } from "@/constants/tabBar";
@@ -77,9 +76,6 @@ export default function RotinaScreen() {
   const today = new Date().getDay();
   const [selectedDay, setSelectedDay] = useState(today);
   const [selectedPeriod, setSelectedPeriod] = useState<DayPeriod>(currentPeriod);
-  const [addingPeriod, setAddingPeriod] = useState<DayPeriod | null>(null);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [creating, setCreating] = useState(false);
   const [removing, setRemoving] = useState<{ period: DayPeriod; item: RoutineItem } | null>(null);
   const [editing, setEditing] = useState(false);
   const [removeFrames, setRemoveFrames] = useState<Record<string, RemoveFrame>>({});
@@ -87,6 +83,21 @@ export default function RotinaScreen() {
 
   const dayCategory = categories?.find((category) => category.slug === DIA_A_DIA);
   const dayColor = dayCategory?.categoriasDePec?.configuracoesCategorias?.cor ?? "deepPurple";
+  const catalog = useMemo(() => {
+    if (!categories) return [];
+    if (customPecs.length === 0) return categories;
+    return categories.map((category) => ({
+      ...category,
+      pECS: {
+        nodes: [
+          ...category.pECS.nodes,
+          ...customPecs.filter((pec) => pec.categorySlug === category.slug).map(customPecToItem),
+        ],
+      },
+    }));
+  }, [categories, customPecs]);
+  const catalogRef = useRef(catalog);
+  catalogRef.current = catalog;
 
   const options = useMemo(() => {
     const catalog = dayCategory?.pECS.nodes ?? [];
@@ -149,40 +160,46 @@ export default function RotinaScreen() {
     return navigation.addListener("blur", cancelEditing);
   }, [navigation]);
 
+  const describePick = (pecId: string, title: string): RoutinePick => {
+    for (const category of catalogRef.current) {
+      const pec = category.pECS.nodes.find((item) => item.id === pecId);
+      if (!pec) continue;
+      return {
+        id: pecId,
+        title,
+        image: pec.featuredImage?.node?.sourceUrl,
+        color: category.categoriasDePec?.configuracoesCategorias?.cor ?? "blue",
+      };
+    }
+    return { id: pecId, title, color: dayColor };
+  };
+
   const openPeriod = (period: DayPeriod) => {
     if (editing) {
       cancelEditing();
       return;
     }
-    setSelectedIds(itemsFor(selectedDay, period).map((item) => item.pecId));
-    setAddingPeriod(period);
-    haptic(Haptics.ImpactFeedbackStyle.Light);
-  };
-
-  const toggleSelected = (option: RoutinePecOption) => {
-    setSelectedIds((current) =>
-      current.includes(option.id) ? current.filter((id) => id !== option.id) : [...current, option.id],
-    );
-    haptic(Haptics.ImpactFeedbackStyle.Light);
-  };
-
-  const confirmSelection = async () => {
-    if (!addingPeriod) return;
-    const saved = itemsFor(selectedDay, addingPeriod);
-    const savedIds = new Set(saved.map((item) => item.pecId));
-    const chosen = new Set(selectedIds);
-    for (const option of options) {
-      if (chosen.has(option.id) && !savedIds.has(option.id)) {
-        await addItem(selectedDay, addingPeriod, option);
-      }
-    }
-    for (const item of saved) {
-      if (!chosen.has(item.pecId)) {
-        await removeItem(selectedDay, addingPeriod, item.id);
-      }
-    }
-    setSelectedIds([]);
-    setAddingPeriod(null);
+    if (catalogRef.current.length === 0) return;
+    const day = selectedDay;
+    const saved = itemsFor(day, period);
+    openRoutineForm({
+      day,
+      period,
+      initialSelected: saved.map((item) => describePick(item.pecId, item.title)),
+      getCategories: () => catalogRef.current,
+      addPec,
+      onSubmit: async (chosen) => {
+        const current = itemsFor(day, period);
+        const savedIds = new Set(current.map((item) => item.pecId));
+        const chosenIds = new Set(chosen.map((item) => item.id));
+        for (const pick of chosen) {
+          if (!savedIds.has(pick.id)) await addItem(day, period, { id: pick.id, title: pick.title });
+        }
+        for (const item of current) {
+          if (!chosenIds.has(item.pecId)) await removeItem(day, period, item.id);
+        }
+      },
+    });
     haptic(Haptics.ImpactFeedbackStyle.Light);
   };
 
@@ -326,34 +343,6 @@ export default function RotinaScreen() {
           }}
         />
       </Modal>
-
-      <AddRoutineItemModal
-        visible={addingPeriod != null && !creating}
-        title={addingPeriod ? `${PERIOD_LABELS[addingPeriod]} · ${DAY_LABELS[selectedDay]}` : "Rotina"}
-        options={options}
-        selectedIds={selectedIds}
-        onClose={() => {
-          setSelectedIds([]);
-          setAddingPeriod(null);
-        }}
-        onToggle={toggleSelected}
-        onConfirm={confirmSelection}
-        onCreate={() => setCreating(true)}
-      />
-
-      {dayCategory ? (
-        <AddPecModal
-          visible={creating}
-          categories={[dayCategory]}
-          initialCategorySlug={DIA_A_DIA}
-          onClose={() => setCreating(false)}
-          onSubmit={async (input) => {
-            const pec = await addPec({ ...input, categorySlug: DIA_A_DIA });
-            setSelectedIds((current) => (current.includes(pec.id) ? current : [...current, pec.id]));
-            setCreating(false);
-          }}
-        />
-      ) : null}
 
       <BottomSheet
         visible={!!removing}

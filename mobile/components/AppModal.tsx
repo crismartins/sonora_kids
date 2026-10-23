@@ -10,26 +10,43 @@ type BottomSheetProps = {
   onClose: () => void;
   title?: string;
   closeLabel?: string;
+  avoidKeyboard?: boolean;
   children: ReactNode;
 };
 
-export function BottomSheet({ visible, onClose, title, closeLabel = "Fechar", children }: BottomSheetProps) {
+export function BottomSheet({
+  visible,
+  onClose,
+  title,
+  closeLabel = "Fechar",
+  avoidKeyboard = false,
+  children,
+}: BottomSheetProps) {
   const insets = useSafeAreaInsets();
+  const sheet = (
+    <View className="flex-1 justify-end">
+      <Pressable
+        accessibilityLabel={closeLabel}
+        onPress={onClose}
+        style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: SCRIM }}
+      />
+      <View className="rounded-t-[28px] bg-white px-5 pt-3" style={{ paddingBottom: insets.bottom + 20 }}>
+        <View className="mb-4 h-1.5 w-12 self-center rounded-full bg-neutral" />
+        {title ? <Text className="mb-4 text-center font-quicksand text-3xl text-dark">{title}</Text> : null}
+        {children}
+      </View>
+    </View>
+  );
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 justify-end">
-        <Pressable
-          accessibilityLabel={closeLabel}
-          onPress={onClose}
-          style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: SCRIM }}
-        />
-        <View className="rounded-t-[28px] bg-white px-5 pt-3" style={{ paddingBottom: insets.bottom + 20 }}>
-          <View className="mb-4 h-1.5 w-12 self-center rounded-full bg-neutral" />
-          {title ? <Text className="mb-4 text-center font-quicksand text-3xl text-dark">{title}</Text> : null}
-          {children}
-        </View>
-      </View>
+      {avoidKeyboard ? (
+        <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === "ios" ? "padding" : undefined}>
+          {sheet}
+        </KeyboardAvoidingView>
+      ) : (
+        sheet
+      )}
     </Modal>
   );
 }

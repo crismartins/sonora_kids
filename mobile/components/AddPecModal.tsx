@@ -1,26 +1,48 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  ScrollView,
-  Image,
-  Platform,
-  Linking,
-} from "react-native";
+import React, { useState } from "react";
+import { Alert, View, Text, TextInput, Pressable, ScrollView, Image, Platform, Linking, KeyboardAvoidingView } from "react-native";
+import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ScreenModal } from "@/components/AppModal";
-import { Button } from "@/components/Button";
+import { Button, IconButton } from "@/components/Button";
+import { SolarIcon } from "@/components/SolarIcon";
 import * as ImagePicker from "expo-image-picker";
 import { Category } from "@/types";
-import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
+import { colors } from "@/constants/colors";
+import { FONT_FAMILY } from "@/constants/typography";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { categoryIconBySlug } from "@/constants/categoryIcons";
+import { useAppSettings } from "@/context/AppSettingsContext";
 import { CustomPec, NewCustomPec } from "@/services/customPecs";
 
-interface AddPecModalProps {
-  visible: boolean;
+export type PecFormRequest = {
+  categories: Category[];
+  initialCategorySlug: string;
+  initialPec?: CustomPec | null;
+  onSubmit: (input: NewCustomPec) => Promise<void>;
+  onClose?: () => void;
+};
+
+let request: PecFormRequest | null = null;
+let open = false;
+
+export function openPecForm(next: PecFormRequest) {
+  if (open) return;
+  open = true;
+  request = next;
+  router.push("/pec");
+}
+
+export function currentPecForm() {
+  return request;
+}
+
+export function finishPecForm() {
+  const closing = request;
+  request = null;
+  open = false;
+  closing?.onClose?.();
+}
+
+interface AddPecFormProps {
   categories: Category[];
   initialCategorySlug: string;
   initialPec?: CustomPec | null;
@@ -32,35 +54,21 @@ function existingImage(pec?: CustomPec | null) {
   return pec?.localUri || pec?.imageUrl || "";
 }
 
-export function AddPecModal({
-  visible,
-  categories,
-  initialCategorySlug,
-  initialPec,
-  onClose,
-  onSubmit,
-}: AddPecModalProps) {
+export function AddPecForm({ categories, initialCategorySlug, initialPec, onClose, onSubmit }: AddPecFormProps) {
   const insets = useSafeAreaInsets();
-  const [title, setTitle] = useState("");
-  const [categorySlug, setCategorySlug] = useState(initialCategorySlug);
-  const [localUri, setLocalUri] = useState<string | null>(null);
+  const { speak } = useAppSettings();
+  const [title, setTitle] = useState(initialPec?.title ?? "");
+  const [categorySlug, setCategorySlug] = useState(initialPec?.categorySlug ?? initialCategorySlug);
+  const [localUri, setLocalUri] = useState<string | null>(existingImage(initialPec) || null);
   const [imageChanged, setImageChanged] = useState(false);
   const [previewFailed, setPreviewFailed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (!visible) return;
-    setTitle(initialPec?.title ?? "");
-    setCategorySlug(initialPec?.categorySlug ?? initialCategorySlug);
-    setLocalUri(existingImage(initialPec) || null);
-    setImageChanged(false);
-    setPreviewFailed(false);
-    setError(null);
-    setSaving(false);
-  }, [visible, initialCategorySlug, initialPec]);
-
   const previewUri = localUri && !previewFailed ? localUri : null;
+  const name = title.trim();
+  const canHear = name.length > 0;
+  const canSave = canHear && !!categorySlug && !!previewUri && !saving;
 
   const handleSave = async () => {
     const name = title.trim();
@@ -89,17 +97,11 @@ export function AddPecModal({
               localUri: localUri ?? undefined,
             },
       );
+      onClose();
     } catch {
       setError("Não foi possível salvar. Tente de novo.");
       setSaving(false);
     }
-  };
-
-  const openGoogleImages = () => {
-    const query = title.trim() || "pictograma";
-    Linking.openURL(
-      `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query)}`,
-    );
   };
 
   const usePickedImage = (uri: string) => {
@@ -133,6 +135,14 @@ export function AddPecModal({
     }
   };
 
+  const choosePhotoSource = () => {
+    Alert.alert("Foto do PEC", "Tire uma foto ou escolha uma da galeria.", [
+      { text: "Tirar foto", onPress: takePhoto },
+      { text: "Escolher da galeria", onPress: pickFromDevice },
+      { text: "Cancelar", style: "cancel" },
+    ]);
+  };
+
   const takePhoto = async () => {
     try {
       if (Platform.OS !== "web") {
@@ -157,113 +167,110 @@ export function AddPecModal({
     }
   };
 
+  const hearTitle = () => {
+    const name = title.trim();
+    if (!name) return;
+    speak(name);
+  };
+
   return (
-    <ScreenModal
-      visible={visible}
-      title={initialPec ? "Editar PEC" : "Novo PEC"}
-      onClose={onClose}
-      avoidKeyboard
-    >
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            padding: 20,
-            paddingBottom: insets.bottom + 32,
-            gap: 18,
-          }}
+    <KeyboardAvoidingView className="flex-1 bg-white" behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 24, gap: 16 }}
+      >
+        <Pressable
+          accessibilityLabel="Adicionar foto do PEC"
+          onPress={choosePhotoSource}
+          className="h-24 w-24 self-center items-center justify-center overflow-hidden rounded-3xl bg-primary-soft"
         >
-          <View className="gap-2">
-            <Text className="font-quicksand text-xl text-dark">Nome</Text>
-            <TextInput
-              value={title}
-              onChangeText={setTitle}
-              placeholder="Ex: Bola"
-              placeholderTextColor={colors.neutralDark}
-              className="rounded-2xl border border-neutral bg-neutral-light px-4 text-dark"
-              style={{ fontSize: 18, height: 56 }}
-            />
+          {previewUri ? (
+            <Image source={{ uri: previewUri }} onError={() => setPreviewFailed(true)} className="h-full w-full" />
+          ) : (
+            <SolarIcon name="camera" size={36} color={colors.neutralDark} />
+          )}
+        </Pressable>
+
+        <TextInput
+          value={title}
+          onChangeText={setTitle}
+          placeholder="Nome do PEC"
+          placeholderTextColor={colors.neutralDark}
+          accessibilityLabel="Nome do PEC"
+          className="rounded-3xl border border-neutral bg-neutral-light px-4 font-quicksand text-xl text-dark"
+          style={{ fontFamily: FONT_FAMILY, fontSize: 20, height: 64 }}
+        />
+
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          <View className="flex-row gap-2">
+            {categories.map((category) => {
+              const selected = category.slug === categorySlug;
+              const icon = categoryIconBySlug[category.slug];
+              return (
+                <Pressable
+                  key={category.slug}
+                  accessibilityState={{ selected }}
+                  onPress={() => {
+                    setCategorySlug(category.slug);
+                    if (category.name) speak(category.name);
+                  }}
+                  className={`h-16 flex-row items-center gap-2 rounded-2xl bg-primary-soft px-3 ${
+                    selected ? "border-2 border-primary" : "border-2 border-transparent"
+                  }`}
+                >
+                  {icon ? (
+                    <View className="h-10 w-10 items-center justify-center rounded-full bg-white">
+                      <CategoryIcon slug={category.slug} size={28} />
+                    </View>
+                  ) : null}
+                  <Text className="font-quicksand text-lg text-dark">{category.name.toUpperCase()}</Text>
+                </Pressable>
+              );
+            })}
           </View>
-
-          <View className="gap-2">
-            <Text className="font-quicksand text-xl text-dark">Categoria</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View className="flex-row gap-2">
-                {categories.map((category) => {
-                  const selected = category.slug === categorySlug;
-                  const colorName =
-                    category.categoriasDePec?.configuracoesCategorias?.cor ?? "blue";
-                  const icon = categoryIconBySlug[category.slug];
-                  return (
-                    <Pressable
-                      key={category.slug}
-                      onPress={() => setCategorySlug(category.slug)}
-                      className="h-11 flex-row items-center gap-1.5 rounded-full px-3"
-                      style={{
-                        backgroundColor: selected ? getCategoryBgColor(colorName) : colors.muted,
-                      }}
-                    >
-                      {icon ? <CategoryIcon slug={category.slug} size={24} /> : null}
-                      <Text
-                        className="font-quicksand text-lg"
-                        style={{ color: selected ? getCategoryColor(colorName) : colors.neutralDark }}
-                      >
-                        {category.name}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </ScrollView>
-          </View>
-
-          <View className="gap-2">
-            <Text className="font-quicksand text-xl text-dark">Imagem</Text>
-            <View className="flex-row flex-wrap gap-2">
-              <Button label="Tirar foto" icon="camera" variant="soft" size="md" onPress={takePhoto} />
-              <Button
-                label="Do dispositivo"
-                icon="gallery"
-                variant="soft"
-                size="md"
-                accessibilityLabel="Escolher foto do dispositivo"
-                onPress={pickFromDevice}
-              />
-              <Button
-                label="Buscar no Google"
-                icon="magnifier"
-                variant="soft"
-                size="md"
-                onPress={openGoogleImages}
-              />
-            </View>
-            <Text className="font-quicksand text-lg text-neutral-dark">
-              No Google, segure a foto e escolha salvar no dispositivo. Depois, toque em Do dispositivo e selecione essa imagem.
-            </Text>
-            {previewUri ? (
-              <Image
-                source={{ uri: previewUri }}
-                onError={() => setPreviewFailed(true)}
-                className="h-36 w-36 rounded-3xl bg-muted"
-                resizeMode="cover"
-              />
-            ) : null}
-            {previewFailed ? (
-              <Text className="font-quicksand text-lg text-danger">
-                Não consegui abrir essa imagem. Escolha outra foto do dispositivo.
-              </Text>
-            ) : null}
-          </View>
-
-          {error ? (
-            <Text className="font-quicksand text-xl text-danger">{error}</Text>
-          ) : null}
-
-          <Button
-            label={initialPec ? "Salvar alterações" : "Salvar PEC"}
-            loading={saving}
-            onPress={handleSave}
-          />
         </ScrollView>
-    </ScreenModal>
+
+        <IconButton
+          icon="volume"
+          accessibilityLabel="Ouvir o nome do PEC"
+          variant="primary"
+          size="lg"
+          iconSize={28}
+          disabled={!canHear}
+          className="self-center"
+          onPress={hearTitle}
+        />
+
+        {previewFailed ? (
+          <Text className="text-center font-quicksand text-lg text-danger">
+            Não consegui abrir essa imagem. Escolha outra foto.
+          </Text>
+        ) : null}
+        {error ? <Text className="text-center font-quicksand text-lg text-danger">{error}</Text> : null}
+      </ScrollView>
+
+      <View className="flex-row gap-3 px-5 pt-2" style={{ paddingBottom: insets.bottom + 16 }}>
+        <Button
+          label="Sair"
+          icon="close-circle"
+          variant="soft"
+          shape="rounded"
+          size="md"
+          disabled={saving}
+          className="flex-1"
+          onPress={onClose}
+        />
+        <Button
+          label="Salvar"
+          icon="check-circle"
+          shape="rounded"
+          size="md"
+          loading={saving}
+          disabled={!canSave}
+          className="flex-1"
+          onPress={handleSave}
+        />
+      </View>
+    </KeyboardAvoidingView>
   );
 }

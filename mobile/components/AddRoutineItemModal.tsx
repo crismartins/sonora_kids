@@ -1,12 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, Pressable, ScrollView, Image, ImageSourcePropType } from "react-native";
+import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SolarIcon } from "@/components/SolarIcon";
-import { ScreenModal } from "@/components/AppModal";
-import { Button, FloatingButton } from "@/components/Button";
-import { colors, getCategoryBgColor } from "@/constants/colors";
+import { Button, FloatingButton, IconButton } from "@/components/Button";
+import { PecCard } from "@/components/PecCard";
 import { PillText } from "@/components/PillText";
+import { openPecForm } from "@/components/AddPecModal";
+import { Category, PecItem } from "@/types";
+import { getCategoryBgColor, getCategoryColor } from "@/constants/colors";
+import { CategoryIcon } from "@/components/CategoryIcon";
+import { categoryIconBySlug } from "@/constants/categoryIcons";
+import { useAppSettings } from "@/context/AppSettingsContext";
+import { CustomPec, NewCustomPec } from "@/services/customPecs";
+import { DayPeriod, PERIOD_LABELS, DAY_LABELS } from "@/services/routine";
 
+const PILL_SIZE = 44;
+const PILL_ICON = 28;
+const DIA_A_DIA = "dia-a-dia";
 const FALLBACK_IMAGE = require("../assets/images/avatar_default_v1.png");
 
 export interface RoutinePecOption {
@@ -15,108 +25,269 @@ export interface RoutinePecOption {
   image?: ImageSourcePropType;
 }
 
-function chunkPairs<T>(items: T[]): T[][] {
-  const rows: T[][] = [];
-  for (let i = 0; i < items.length; i += 2) {
-    rows.push(items.slice(i, i + 2));
-  }
-  return rows;
-}
-
-interface AddRoutineItemModalProps {
-  visible: boolean;
+export type RoutinePick = {
+  id: string;
   title: string;
-  options: RoutinePecOption[];
-  selectedIds: string[];
-  onClose: () => void;
-  onToggle: (option: RoutinePecOption) => void;
-  onConfirm: () => void;
-  onCreate: () => void;
+  image?: string;
+  color: string;
+};
+
+export type RoutineFormRequest = {
+  day: number;
+  period: DayPeriod;
+  initialSelected: RoutinePick[];
+  getCategories: () => Category[];
+  addPec: (input: NewCustomPec) => Promise<CustomPec>;
+  onSubmit: (items: RoutinePick[]) => Promise<void>;
+  onClose?: () => void;
+};
+
+let request: RoutineFormRequest | null = null;
+let open = false;
+
+export function openRoutineForm(next: RoutineFormRequest) {
+  if (open) return;
+  open = true;
+  request = next;
+  router.push("/rotina-item");
 }
 
-export function AddRoutineItemModal({
-  visible,
-  title,
-  options,
-  selectedIds,
+export function currentRoutineForm() {
+  return request;
+}
+
+export function finishRoutineForm() {
+  const closing = request;
+  request = null;
+  open = false;
+  closing?.onClose?.();
+}
+
+export function routineFormTitle(day: number, period: DayPeriod) {
+  return `${PERIOD_LABELS[period]} · ${DAY_LABELS[day]}`;
+}
+
+function categoryColorName(category: Category) {
+  return category.categoriasDePec?.configuracoesCategorias?.cor ?? "blue";
+}
+
+function pecImageUri(pec: PecItem) {
+  return pec.featuredImage?.node?.sourceUrl || undefined;
+}
+
+export function AddRoutineForm({
+  initialSelected,
+  getCategories,
+  addPec,
   onClose,
-  onToggle,
-  onConfirm,
-  onCreate,
-}: AddRoutineItemModalProps) {
+  onSubmit,
+}: Omit<RoutineFormRequest, "day" | "period" | "onClose"> & { onClose: () => void }) {
   const insets = useSafeAreaInsets();
-  const background = getCategoryBgColor("deepPurple");
+  const { settings, speak } = useAppSettings();
+  const categories = getCategories();
+  const [selected, setSelected] = useState<RoutinePick[]>(initialSelected);
+  const [extras, setExtras] = useState<{ slug: string; pec: PecItem }[]>([]);
+  const [categorySlug, setCategorySlug] = useState(
+    categories.find((category) => category.slug === DIA_A_DIA)?.slug ?? categories[0]?.slug ?? "",
+  );
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const selectedCategory = categories.find((category) => category.slug === categorySlug) ?? categories[0];
+  const selectedColor = selectedCategory ? categoryColorName(selectedCategory) : "blue";
+  const catalogPecs = selectedCategory?.pECS?.nodes ?? [];
+  const pecs = [
+    ...catalogPecs,
+    ...extras
+      .filter((extra) => extra.slug === categorySlug && !catalogPecs.some((item) => item.id === extra.pec.id))
+      .map((extra) => extra.pec),
+  ];
+  const spoken = selected.map((item) => item.title).join(" ").trim();
+  const canHear = spoken.length > 0;
+  const canSave = !saving;
+
+  const addPick = (pec: PecItem, color = selectedColor) => {
+    setSelected((current) => {
+      if (current.some((item) => item.id === pec.id)) return current;
+      return [...current, { id: pec.id, title: pec.title, image: pecImageUri(pec), color }];
+    });
+    speak(pec.title);
+  };
+
+  const createPec = () => {
+    const slug = categorySlug || DIA_A_DIA;
+    openPecForm({
+      categories: getCategories(),
+      initialCategorySlug: slug,
+      onSubmit: async (input) => {
+        const pec = await addPec(input);
+        const color =
+          getCategories().find((category) => category.slug === input.categorySlug)?.categoriasDePec
+            ?.configuracoesCategorias?.cor ?? selectedColor;
+        const created: PecItem = {
+          id: pec.id,
+          title: pec.title,
+          featuredImage: { node: { sourceUrl: pec.localUri || pec.imageUrl } },
+        };
+        setExtras((current) => [...current, { slug: input.categorySlug, pec: created }]);
+        addPick(created, color);
+      },
+    });
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      await onSubmit(selected);
+      onClose();
+    } catch {
+      setError("Não foi possível salvar. Tente de novo.");
+      setSaving(false);
+    }
+  };
 
   return (
-    <ScreenModal visible={visible} title={title} onClose={onClose}>
+    <View className="flex-1 bg-white">
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 16 }}>
+        <View className="min-h-[72px] flex-row flex-wrap gap-2 px-5 pt-4">
+          {selected.map((item) => (
+            <View
+              key={item.id}
+              className="h-14 flex-row items-center gap-1.5 rounded-full py-1 pl-1 pr-3"
+              style={{ backgroundColor: getCategoryBgColor(item.color) }}
+            >
+              <Image source={item.image ? { uri: item.image } : FALLBACK_IMAGE} className="h-10 w-10 rounded-full" />
+              <View className="h-9 max-w-[140px] items-center justify-center rounded-xl bg-white px-3">
+                <Text className="font-quicksand text-lg text-dark" numberOfLines={1}>
+                  {item.title}
+                </Text>
+              </View>
+              <Pressable
+                accessibilityLabel={`Remover ${item.title}`}
+                hitSlop={8}
+                onPress={() => setSelected((current) => current.filter((entry) => entry.id !== item.id))}
+              >
+                <Text className="px-1 font-quicksand text-2xl text-dark">×</Text>
+              </Pressable>
+            </View>
+          ))}
+        </View>
+
+        <IconButton
+          icon="volume"
+          accessibilityLabel="Ouvir os itens da rotina"
+          variant="primary"
+          size="lg"
+          iconSize={28}
+          disabled={!canHear}
+          className="mt-4 self-center"
+          onPress={() => speak(spoken)}
+        />
+
+        <View className="mx-5 mt-5 h-px bg-line" />
+
         <ScrollView
-          contentContainerStyle={{
-            padding: 16,
-            paddingBottom: insets.bottom + 156,
-          }}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="mt-4"
+          contentContainerStyle={{ gap: 6, paddingHorizontal: 20 }}
         >
-          {options.length === 0 ? (
-            <Text className="text-center font-quicksand text-xl text-neutral-dark">Nenhum PEC de Dia a Dia ainda.</Text>
-          ) : (
-            <>
-              {chunkPairs(options).map((row) => (
-                <View key={row.map((option) => option.id).join("-")} className="flex-row items-stretch">
-                  {row.map((option) => {
-                    const selected = selectedIds.includes(option.id);
-                    return (
-                      <View key={option.id} className="w-1/2 self-stretch">
-                        <Pressable
-                          accessibilityLabel={
-                            selected ? `Tirar seleção de ${option.title}` : `Selecionar ${option.title}`
-                          }
-                          onPress={() => onToggle(option)}
-                          className="m-[5px] min-h-[150px] items-center justify-start self-stretch rounded-[20px] p-3"
-                          style={{ flexGrow: 1, alignSelf: "stretch", backgroundColor: background }}
-                        >
-                          <View className="mb-2.5 aspect-square w-full self-stretch overflow-hidden rounded-2xl bg-white">
-                            <Image
-                              source={option.image ?? FALLBACK_IMAGE}
-                              className="h-full w-full"
-                              resizeMode="cover"
-                            />
-                          </View>
-                          <View className="max-w-full items-center justify-center px-3 py-1">
-                            <PillText size={20} numberOfLines={2} style={{ color: colors.dark }}>
-                              {option.title}
-                            </PillText>
-                          </View>
-                          {selected ? (
-                            <View className="absolute right-3 top-3">
-                              <SolarIcon name="check-circle" size={22} color={colors.primary} />
-                            </View>
-                          ) : null}
-                        </Pressable>
-                      </View>
-                    );
-                  })}
+          {categories.map((category) => {
+            const active = category.slug === selectedCategory?.slug;
+            const colorName = categoryColorName(category);
+            const color = getCategoryColor(colorName);
+            const background = getCategoryBgColor(colorName);
+            return (
+              <Pressable
+                key={category.slug}
+                accessibilityLabel={category.name}
+                accessibilityState={{ selected: active }}
+                onPress={() => {
+                  setCategorySlug(category.slug);
+                  if (category.name) speak(category.name);
+                }}
+                className="flex-row items-center justify-center rounded-full"
+                style={{
+                  backgroundColor: settings.highContrast ? color : background,
+                  height: PILL_SIZE,
+                  width: active ? undefined : PILL_SIZE,
+                  paddingHorizontal: active ? 10 : 0,
+                  gap: active ? 6 : 0,
+                }}
+              >
+                <View
+                  className="items-center justify-center rounded-full bg-white/60"
+                  style={{ width: PILL_ICON, height: PILL_ICON }}
+                >
+                  {categoryIconBySlug[category.slug] ? (
+                    <CategoryIcon slug={category.slug} size={PILL_ICON} />
+                  ) : (
+                    <PillText size={14} style={{ color: settings.highContrast ? "#FFFFFF" : color }}>
+                      {category.name.slice(0, 1)}
+                    </PillText>
+                  )}
                 </View>
-              ))}
-            </>
+                {active ? (
+                  <PillText size={14} style={{ color: settings.highContrast ? "#FFFFFF" : color, letterSpacing: 0.4 }}>
+                    {category.name.toUpperCase()}
+                  </PillText>
+                ) : null}
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="mt-3"
+          contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 4 }}
+        >
+          {pecs.length === 0 ? (
+            <Text className="py-6 font-quicksand text-lg text-neutral-dark">Nenhum PEC nesta categoria</Text>
+          ) : (
+            pecs.map((pec) => (
+              <PecCard
+                key={pec.id}
+                item={pec}
+                compact
+                colorName={selectedColor}
+                backgroundColor={getCategoryBgColor(selectedColor)}
+                onPress={() => addPick(pec)}
+              />
+            ))
           )}
         </ScrollView>
 
-        <View
-          pointerEvents="box-none"
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            paddingBottom: insets.bottom + 12,
-            paddingHorizontal: 16,
-            gap: 12,
-          }}
-        >
-          <View className="items-end" pointerEvents="box-none">
-            <FloatingButton icon="widget-add" accessibilityLabel="Criar PEC" onPress={onCreate} />
-          </View>
-          <Button label="Confirmar" elevated className="w-full" onPress={onConfirm} />
-        </View>
-    </ScreenModal>
+        {error ? <Text className="mt-4 px-5 text-center font-quicksand text-lg text-danger">{error}</Text> : null}
+      </ScrollView>
+
+      <View className="items-end px-5 pb-2">
+        <FloatingButton icon="widget-add" accessibilityLabel="Criar PEC" onPress={createPec} />
+      </View>
+      <View className="flex-row gap-3 px-5 pt-2" style={{ paddingBottom: insets.bottom + 16 }}>
+        <Button
+          label="Sair"
+          icon="close-circle"
+          variant="soft"
+          shape="rounded"
+          size="md"
+          disabled={saving}
+          className="flex-1"
+          onPress={onClose}
+        />
+        <Button
+          label="Salvar"
+          icon="check-circle"
+          shape="rounded"
+          size="md"
+          loading={saving}
+          disabled={!canSave}
+          className="flex-1"
+          onPress={handleSave}
+        />
+      </View>
+    </View>
   );
 }

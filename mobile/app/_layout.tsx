@@ -1,7 +1,7 @@
 import "../global.css";
 import { useEffect, useState } from "react";
-import { StatusBar } from "react-native";
-import { Stack } from "expo-router";
+import { Platform, StatusBar } from "react-native";
+import { router, Stack } from "expo-router";
 import * as SystemUI from "expo-system-ui";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
@@ -23,8 +23,26 @@ function RootNavigator() {
   const { fontScale } = useAppSettings();
   const headerTitleStyle = {
     fontFamily: FONT_FAMILY,
-    fontSize: Math.round(22 * fontScale),
+    fontSize: Math.round(20 * fontScale),
   };
+  const androidHeader = Platform.OS === "android"
+    ? {
+        headerShadowVisible: false,
+        headerStyle: {
+          backgroundColor: colors.white,
+          elevation: 0,
+          shadowOpacity: 0,
+          borderBottomWidth: 0,
+        },
+      }
+    : {
+        headerShadowVisible: false,
+        headerStyle: {
+          backgroundColor: colors.white,
+          shadowOpacity: 0,
+          borderBottomWidth: 0,
+        },
+      };
 
   return (
     <Stack
@@ -43,7 +61,7 @@ function RootNavigator() {
           title: "Perfil",
           headerTitleStyle,
           headerTintColor: colors.dark,
-          headerStyle: { backgroundColor: colors.white },
+          ...androidHeader,
         }}
       />
       <Stack.Screen
@@ -54,7 +72,40 @@ function RootNavigator() {
           title: "Configurações",
           headerTitleStyle,
           headerTintColor: colors.dark,
-          headerStyle: { backgroundColor: colors.white },
+          ...androidHeader,
+        }}
+      />
+      <Stack.Screen
+        name="pec"
+        options={{
+          presentation: "modal",
+          headerShown: true,
+          title: "Novo PEC",
+          headerTitleStyle,
+          headerTintColor: colors.dark,
+          ...androidHeader,
+        }}
+      />
+      <Stack.Screen
+        name="frase"
+        options={{
+          presentation: "modal",
+          headerShown: true,
+          title: "Nova frase",
+          headerTitleStyle,
+          headerTintColor: colors.dark,
+          ...androidHeader,
+        }}
+      />
+      <Stack.Screen
+        name="rotina-item"
+        options={{
+          presentation: "modal",
+          headerShown: true,
+          title: "Rotina",
+          headerTitleStyle,
+          headerTintColor: colors.dark,
+          ...androidHeader,
         }}
       />
     </Stack>
@@ -68,7 +119,14 @@ function AppShell({ initialOnboardingSeen }: { initialOnboardingSeen: boolean })
     <>
       <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
       <RootNavigator />
-      {onboardingSeen ? null : <OnboardingSlider onDone={() => setOnboardingSeen(true)} />}
+      {onboardingSeen ? null : (
+        <OnboardingSlider
+          onDone={() => {
+            setOnboardingSeen(true);
+            router.push({ pathname: "/profile", params: { edit: "1" } });
+          }}
+        />
+      )}
       <SilentModeToast />
     </>
   );
