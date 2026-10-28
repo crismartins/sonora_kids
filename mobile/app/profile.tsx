@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { SolarIcon } from "@/components/SolarIcon";
 import { Button } from "@/components/Button";
+import { FormError } from "@/components/ScreenState";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
@@ -205,7 +206,7 @@ export default function ProfileScreen() {
               elevation: 6,
             }}
           >
-            <Text className="font-quicksand text-[26px] text-white">Palavras mais usadas</Text>
+            <Text className="font-quicksand text-2xl text-white">Palavras mais usadas</Text>
             {words.length === 0 ? (
               <Text className="font-quicksand text-lg text-white/85">
                 As 10 palavras mais faladas aparecem aqui conforme os PECS forem usados.
@@ -336,7 +337,7 @@ export default function ProfileScreen() {
               ))}
         </ScrollView>
 
-        {error ? <Text className="px-4 text-center font-quicksand text-lg text-danger">{error}</Text> : null}
+        <FormError message={error} className="px-4" />
       </ScrollView>
       <View className="bg-white px-4" style={{ paddingBottom: insets.bottom + 16 }}>
         <Button

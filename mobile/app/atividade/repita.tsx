@@ -1,16 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, Pressable, ScrollView, Platform } from "react-native";
 import * as Haptics from "expo-haptics";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSequence,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming } from "react-native-reanimated";
 import { SolarIcon } from "@/components/SolarIcon";
 import { Button } from "@/components/Button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ActivityChrome, ActivityDone } from "@/components/activities/ActivityChrome";
+import { ActivityChrome, ActivityDone, ActivityPrompt, activityPadding } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { playPecs, sample, shuffle, PlayPec } from "@/data/play";
@@ -27,7 +22,13 @@ function makeRounds(): Round[] {
   const pool = playPecs();
   return sample(pool, ROUND_COUNT).map((target) => ({
     target,
-    options: shuffle([target, ...sample(pool.filter((pec) => pec.id !== target.id), 2)]),
+    options: shuffle([
+      target,
+      ...sample(
+        pool.filter((pec) => pec.id !== target.id),
+        2,
+      ),
+    ]),
   }));
 }
 
@@ -112,19 +113,10 @@ export default function RepitaScreen() {
       ) : (
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{
-            paddingHorizontal: 20,
-            paddingBottom: insets.bottom + 24,
-            flexGrow: 1,
-          }}
+          contentContainerStyle={{ ...activityPadding(insets.bottom), flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
         >
-          <Text className="pb-1 text-center font-quicksand text-lg text-neutral-dark">
-            Ouça e toque na palavra
-          </Text>
-          <Text className="pb-5 text-center font-quicksand text-base text-primary">
-            {index + 1} de {rounds.length}
-          </Text>
+          <ActivityPrompt instruction="Ouça e toque na palavra" progress={`${index + 1} de ${rounds.length}`} />
 
           <View className="gap-3">
             {round.options.map((pec) => (
@@ -139,15 +131,16 @@ export default function RepitaScreen() {
             ))}
           </View>
 
-          <Button
-            label="Ouvir de novo"
-            icon="volume-loud"
-            iconSize={24}
-            variant="neutral"
-            labelSize="md"
-            className="mt-6"
-            onPress={() => speak(round.target.title)}
-          />
+          <View className="mt-auto pt-6">
+            <Button
+              label="Ouvir de novo"
+              icon="volume-loud"
+              iconSize={24}
+              variant="neutral"
+              labelSize="md"
+              onPress={() => speak(round.target.title)}
+            />
+          </View>
         </ScrollView>
       )}
     </ActivityChrome>
@@ -189,14 +182,14 @@ function ChoiceCard({
       <Pressable
         accessibilityLabel={pec.title}
         onPress={onPress}
-        className="min-h-[84px] flex-row items-center justify-center rounded-[22px] px-4 active:opacity-90"
+        className="min-h-[84px] flex-row items-center justify-center rounded-[22px] px-12 active:opacity-90"
         style={{
-          backgroundColor: highContrast ? "#FFFFFF" : getCategoryBgColor(pec.colorName),
-          borderWidth: selected || highContrast ? 3 : wrong ? 3 : 0,
-          borderColor: wrong ? colors.neutralDark : color,
+          backgroundColor: highContrast ? colors.white : getCategoryBgColor(pec.colorName),
+          borderWidth: selected || wrong || highContrast ? 3 : 0,
+          borderColor: wrong ? colors.dark : color,
         }}
       >
-        <Text className="font-quicksand text-3xl" style={{ color }}>
+        <Text className="text-center font-quicksand text-3xl" style={{ color }}>
           {pec.title}
         </Text>
         {selected ? (

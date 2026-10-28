@@ -3,7 +3,7 @@ import { View, Text, Pressable, Platform } from "react-native";
 import * as Haptics from "expo-haptics";
 import { SolarIcon } from "@/components/SolarIcon";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ActivityChrome, ActivityDone } from "@/components/activities/ActivityChrome";
+import { ActivityChrome, ActivityDone, ActivityPrompt, activityPadding } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { playPecs, sample, shuffle } from "@/data/play";
@@ -129,18 +129,13 @@ export default function MemoriaScreen() {
           onAgain={restart}
         />
       ) : (
-        <View className="flex-1 px-3" style={{ paddingBottom: insets.bottom + 12 }}>
-          <Text className="px-2 pb-1 text-center font-quicksand text-lg text-neutral-dark">
-            Toque em duas cartas iguais
-          </Text>
-          <Text className="px-2 pb-2 text-center font-quicksand text-base text-primary">
-            {found} de {PAIR_COUNT} pares
-          </Text>
-          <View className="flex-1">
+        <View className="flex-1" style={activityPadding(insets.bottom)}>
+          <ActivityPrompt instruction="Toque em duas cartas iguais" progress={`${found} de ${PAIR_COUNT}`} />
+          <View className="flex-1 gap-3">
             {rows.map((row) => (
-              <View key={row.map((card) => card.key).join("-")} className="flex-1 flex-row">
+              <View key={row.map((card) => card.key).join("-")} className="flex-1 flex-row gap-3">
                 {row.map((card) => (
-                  <View key={card.key} className="flex-1 p-1.5">
+                  <View key={card.key} className="flex-1">
                     <MemoryTile
                       card={card}
                       highContrast={settings.highContrast}
@@ -167,30 +162,30 @@ function MemoryTile({
   onPress: () => void;
 }) {
   const color = getCategoryColor(card.colorName);
-  const background = highContrast ? "#FFFFFF" : getCategoryBgColor(card.colorName);
+  const background = highContrast ? colors.white : getCategoryBgColor(card.colorName);
   const showing = card.faceUp || card.matched;
 
   return (
     <Pressable
       accessibilityLabel={showing ? card.title : "Carta virada"}
       onPress={onPress}
-      className="flex-1 items-center justify-center rounded-[20px] active:opacity-90"
+      className="flex-1 items-center justify-center rounded-[22px] px-3 active:opacity-90"
       style={{
         backgroundColor: showing ? background : colors.primary,
-        borderWidth: showing ? (card.matched || highContrast ? 3 : 0) : 0,
+        borderWidth: showing && (card.matched || highContrast) ? 3 : 0,
         borderColor: color,
       }}
     >
       {showing ? (
-        <Text className="px-2 text-center font-quicksand text-2xl" style={{ color }} numberOfLines={2}>
+        <Text className="text-center font-quicksand text-2xl" style={{ color }} numberOfLines={2}>
           {card.title}
         </Text>
       ) : (
-        <SolarIcon name="star" size={36} color="#FFFFFF" />
+        <SolarIcon name="star" size={36} color={colors.white} />
       )}
       {card.matched ? (
-        <View className="absolute right-2 top-2 h-6 w-6 items-center justify-center rounded-full bg-white">
-          <SolarIcon name="check" size={16} color={color} />
+        <View className="absolute right-2 top-2 h-8 w-8 items-center justify-center rounded-full bg-white">
+          <SolarIcon name="check" size={20} color={color} />
         </View>
       ) : null}
     </Pressable>

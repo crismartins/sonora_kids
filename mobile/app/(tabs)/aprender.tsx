@@ -1,23 +1,62 @@
 import React from "react";
-import { View, Text, ScrollView, Pressable, Image } from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
 import { router, type Href } from "expo-router";
-import { SolarIcon } from "@/components/SolarIcon";
+import { SolarIcon, SolarIconName } from "@/components/SolarIcon";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors } from "@/constants/colors";
+import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { tabBarClearance } from "@/constants/tabBar";
 import { PillText } from "@/components/PillText";
 
 interface ActivityCardProps {
   href: Href;
-  icon: React.ReactNode;
+  icon: SolarIconName;
   title: string;
   description: string;
-  tagColor: string;
-  bgColor: string;
+  color: string;
+  background: string;
   tag: string;
 }
 
-function ActivityCard({ href, icon, title, description, tagColor, bgColor, tag }: ActivityCardProps) {
+const ACTIVITIES: ActivityCardProps[] = [
+  {
+    href: "/atividade/memoria",
+    icon: "gamepad",
+    title: "Memória com PECS",
+    description: "Encontre os pares de palavras",
+    tag: "Jogo",
+    color: colors.primary,
+    background: colors.primaryWash,
+  },
+  {
+    href: "/atividade/repita",
+    icon: "microphone",
+    title: "Repita Comigo",
+    description: "Ouça e toque na palavra",
+    tag: "Fala",
+    color: getCategoryColor("greenAccent"),
+    background: getCategoryBgColor("greenAccent"),
+  },
+  {
+    href: "/atividade/frase",
+    icon: "text-field",
+    title: "Monte a Frase",
+    description: "Toque as palavras na ordem",
+    tag: "Frase",
+    color: getCategoryColor("purple"),
+    background: getCategoryBgColor("purple"),
+  },
+  {
+    href: "/atividade/historia",
+    icon: "book",
+    title: "História do Dia",
+    description: "Toque para ouvir a história",
+    tag: "Leitura",
+    color: getCategoryColor("orange"),
+    background: getCategoryBgColor("orange"),
+  },
+];
+
+function ActivityCard({ href, icon, title, description, color, background, tag }: ActivityCardProps) {
   return (
     <Pressable
       accessibilityLabel={title}
@@ -26,16 +65,16 @@ function ActivityCard({ href, icon, title, description, tagColor, bgColor, tag }
     >
       <View
         className="h-12 w-12 shrink-0 items-center justify-center rounded-[14px]"
-        style={{ backgroundColor: bgColor }}
+        style={{ backgroundColor: background }}
       >
-        {icon}
+        <SolarIcon name={icon} size={26} color={color} />
       </View>
       <View className="flex-1 gap-0.5">
-        <Text className="font-quicksand text-[21px] text-dark">{title}</Text>
+        <Text className="font-quicksand text-[22px] text-dark">{title}</Text>
         <Text className="font-quicksand text-base text-neutral-dark">{description}</Text>
       </View>
-      <View className="h-7 items-center justify-center rounded-full px-2.5" style={{ backgroundColor: bgColor }}>
-        <PillText size={14} style={{ color: tagColor }}>
+      <View className="h-7 items-center justify-center rounded-full px-2.5" style={{ backgroundColor: background }}>
+        <PillText size={14} style={{ color }}>
           {tag}
         </PillText>
       </View>
@@ -58,46 +97,13 @@ export default function AprenderScreen() {
       }}
       showsVerticalScrollIndicator={false}
     >
-      <View className="rounded-[20px] border border-line bg-canvas p-4">
-        <ActivityCard
-          href="/atividade/memoria"
-          icon={<SolarIcon name="fallback" size={26} color={colors.primary} />}
-          title="Memória com PECS"
-          description="Encontre os pares de palavras"
-          tag="Jogo"
-          bgColor={colors.primaryWash}
-          tagColor={colors.primary}
-        />
-        <View className="h-px bg-line" />
-        <ActivityCard
-          href="/atividade/repita"
-          icon={<SolarIcon name="microphone" size={26} color="#00897B" />}
-          title="Repita Comigo"
-          description="Ouça e toque na palavra"
-          tag="Fala"
-          bgColor="#E0F2F1"
-          tagColor="#00897B"
-        />
-        <View className="h-px bg-line" />
-        <ActivityCard
-          href="/atividade/frase"
-          icon={<SolarIcon name="fallback" size={26} color="#6A1B9A" />}
-          title="Monte a Frase"
-          description="Toque as palavras na ordem"
-          tag="Atividade"
-          bgColor="#EDE7F6"
-          tagColor="#6A1B9A"
-        />
-        <View className="h-px bg-line" />
-        <ActivityCard
-          href="/atividade/historia"
-          icon={<SolarIcon name="book" size={26} color="#EF6C00" />}
-          title="História do Dia"
-          description="Histórias para ouvir e ver"
-          tag="Leitura"
-          bgColor="#FBE9E7"
-          tagColor="#EF6C00"
-        />
+      <View className="rounded-[22px] border border-line bg-canvas p-4">
+        {ACTIVITIES.map((activity, index) => (
+          <View key={activity.title}>
+            {index > 0 ? <View className="h-px bg-line" /> : null}
+            <ActivityCard {...activity} />
+          </View>
+        ))}
       </View>
     </ScrollView>
   );

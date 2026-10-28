@@ -44,13 +44,13 @@ function Row({ icon, label, description, toggle, value, onToggle, onPress, destr
     >
       <View
         className="h-9 w-9 shrink-0 items-center justify-center rounded-[10px]"
-        style={{ backgroundColor: destructive ? "#FFEBEE" : colors.primarySoft }}
+        style={{ backgroundColor: destructive ? colors.dangerSoft : colors.primarySoft }}
       >
         {icon}
       </View>
       <View className="flex-1 gap-px">
         <Text className={`font-quicksand text-xl ${destructive ? "text-danger" : "text-dark"}`}>{label}</Text>
-        {description ? <Text className="font-quicksand text-[15px] text-neutral-dark">{description}</Text> : null}
+        {description ? <Text className="font-quicksand text-base text-neutral-dark">{description}</Text> : null}
       </View>
       {toggle && onToggle ? (
         <Switch
@@ -69,7 +69,7 @@ function Row({ icon, label, description, toggle, value, onToggle, onPress, destr
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View className="mb-1">
-      <Text className="px-5 pb-[5px] pt-[18px] font-quicksand text-[17px] uppercase tracking-wide text-neutral-dark">
+      <Text className="px-5 pb-1 pt-4 font-quicksand text-lg uppercase tracking-wide text-neutral-dark">
         {title}
       </Text>
       <View className="mx-4 overflow-hidden rounded-2xl border border-line bg-white">{children}</View>
@@ -213,7 +213,7 @@ export default function SettingsScreen() {
 
       <Section title="Acessibilidade">
         <Row
-          icon={<SolarIcon name="vibration" size={20} color="#00897B" />}
+          icon={<SolarIcon name="vibration" size={20} color={colors.primary} />}
           label="Vibração (haptics)"
           toggle
           value={settings.haptics}
@@ -225,7 +225,7 @@ export default function SettingsScreen() {
           }}
         />
         <Row
-          icon={<SolarIcon name="text-field" size={20} color="#00897B" />}
+          icon={<SolarIcon name="text-field" size={20} color={colors.primary} />}
           label="Texto grande"
           description="Aumenta o texto em todo o app"
           toggle
@@ -233,7 +233,7 @@ export default function SettingsScreen() {
           onToggle={(value) => updateSettings({ largeText: value })}
         />
         <Row
-          icon={<SolarIcon name="fallback" size={20} color="#00897B" />}
+          icon={<SolarIcon name="fallback" size={20} color={colors.primary} />}
           label="Alto contraste"
           description="Deixa as palavras mais fáceis de ler"
           toggle
@@ -245,13 +245,13 @@ export default function SettingsScreen() {
 
       <Section title="Conectar">
         <Row
-          icon={<SolarIcon name="microphone" size={20} color="#6A1B9A" />}
+          icon={<SolarIcon name="microphone" size={20} color={colors.primary} />}
           label="Conecta à Alexa"
           description="Ainda não disponível"
           onPress={() => Alert.alert("Alexa", "A conexão com a Amazon Alexa ainda não está disponível nesta versão.")}
         />
         <Row
-          icon={<SolarIcon name="chat-round" size={20} color="#6A1B9A" />}
+          icon={<SolarIcon name="chat-round" size={20} color={colors.primary} />}
           label="Envie-nos Sugestões"
           description="Guarde uma ideia para melhorar o app"
           onPress={() => {
@@ -288,7 +288,7 @@ export default function SettingsScreen() {
         />
       </Section>
 
-      <Text className="mb-1 mt-3 text-center font-quicksand text-base text-[#BDBDBD]">App Versão 1.0</Text>
+      <Text className="mb-1 mt-3 text-center font-quicksand text-base text-neutral-dark">App Versão 1.0</Text>
 
       <Modal
         visible={introOpen}

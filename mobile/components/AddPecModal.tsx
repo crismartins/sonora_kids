@@ -3,6 +3,7 @@ import { Alert, View, Text, TextInput, Pressable, ScrollView, Image, Platform, L
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, IconButton } from "@/components/Button";
+import { FormError } from "@/components/ScreenState";
 import { SolarIcon } from "@/components/SolarIcon";
 import * as ImagePicker from "expo-image-picker";
 import { Category } from "@/types";
@@ -241,12 +242,8 @@ export function AddPecForm({ categories, initialCategorySlug, initialPec, onClos
           onPress={hearTitle}
         />
 
-        {previewFailed ? (
-          <Text className="text-center font-quicksand text-lg text-danger">
-            Não consegui abrir essa imagem. Escolha outra foto.
-          </Text>
-        ) : null}
-        {error ? <Text className="text-center font-quicksand text-lg text-danger">{error}</Text> : null}
+        <FormError message={previewFailed ? "Não consegui abrir essa imagem. Escolha outra foto." : null} />
+        <FormError message={error} />
       </ScrollView>
 
       <View className="flex-row gap-3 px-5 pt-2" style={{ paddingBottom: insets.bottom + 16 }}>

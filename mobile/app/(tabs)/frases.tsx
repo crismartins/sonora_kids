@@ -1,14 +1,14 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
-import { View, Text, FlatList, Pressable, ScrollView, ImageSourcePropType } from "react-native";
+import { View, FlatList, ScrollView, ImageSourcePropType } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { FloatingButton } from "@/components/Button";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { PhraseCard } from "@/components/PhraseCard";
-import { PillText } from "@/components/PillText";
+import { FilterChip } from "@/components/FilterChip";
+import { EmptyState } from "@/components/ScreenState";
 import { openPhraseForm } from "@/components/AddPhraseModal";
 import { PhraseActionsModal } from "@/components/PhraseActionsModal";
-import { colors } from "@/constants/colors";
 import { tabBarClearance } from "@/constants/tabBar";
 import { PHRASES_MAIS_USADAS, PHRASES_TODAS } from "@/constants/phrases";
 import { useCategories } from "@/hooks/useCategories";
@@ -152,40 +152,18 @@ export default function FrasesScreen() {
             paddingVertical: 10,
           }}
         >
-          {FILTER_TABS.map((tab) => {
-            const isActive = tab === activeFilter;
-            return (
-              <Pressable
-                key={tab}
-                onPress={() => handleSelectFilter(tab)}
-                className={`h-10 items-center justify-center rounded-full px-4 ${
-                  isActive ? "bg-primary-wash" : "border-transparent bg-muted"
-                }`}
-              >
-                <PillText
-                  size={15}
-                  numberOfLines={1}
-                  style={{
-                    color: isActive ? colors.primary : colors.neutralDark,
-                    letterSpacing: 0.3,
-                  }}
-                >
-                  {tab}
-                </PillText>
-              </Pressable>
-            );
-          })}
+          {FILTER_TABS.map((tab) => (
+            <FilterChip key={tab} label={tab} selected={tab === activeFilter} onPress={() => handleSelectFilter(tab)} />
+          ))}
         </ScrollView>
       </View>
 
       {phrases.length === 0 ? (
-        <View className="flex-1 items-center justify-center gap-2 px-10">
-          <Text className="text-5xl">💬</Text>
-          <Text className="font-quicksand text-2xl text-dark">Nenhuma frase aqui</Text>
-          <Text className="text-center font-quicksand text-lg text-neutral-dark">
-            Toque em + e monte uma frase com os PECs
-          </Text>
-        </View>
+        <EmptyState
+          icon="chat-square-line"
+          title="Nenhuma frase aqui"
+          detail="Toque em + e monte uma frase com os PECs"
+        />
       ) : (
         <FlatList
           data={phrases}

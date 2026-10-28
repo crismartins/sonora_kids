@@ -1,38 +1,26 @@
-import { Platform, Pressable, Image, View, Text } from "react-native";
+import { Platform, Pressable, Image, View } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SolarIcon } from "@/components/SolarIcon";
+import { ScreenTitle } from "@/components/ScreenTitle";
 import { colors } from "@/constants/colors";
-import { FONT_FAMILY } from "@/constants/typography";
-import { useAppSettings } from "@/context/AppSettingsContext";
 import { useProfile } from "@/context/ProfileContext";
 import { profileAvatarSource } from "@/services/profile";
 
-const HEADER_TITLE_SIZE = 22;
 const AVATAR_SIZE = 32;
 const AVATAR_RADIUS = 12;
 const AVATAR_BORDER = 3;
-const AVATAR_RING = "#D7EEF8";
+const AVATAR_RING = colors.light;
 const BAR_HEIGHT = Platform.OS === "ios" ? 44 : 64;
 
 export function AppHeader({ title }: { title: string }) {
   const insets = useSafeAreaInsets();
-  const { fontScale } = useAppSettings();
   const { profile } = useProfile();
 
   return (
     <View className="bg-white" style={{ paddingTop: insets.top }}>
       <View pointerEvents="box-none" className="items-center justify-center px-16" style={{ height: BAR_HEIGHT }}>
-        <Text
-          numberOfLines={1}
-          className="font-quicksand text-dark"
-          style={{
-            fontFamily: FONT_FAMILY,
-            fontSize: Math.round(HEADER_TITLE_SIZE * fontScale),
-          }}
-        >
-          {title}
-        </Text>
+        <ScreenTitle>{title}</ScreenTitle>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Abrir configurações"

@@ -1,15 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import * as Haptics from "expo-haptics";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSequence,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming } from "react-native-reanimated";
 import { Button } from "@/components/Button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ActivityChrome, ActivityDone } from "@/components/activities/ActivityChrome";
+import { ActivityChrome, ActivityDone, ActivityPrompt, activityPadding } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { PHRASES_MAIS_USADAS } from "@/constants/phrases";
@@ -46,9 +41,11 @@ export default function FraseScreen() {
   const [roundIndex, setRoundIndex] = useState(0);
   const [picked, setPicked] = useState<Chip[]>([]);
   const [shake, setShake] = useState({ id: "", count: 0 });
+  const [wrongId, setWrongId] = useState<string | null>(null);
   const [solved, setSolved] = useState(false);
   const [finished, setFinished] = useState(false);
   const solvedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const phrase = rounds[roundIndex] ?? [];
   const roundKey = `${session}-${roundIndex}`;
@@ -71,6 +68,7 @@ export default function FraseScreen() {
   useEffect(() => {
     return () => {
       if (solvedTimer.current) clearTimeout(solvedTimer.current);
+      if (wrongTimer.current) clearTimeout(wrongTimer.current);
     };
   }, [roundIndex, session]);
 
@@ -78,12 +76,18 @@ export default function FraseScreen() {
     if (solved || picked.some((item) => item.id === chip.id)) return;
     if (chip.order !== picked.length) {
       setShake({ id: chip.id, count: shake.count + 1 });
+      setWrongId(chip.id);
       haptic(Haptics.ImpactFeedbackStyle.Light);
+      const expected = phrase[picked.length];
+      if (expected) speak(expected.text);
+      if (wrongTimer.current) clearTimeout(wrongTimer.current);
+      wrongTimer.current = setTimeout(() => setWrongId(null), 500);
       return;
     }
 
     const next = [...picked, chip];
     setPicked(next);
+    setWrongId(null);
     speak(chip.text);
     haptic();
     recordWordUse(chip.text, chip.color);
@@ -123,24 +127,18 @@ export default function FraseScreen() {
       ) : (
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{
-            paddingHorizontal: 20,
-            paddingBottom: insets.bottom + 24,
-            flexGrow: 1,
-          }}
+          contentContainerStyle={{ ...activityPadding(insets.bottom), flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
         >
-          <Text className="pb-1 text-center font-quicksand text-lg text-neutral-dark">
-            Toque as palavras na ordem
-          </Text>
-          <Text className="pb-4 text-center font-quicksand text-base text-primary">
-            Frase {roundIndex + 1} de {rounds.length}
-          </Text>
+          <ActivityPrompt
+            instruction="Toque as palavras na ordem"
+            progress={`${roundIndex + 1} de ${rounds.length}`}
+          />
 
           <Pressable
             accessibilityLabel={`Ouvir ${spoken}`}
             onPress={() => speak(spoken)}
-            className="mb-4 min-h-[72px] flex-row flex-wrap items-center justify-center gap-2 rounded-[22px] bg-canvas px-3 py-3"
+            className="mb-5 min-h-[72px] flex-row flex-wrap items-center justify-center gap-2 rounded-[22px] bg-canvas px-3 py-3"
           >
             {phrase.map((item, index) => (
               <WordPill
@@ -163,7 +161,7 @@ export default function FraseScreen() {
                 return (
                   <View
                     key={`slot-${index}`}
-                    className="h-12 min-w-[88px] rounded-full border-2 border-dashed border-neutral"
+                    className="h-12 min-w-[88px] rounded-full border-2 border-dashed border-neutral-dark"
                   />
                 );
               }
@@ -189,6 +187,7 @@ export default function FraseScreen() {
                       text={chip.text}
                       colorName={chip.color}
                       highContrast={settings.highContrast}
+                      wrong={wrongId === chip.id}
                     />
                   </Pressable>
                 </ShakeChip>
@@ -196,7 +195,7 @@ export default function FraseScreen() {
             })}
           </View>
 
-          <View className="mt-auto pt-8">
+          <View className="mt-auto pt-6">
             {solved ? (
               <Button
                 label={roundIndex + 1 >= rounds.length ? "Concluir" : "Próxima frase"}
@@ -225,20 +224,22 @@ function WordPill({
   colorName,
   highContrast,
   muted,
+  wrong,
 }: {
   text: string;
   colorName: string;
   highContrast: boolean;
   muted?: boolean;
+  wrong?: boolean;
 }) {
   const color = getCategoryColor(colorName);
   return (
     <View
       className="h-12 items-center justify-center rounded-full px-4"
       style={{
-        backgroundColor: highContrast ? "#FFFFFF" : getCategoryBgColor(colorName),
-        borderWidth: highContrast ? 2 : 0,
-        borderColor: color,
+        backgroundColor: highContrast ? colors.white : getCategoryBgColor(colorName),
+        borderWidth: wrong || highContrast ? 2 : 0,
+        borderColor: wrong ? colors.dark : color,
         opacity: muted ? 0.55 : 1,
       }}
     >
@@ -255,10 +256,10 @@ function ShakeChip({ trigger, children }: { trigger: number; children: React.Rea
   useEffect(() => {
     if (!trigger) return;
     x.value = withSequence(
-      withTiming(-8, { duration: 40 }),
-      withTiming(8, { duration: 40 }),
-      withTiming(-6, { duration: 40 }),
-      withTiming(0, { duration: 40 }),
+      withTiming(-10, { duration: 45 }),
+      withTiming(10, { duration: 45 }),
+      withTiming(-6, { duration: 45 }),
+      withTiming(0, { duration: 45 }),
     );
   }, [trigger, x]);
 

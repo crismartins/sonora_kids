@@ -1,11 +1,37 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text } from "react-native";
 import { router } from "expo-router";
 import { SolarIcon } from "@/components/SolarIcon";
-import { Button } from "@/components/Button";
+import { Button, IconButton } from "@/components/Button";
+import { ScreenTitle } from "@/components/ScreenTitle";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/constants/colors";
 import { useAppSettings } from "@/context/AppSettingsContext";
+
+export function activityPadding(bottomInset: number) {
+  return {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: bottomInset + 24,
+  };
+}
+
+export function ActivityPrompt({
+  instruction,
+  progress,
+}: {
+  instruction: string;
+  progress?: string;
+}) {
+  return (
+    <View className="pb-5">
+      <Text className="text-center font-quicksand text-lg text-neutral-dark">{instruction}</Text>
+      {progress ? (
+        <Text className="pt-1 text-center font-quicksand text-base text-primary">{progress}</Text>
+      ) : null}
+    </View>
+  );
+}
 
 export function ActivityChrome({
   title,
@@ -31,17 +57,15 @@ export function ActivityChrome({
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
       <View className="h-14 flex-row items-center px-2">
-        <Pressable
+        <IconButton
+          icon="arrow-left"
+          variant="ghost"
+          size="md"
           accessibilityLabel="Voltar"
           onPress={() => (onBack ? onBack() : router.back())}
-          className="h-11 w-11 items-center justify-center rounded-full active:opacity-70"
-        >
-          <SolarIcon name="arrow-left" size={28} color={colors.dark} />
-        </Pressable>
-        <Text className="flex-1 text-center font-quicksand text-[22px] text-dark" numberOfLines={1}>
-          {title}
-        </Text>
-        <View className="w-11" />
+        />
+        <ScreenTitle className="flex-1 text-center">{title}</ScreenTitle>
+        <View className="w-12" />
       </View>
       {children}
     </View>

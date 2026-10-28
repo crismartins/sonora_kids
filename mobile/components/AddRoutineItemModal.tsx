@@ -1,21 +1,18 @@
 import React, { useState } from "react";
-import { View, Text, Pressable, ScrollView, Image, ImageSourcePropType } from "react-native";
+import { View, Text, ScrollView, Image, ImageSourcePropType } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, FloatingButton, IconButton } from "@/components/Button";
+import { CategoryPill } from "@/components/CategoryPill";
 import { PecCard } from "@/components/PecCard";
-import { PillText } from "@/components/PillText";
+import { FormError } from "@/components/ScreenState";
 import { openPecForm } from "@/components/AddPecModal";
 import { Category, PecItem } from "@/types";
-import { getCategoryBgColor, getCategoryColor } from "@/constants/colors";
-import { CategoryIcon } from "@/components/CategoryIcon";
-import { categoryIconBySlug } from "@/constants/categoryIcons";
+import { getCategoryBgColor } from "@/constants/colors";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { CustomPec, NewCustomPec } from "@/services/customPecs";
 import { DayPeriod, PERIOD_LABELS, DAY_LABELS } from "@/services/routine";
 
-const PILL_SIZE = 44;
-const PILL_ICON = 28;
 const DIA_A_DIA = "dia-a-dia";
 const FALLBACK_IMAGE = require("../assets/images/avatar_default_v1.png");
 
@@ -154,7 +151,7 @@ export function AddRoutineForm({
           {selected.map((item) => (
             <View
               key={item.id}
-              className="h-14 flex-row items-center gap-1.5 rounded-full py-1 pl-1 pr-3"
+              className="h-14 flex-row items-center gap-1.5 rounded-full py-1 pl-1 pr-1"
               style={{ backgroundColor: getCategoryBgColor(item.color) }}
             >
               <Image source={item.image ? { uri: item.image } : FALLBACK_IMAGE} className="h-10 w-10 rounded-full" />
@@ -163,13 +160,13 @@ export function AddRoutineForm({
                   {item.title}
                 </Text>
               </View>
-              <Pressable
+              <IconButton
+                icon="close-circle"
+                variant="ghost"
+                size="sm"
                 accessibilityLabel={`Remover ${item.title}`}
-                hitSlop={8}
                 onPress={() => setSelected((current) => current.filter((entry) => entry.id !== item.id))}
-              >
-                <Text className="px-1 font-quicksand text-2xl text-dark">×</Text>
-              </Pressable>
+              />
             </View>
           ))}
         </View>
@@ -191,51 +188,22 @@ export function AddRoutineForm({
           horizontal
           showsHorizontalScrollIndicator={false}
           className="mt-4"
-          contentContainerStyle={{ gap: 6, paddingHorizontal: 20 }}
+          contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}
         >
-          {categories.map((category) => {
-            const active = category.slug === selectedCategory?.slug;
-            const colorName = categoryColorName(category);
-            const color = getCategoryColor(colorName);
-            const background = getCategoryBgColor(colorName);
-            return (
-              <Pressable
-                key={category.slug}
-                accessibilityLabel={category.name}
-                accessibilityState={{ selected: active }}
-                onPress={() => {
-                  setCategorySlug(category.slug);
-                  if (category.name) speak(category.name);
-                }}
-                className="flex-row items-center justify-center rounded-full"
-                style={{
-                  backgroundColor: settings.highContrast ? color : background,
-                  height: PILL_SIZE,
-                  width: active ? undefined : PILL_SIZE,
-                  paddingHorizontal: active ? 10 : 0,
-                  gap: active ? 6 : 0,
-                }}
-              >
-                <View
-                  className="items-center justify-center rounded-full bg-white/60"
-                  style={{ width: PILL_ICON, height: PILL_ICON }}
-                >
-                  {categoryIconBySlug[category.slug] ? (
-                    <CategoryIcon slug={category.slug} size={PILL_ICON} />
-                  ) : (
-                    <PillText size={14} style={{ color: settings.highContrast ? "#FFFFFF" : color }}>
-                      {category.name.slice(0, 1)}
-                    </PillText>
-                  )}
-                </View>
-                {active ? (
-                  <PillText size={14} style={{ color: settings.highContrast ? "#FFFFFF" : color, letterSpacing: 0.4 }}>
-                    {category.name.toUpperCase()}
-                  </PillText>
-                ) : null}
-              </Pressable>
-            );
-          })}
+          {categories.map((category) => (
+            <CategoryPill
+              key={category.slug}
+              slug={category.slug}
+              name={category.name}
+              colorName={categoryColorName(category)}
+              selected={category.slug === selectedCategory?.slug}
+              highContrast={settings.highContrast}
+              onPress={() => {
+                setCategorySlug(category.slug);
+                if (category.name) speak(category.name);
+              }}
+            />
+          ))}
         </ScrollView>
 
         <ScrollView
@@ -260,7 +228,7 @@ export function AddRoutineForm({
           )}
         </ScrollView>
 
-        {error ? <Text className="mt-4 px-5 text-center font-quicksand text-lg text-danger">{error}</Text> : null}
+        <FormError message={error} className="mt-4 px-5" />
       </ScrollView>
 
       <View className="items-end px-5 pb-2">

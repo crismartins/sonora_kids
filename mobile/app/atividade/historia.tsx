@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView } from "react-native";
 import { SolarIcon } from "@/components/SolarIcon";
 import { IconButton } from "@/components/Button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ActivityChrome, ActivityDone } from "@/components/activities/ActivityChrome";
+import { ActivityChrome, ActivityDone, ActivityPrompt, activityPadding } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { STORIES, Story } from "@/data/stories";
@@ -29,44 +29,41 @@ function StoryList({ onOpen }: { onOpen: (story: Story) => void }) {
   return (
     <ScrollView
       className="flex-1"
-      contentContainerStyle={{
-        paddingHorizontal: 16,
-        paddingTop: 8,
-        paddingBottom: insets.bottom + 24,
-        gap: 12,
-      }}
+      contentContainerStyle={activityPadding(insets.bottom)}
       showsVerticalScrollIndicator={false}
     >
-      <Text className="px-1 pb-1 font-quicksand text-lg text-neutral-dark">Toque para ouvir a história</Text>
-      {STORIES.map((story) => {
-        const color = getCategoryColor(story.colorName);
-        const background = settings.highContrast ? "#FFFFFF" : getCategoryBgColor(story.colorName);
-        return (
-          <Pressable
-            key={story.id}
-            accessibilityLabel={story.title}
-            onPress={() => {
-              haptic();
-              onOpen(story);
-            }}
-            className="min-h-[92px] flex-row items-center gap-4 rounded-[22px] px-4 py-4 active:opacity-90"
-            style={{
-              backgroundColor: background,
-              borderWidth: settings.highContrast ? 2 : 0,
-              borderColor: color,
-            }}
-          >
-            <View className="h-14 w-14 items-center justify-center rounded-2xl bg-white">
-              <SolarIcon name={story.icon} size={30} color={color} />
-            </View>
-            <View className="flex-1 gap-0.5">
-              <Text className="font-quicksand text-[22px] text-dark">{story.title}</Text>
-              <Text className="font-quicksand text-base text-neutral-dark">{story.summary}</Text>
-            </View>
-            <SolarIcon name="arrow-right" size={22} color={color} />
-          </Pressable>
-        );
-      })}
+      <ActivityPrompt instruction="Toque para ouvir a história" />
+      <View className="gap-3">
+        {STORIES.map((story) => {
+          const color = getCategoryColor(story.colorName);
+          const background = settings.highContrast ? colors.white : getCategoryBgColor(story.colorName);
+          return (
+            <Pressable
+              key={story.id}
+              accessibilityLabel={story.title}
+              onPress={() => {
+                haptic();
+                onOpen(story);
+              }}
+              className="min-h-[92px] flex-row items-center gap-4 rounded-[22px] px-4 py-4 active:opacity-90"
+              style={{
+                backgroundColor: background,
+                borderWidth: settings.highContrast ? 3 : 0,
+                borderColor: color,
+              }}
+            >
+              <View className="h-14 w-14 items-center justify-center rounded-[14px] bg-white">
+                <SolarIcon name={story.icon} size={30} color={color} />
+              </View>
+              <View className="flex-1 gap-0.5">
+                <Text className="font-quicksand text-[22px] text-dark">{story.title}</Text>
+                <Text className="font-quicksand text-base text-neutral-dark">{story.summary}</Text>
+              </View>
+              <SolarIcon name="arrow-right" size={22} color={color} />
+            </Pressable>
+          );
+        })}
+      </View>
     </ScrollView>
   );
 }
@@ -78,7 +75,7 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
   const [finished, setFinished] = useState(false);
   const current = story.pages[page];
   const color = getCategoryColor(current?.colorName ?? "blue");
-  const background = settings.highContrast ? "#FFFFFF" : getCategoryBgColor(current?.colorName ?? "blue");
+  const background = settings.highContrast ? colors.white : getCategoryBgColor(current?.colorName ?? "blue");
 
   useEffect(() => {
     if (!current || finished) return;
@@ -115,14 +112,14 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
 
   return (
     <ActivityChrome title={story.title} onBack={onClose} announce={false}>
-      <View className="flex-1 px-5" style={{ paddingBottom: insets.bottom + 16 }}>
+      <View className="flex-1" style={activityPadding(insets.bottom)}>
         <Pressable
           accessibilityLabel={current.text}
           onPress={() => speak(current.text)}
-          className="flex-1 items-center justify-center rounded-[28px] px-6"
+          className="flex-1 items-center justify-center rounded-[22px] px-6"
           style={{
             backgroundColor: background,
-            borderWidth: settings.highContrast ? 2 : 0,
+            borderWidth: settings.highContrast ? 3 : 0,
             borderColor: color,
           }}
         >

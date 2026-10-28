@@ -418,7 +418,7 @@ export function OnboardingSlider({ onDone }: { onDone: () => void }) {
             opacity: pressed ? 0.6 : 1,
           })}
         >
-          <Text style={{ fontFamily: FONT_FAMILY, fontSize: 17, color: colors.primary }}>Pular</Text>
+          <Text style={{ fontFamily: FONT_FAMILY, fontSize: 18, color: colors.primary }}>Pular</Text>
         </Pressable>
       </View>
 
@@ -478,7 +478,7 @@ export function OnboardingSlider({ onDone }: { onDone: () => void }) {
                       textAlign: "center",
                       fontFamily: FONT_FAMILY,
                       fontSize: 16,
-                      lineHeight: 23,
+                      lineHeight: 24,
                       color: BODY_COLOR,
                     }}
                   >

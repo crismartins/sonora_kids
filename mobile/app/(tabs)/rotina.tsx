@@ -12,7 +12,9 @@ import { useCustomPecs } from "@/hooks/useCustomPecs";
 import { useRoutine } from "@/hooks/useRoutine";
 import { RoutinePecCard } from "@/components/PecCard";
 import { openRoutineForm, RoutinePecOption, RoutinePick } from "@/components/AddRoutineItemModal";
+import { FilterChip } from "@/components/FilterChip";
 import { PillText } from "@/components/PillText";
+import { EmptyState } from "@/components/ScreenState";
 import { colors } from "@/constants/colors";
 import { tabBarClearance } from "@/constants/tabBar";
 import { customPecToItem } from "@/services/customPecs";
@@ -220,43 +222,29 @@ export default function RotinaScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{
-            paddingHorizontal: 12,
+            paddingHorizontal: 16,
             paddingVertical: 10,
-            gap: 6,
+            gap: 8,
             flexDirection: "row",
           }}
         >
-          {DAY_CHIPS.map((day, index) => {
-            const isActive = index === selectedDay;
-            return (
-              <Pressable
-                key={day}
-                accessibilityLabel={DAY_LABELS[index]}
-                onPress={() => {
-                  if (editing) {
-                    cancelEditing();
-                    return;
-                  }
-                  setSelectedDay(index);
-                  haptic(Haptics.ImpactFeedbackStyle.Light);
-                  speak(DAY_LABELS[index]);
-                }}
-                className={`h-10 items-center justify-center rounded-full px-3.5 ${
-                  isActive ? "bg-primary-wash" : "bg-muted"
-                }`}
-              >
-                <PillText
-                  size={16}
-                  style={{
-                    color: isActive ? colors.primary : colors.neutralDark,
-                    letterSpacing: 0.4,
-                  }}
-                >
-                  {day}
-                </PillText>
-              </Pressable>
-            );
-          })}
+          {DAY_CHIPS.map((day, index) => (
+            <FilterChip
+              key={day}
+              label={day}
+              accessibilityLabel={DAY_LABELS[index]}
+              selected={index === selectedDay}
+              onPress={() => {
+                if (editing) {
+                  cancelEditing();
+                  return;
+                }
+                setSelectedDay(index);
+                haptic(Haptics.ImpactFeedbackStyle.Light);
+                speak(DAY_LABELS[index]);
+              }}
+            />
+          ))}
         </ScrollView>
       </View>
 
@@ -270,11 +258,9 @@ export default function RotinaScreen() {
               accessibilityLabel={PERIOD_LABELS[period]}
               accessibilityState={{ selected: active }}
               onPress={() => selectPeriod(period)}
-              className={`flex-1 items-center justify-center gap-0.5 py-2 ${
-                active ? "bg-[#F7FBFF]" : "border-transparent"
-              }`}
+              className={`flex-1 items-center justify-center gap-0.5 py-2 ${active ? "bg-primary-soft" : ""}`}
             >
-              <SolarIcon name={icon} size={22} color={tint} />
+              <SolarIcon name={icon} size={24} color={tint} />
               <PillText size={16} style={{ color: tint }}>
                 {PERIOD_LABELS[period]}
               </PillText>
@@ -292,8 +278,8 @@ export default function RotinaScreen() {
             paddingBottom: tabBarHeight + 16,
           }}
         >
-          {itemsFor(selectedDay, selectedPeriod).length > 0
-            ? chunkPairs(itemsFor(selectedDay, selectedPeriod)).map((row) => (
+          {itemsFor(selectedDay, selectedPeriod).length > 0 ? (
+            chunkPairs(itemsFor(selectedDay, selectedPeriod)).map((row) => (
                 <View key={row.map((item) => item.id).join("-")} className="flex-row items-stretch">
                   {row.map((item) => (
                     <View key={item.id} className="w-1/2 self-stretch">
@@ -315,7 +301,13 @@ export default function RotinaScreen() {
                   ))}
                 </View>
               ))
-            : null}
+          ) : (
+            <EmptyState
+              icon="clock"
+              title="Nada nesta parte do dia"
+              detail="Toque no lápis e escolha os PECs"
+            />
+          )}
         </View>
       </ScrollView>
 

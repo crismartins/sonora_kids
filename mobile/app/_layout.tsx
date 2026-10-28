@@ -23,7 +23,7 @@ function RootNavigator() {
   const { fontScale } = useAppSettings();
   const headerTitleStyle = {
     fontFamily: FONT_FAMILY,
-    fontSize: Math.round(20 * fontScale),
+    fontSize: Math.round(22 * fontScale),
   };
   const androidHeader = Platform.OS === "android"
     ? {

@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
-import { View, Text, FlatList, ScrollView, Pressable, NativeSyntheticEvent, NativeScrollEvent, type ScrollViewInstance } from "react-native";
+import { View, FlatList, ScrollView, NativeSyntheticEvent, NativeScrollEvent, type ScrollViewInstance } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import { SolarIcon } from "@/components/SolarIcon";
-import { Button, FloatingButton } from "@/components/Button";
+import { FloatingButton } from "@/components/Button";
+import { CategoryPill } from "@/components/CategoryPill";
+import { EmptyState } from "@/components/ScreenState";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { useCategories } from "@/hooks/useCategories";
 import { useCustomPecs } from "@/hooks/useCustomPecs";
@@ -11,16 +12,10 @@ import { CustomPec, customPecToItem } from "@/services/customPecs";
 import { PecCard } from "@/components/PecCard";
 import { openPecForm } from "@/components/AddPecModal";
 import { PecActionsModal } from "@/components/PecActionsModal";
-import { PillText } from "@/components/PillText";
 import { SkeletonPecCard, SkeletonChip } from "@/components/SkeletonCard";
-import { colors, getCategoryColor, getCategoryBgColor } from "@/constants/colors";
+import { getCategoryBgColor } from "@/constants/colors";
 import { tabBarClearance } from "@/constants/tabBar";
-import { CategoryIcon } from "@/components/CategoryIcon";
-import { categoryIconBySlug } from "@/constants/categoryIcons";
 import { Category, PecItem } from "@/types";
-
-const CATEGORY_ICON_SIZE = 33;
-const CATEGORY_PILL_SIZE = 52;
 
 export default function PecsScreen() {
   const insets = useSafeAreaInsets();
@@ -156,10 +151,13 @@ export default function PecsScreen() {
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 bg-white">
-        <SolarIcon name="cloud-cross" size={48} color={colors.neutralDark} />
-        <Text className="text-center font-quicksand text-xl text-neutral-dark">Não foi possível carregar</Text>
-        <Button label="Tentar novamente" size="md" className="mt-2 px-6" onPress={() => refetch()} />
+      <View className="flex-1 bg-white">
+        <EmptyState
+          icon="cloud-cross"
+          title="Não foi possível carregar"
+          actionLabel="Tentar novamente"
+          onAction={() => refetch()}
+        />
       </View>
     );
   }
@@ -176,73 +174,33 @@ export default function PecsScreen() {
             scrollToSelectedChip(selectedIndexRef.current);
           }}
           contentContainerStyle={{
-            paddingHorizontal: 12,
+            paddingHorizontal: 16,
             paddingVertical: 10,
-            gap: 6,
+            gap: 8,
             flexDirection: "row",
           }}
         >
           {isLoading
             ? Array.from({ length: 5 }).map((_, i) => <SkeletonChip key={i} />)
-            : categories?.map((cat, idx) => {
-                const catColorName = cat.categoriasDePec?.configuracoesCategorias?.cor ?? "blue";
-                const catColor = getCategoryColor(catColorName);
-                const catBg = getCategoryBgColor(catColorName);
-                const isActive = idx === selectedIndex;
-                return (
-                  <Pressable
-                    key={cat.slug}
-                    accessibilityLabel={cat.name}
-                    onPress={() => selectCategory(idx, "chip")}
-                    onLayout={(event) => {
-                      const { x, width } = event.nativeEvent.layout;
-                      chipLayouts.current[idx] = { x, width };
-                      if (idx === selectedIndexRef.current) {
-                        scrollToSelectedChip(idx);
-                      }
-                    }}
-                    className="flex-row items-center justify-center rounded-full"
-                    style={{
-                      backgroundColor: settings.highContrast
-                        ? isActive
-                          ? catColor
-                          : catColor
-                        : isActive
-                          ? catBg
-                          : catBg,
-                      borderColor: catColor,
-                      height: CATEGORY_PILL_SIZE,
-                      width: isActive ? undefined : CATEGORY_PILL_SIZE,
-                      paddingHorizontal: isActive ? 12 : 0,
-                      gap: isActive ? 8 : 0,
-                    }}
-                  >
-                    <View
-                      className="items-center justify-center rounded-full bg-white/60"
-                      style={{ width: CATEGORY_ICON_SIZE, height: CATEGORY_ICON_SIZE }}
-                    >
-                      {categoryIconBySlug[cat.slug] ? (
-                        <CategoryIcon slug={cat.slug} size={CATEGORY_ICON_SIZE} />
-                      ) : (
-                        <PillText size={18} style={{ color: catColor }}>
-                          {cat.name.slice(0, 1)}
-                        </PillText>
-                      )}
-                    </View>
-                    {isActive ? (
-                      <PillText
-                        size={16}
-                        style={{
-                          color: settings.highContrast && isActive ? "#FFFFFF" : catColor,
-                          letterSpacing: 0.4,
-                        }}
-                      >
-                        {cat.name.toUpperCase()}
-                      </PillText>
-                    ) : null}
-                  </Pressable>
-                );
-              })}
+            : categories?.map((cat, idx) => (
+                <CategoryPill
+                  key={cat.slug}
+                  slug={cat.slug}
+                  name={cat.name}
+                  colorName={cat.categoriasDePec?.configuracoesCategorias?.cor ?? "blue"}
+                  selected={idx === selectedIndex}
+                  highContrast={settings.highContrast}
+                  size="lg"
+                  onPress={() => selectCategory(idx, "chip")}
+                  onLayout={(event) => {
+                    const { x, width } = event.nativeEvent.layout;
+                    chipLayouts.current[idx] = { x, width };
+                    if (idx === selectedIndexRef.current) {
+                      scrollToSelectedChip(idx);
+                    }
+                  }}
+                />
+              ))}
         </ScrollView>
       </View>
 
@@ -364,10 +322,7 @@ function CategoryPage({
   return (
     <View style={{ width, height }}>
       {pecs.length === 0 ? (
-        <View className="flex-1 items-center justify-center gap-3 bg-white">
-          <SolarIcon name="gallery" size={48} color={colors.neutralDark} />
-          <Text className="font-quicksand text-xl text-neutral-dark">Nenhum item nesta categoria</Text>
-        </View>
+        <EmptyState icon="gallery" title="Nenhum item nesta categoria" />
       ) : (
         <ScrollView
           nestedScrollEnabled

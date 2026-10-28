@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Platform, Pressable, View, Text, Modal, KeyboardAvoidingView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { IconButton } from "@/components/Button";
+import { ScreenTitle } from "@/components/ScreenTitle";
 
 const SCRIM = "rgba(0,0,0,0.4)";
 
@@ -63,10 +64,10 @@ export function ScreenModal({ visible, onClose, title, avoidKeyboard = false, ch
   const insets = useSafeAreaInsets();
   const body = (
     <>
-      <View className="flex-row items-center justify-between px-4 pb-3" style={{ paddingTop: insets.top + 12 }}>
+      <View className="h-14 flex-row items-center px-2" style={{ marginTop: insets.top }}>
         <IconButton variant="ghost" size="md" icon="close-circle" accessibilityLabel="Fechar" onPress={onClose} />
-        <Text className="font-quicksand text-xl text-dark">{title}</Text>
-        <View className="w-10" />
+        <ScreenTitle className="flex-1 text-center">{title}</ScreenTitle>
+        <View className="w-12" />
       </View>
       {children}
     </>

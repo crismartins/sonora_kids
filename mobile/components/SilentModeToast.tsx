@@ -3,7 +3,7 @@ import { Pressable, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SolarIcon } from "@/components/SolarIcon";
-import { colors } from "@/constants/colors";
+import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { FONT_FAMILY } from "@/constants/typography";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { hideSilentModeToast, subscribeSilentModeToast } from "@/services/silentMode";
@@ -17,7 +17,7 @@ export function SilentModeToast() {
 
   if (!message) return null;
 
-  const fontSize = Math.round(15 * fontScale);
+  const fontSize = Math.round(16 * fontScale);
 
   return (
     <Animated.View
@@ -57,10 +57,10 @@ export function SilentModeToast() {
             borderRadius: 12,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#FFF8E1",
+            backgroundColor: getCategoryBgColor("amber"),
           }}
         >
-          <SolarIcon name="volume-cross" size={22} color="#F57F17" />
+          <SolarIcon name="volume-cross" size={22} color={getCategoryColor("amber")} />
         </View>
         <Text
           style={{

@@ -1,21 +1,18 @@
 import React, { useMemo, useState } from "react";
-import { View, Text, Pressable, ScrollView, ImageSourcePropType } from "react-native";
+import { View, ScrollView, ImageSourcePropType } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "@/components/Button";
+import { CategoryPill } from "@/components/CategoryPill";
 import { PecCard } from "@/components/PecCard";
 import { PhraseCard } from "@/components/PhraseCard";
-import { PillText } from "@/components/PillText";
+import { FormError } from "@/components/ScreenState";
 import { Category, PecItem, PhraseItem } from "@/types";
-import { getCategoryBgColor, getCategoryColor } from "@/constants/colors";
-import { CategoryIcon } from "@/components/CategoryIcon";
-import { categoryIconBySlug } from "@/constants/categoryIcons";
+import { getCategoryBgColor } from "@/constants/colors";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { CustomPhrase } from "@/services/customPhrases";
 
 const MAX_ITEMS = 8;
-const PILL_SIZE = 44;
-const PILL_ICON = 28;
 
 export type PhraseFormRequest = {
   categories: Category[];
@@ -141,54 +138,22 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
           horizontal
           showsHorizontalScrollIndicator={false}
           className="mt-4"
-          contentContainerStyle={{ gap: 6, paddingHorizontal: 20 }}
+          contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}
         >
-          {categories.map((category) => {
-            const selected = category.slug === selectedCategory?.slug;
-            const colorName = categoryColorName(category);
-            const color = getCategoryColor(colorName);
-            const background = getCategoryBgColor(colorName);
-            return (
-              <Pressable
-                key={category.slug}
-                accessibilityLabel={category.name}
-                accessibilityState={{ selected }}
-                onPress={() => {
-                  setCategorySlug(category.slug);
-                  if (category.name) speak(category.name);
-                }}
-                className="flex-row items-center justify-center rounded-full"
-                style={{
-                  backgroundColor: settings.highContrast ? color : background,
-                  height: PILL_SIZE,
-                  width: selected ? undefined : PILL_SIZE,
-                  paddingHorizontal: selected ? 10 : 0,
-                  gap: selected ? 6 : 0,
-                }}
-              >
-                <View
-                  className="items-center justify-center rounded-full bg-white/60"
-                  style={{ width: PILL_ICON, height: PILL_ICON }}
-                >
-                  {categoryIconBySlug[category.slug] ? (
-                    <CategoryIcon slug={category.slug} size={PILL_ICON} />
-                  ) : (
-                    <PillText size={14} style={{ color: settings.highContrast ? "#FFFFFF" : color }}>
-                      {category.name.slice(0, 1)}
-                    </PillText>
-                  )}
-                </View>
-                {selected ? (
-                  <PillText
-                    size={14}
-                    style={{ color: settings.highContrast ? "#FFFFFF" : color, letterSpacing: 0.4 }}
-                  >
-                    {category.name.toUpperCase()}
-                  </PillText>
-                ) : null}
-              </Pressable>
-            );
-          })}
+          {categories.map((category) => (
+            <CategoryPill
+              key={category.slug}
+              slug={category.slug}
+              name={category.name}
+              colorName={categoryColorName(category)}
+              selected={category.slug === selectedCategory?.slug}
+              highContrast={settings.highContrast}
+              onPress={() => {
+                setCategorySlug(category.slug);
+                if (category.name) speak(category.name);
+              }}
+            />
+          ))}
         </ScrollView>
 
         <ScrollView
@@ -209,7 +174,7 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
           ))}
         </ScrollView>
 
-        {error ? <Text className="mt-4 px-5 text-center font-quicksand text-lg text-danger">{error}</Text> : null}
+        <FormError message={error} className="mt-4 px-5" />
       </ScrollView>
 
       <View className="flex-row gap-3 px-5 pt-2" style={{ paddingBottom: insets.bottom + 16 }}>

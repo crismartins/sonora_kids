@@ -72,7 +72,7 @@ export function PecCard({ item, backgroundColor, colorName = "blue", onLongPress
       onPress={handlePress}
       onLongPress={onLongPressManage ? handleLongPress : undefined}
       delayLongPress={450}
-      className={compact ? undefined : "m-[5px] self-stretch"}
+      className={compact ? undefined : "m-1.5 self-stretch"}
       style={compact ? { width: 120 } : { flexGrow: 1 }}
     >
       <Animated.View
@@ -81,9 +81,9 @@ export function PecCard({ item, backgroundColor, colorName = "blue", onLongPress
           {
             flexGrow: compact ? undefined : 1,
             alignSelf: "stretch",
-            backgroundColor: settings.highContrast ? "#FFFFFF" : backgroundColor,
-            borderRadius: compact ? 16 : 20,
-            borderWidth: settings.highContrast ? 2 : 0,
+            backgroundColor: settings.highContrast ? colors.white : backgroundColor,
+            borderRadius: compact ? 16 : 22,
+            borderWidth: settings.highContrast ? 3 : 0,
             borderColor: colors.dark,
             minHeight: compact ? 132 : 150,
             padding: compact ? 8 : 12,
@@ -137,7 +137,7 @@ export function RoutinePecCard({
   const removeRef = useRef<ViewInstance>(null);
   const onRemoveFrameRef = useRef(onRemoveFrame);
   onRemoveFrameRef.current = onRemoveFrame;
-  const bg = settings.highContrast ? "#FFFFFF" : getCategoryBgColor(color);
+  const bg = settings.highContrast ? colors.white : getCategoryBgColor(color);
 
   useEffect(() => {
     if (!editing) {
@@ -193,7 +193,7 @@ export function RoutinePecCard({
   }, [color, editing, haptic, onCancelEditing, scale, speak, title]);
 
   return (
-    <View className="m-[5px] self-stretch" style={{ flexGrow: 1 }}>
+    <View className="m-1.5 self-stretch" style={{ flexGrow: 1 }}>
       <Pressable
         accessibilityLabel={title}
         onPress={handlePress}
@@ -203,13 +203,13 @@ export function RoutinePecCard({
         style={{ flexGrow: 1 }}
       >
         <Animated.View
-          className="min-h-[150px] items-center justify-start self-stretch rounded-[20px] p-3"
+          className="min-h-[150px] items-center justify-start self-stretch rounded-[22px] p-3"
           style={[
             {
               flexGrow: 1,
               alignSelf: "stretch",
               backgroundColor: bg,
-              borderWidth: settings.highContrast ? 2 : 0,
+              borderWidth: settings.highContrast ? 3 : 0,
               borderColor: colors.dark,
               justifyContent: "flex-start",
             },
