@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, ScrollView, Pressable, Modal, ImageSourcePropType } from "react-native";
 import { useNavigation } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -10,6 +10,7 @@ import { useAppSettings } from "@/context/AppSettingsContext";
 import { useCategories } from "@/hooks/useCategories";
 import { useCustomPecs } from "@/hooks/useCustomPecs";
 import { useRoutine } from "@/hooks/useRoutine";
+import { usePillPager } from "@/hooks/usePillPager";
 import { RoutinePecCard } from "@/components/PecCard";
 import { openRoutineForm, RoutinePecOption, RoutinePick } from "@/components/AddRoutineItemModal";
 import { FilterChip } from "@/components/FilterChip";
@@ -68,6 +69,71 @@ function pecImage(item: PecItem): ImageSourcePropType | undefined {
   return uri ? { uri } : undefined;
 }
 
+function RoutineDayPage({
+  items,
+  dayColor,
+  imageById,
+  editing,
+  tabBarHeight,
+  onBeginEditing,
+  onCancelEditing,
+  onRemoveFrame,
+  onRemove,
+}: {
+  items: RoutineItem[];
+  dayColor: string;
+  imageById: Map<string, ImageSourcePropType>;
+  editing: boolean;
+  tabBarHeight: number;
+  onBeginEditing: () => void;
+  onCancelEditing: () => void;
+  onRemoveFrame: (id: string, frame: RemoveFrame) => void;
+  onRemove: (item: RoutineItem) => void;
+}) {
+  return (
+    <ScrollView
+      nestedScrollEnabled
+      directionalLockEnabled
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ flexGrow: 1 }}
+      style={{ flex: 1 }}
+    >
+      <View
+        style={{
+          flexGrow: 1,
+          paddingHorizontal: 12,
+          paddingTop: 12,
+          paddingBottom: tabBarHeight + 16,
+        }}
+      >
+        {items.length > 0 ? (
+          chunkPairs(items).map((row) => (
+            <View key={row.map((item) => item.id).join("-")} className="flex-row items-stretch">
+              {row.map((item) => (
+                <View key={item.id} className="w-1/2 self-stretch">
+                  <RoutinePecCard
+                    id={item.id}
+                    title={item.title}
+                    color={dayColor}
+                    image={imageById.get(item.pecId)}
+                    editing={editing}
+                    onLongPress={onBeginEditing}
+                    onCancelEditing={onCancelEditing}
+                    onRemoveFrame={(frame) => onRemoveFrame(item.id, frame)}
+                    onRemove={() => onRemove(item)}
+                  />
+                </View>
+              ))}
+            </View>
+          ))
+        ) : (
+          <EmptyState icon="clock" title="Nada nesta parte do dia" detail="Toque no lápis e escolha os PECs" />
+        )}
+      </View>
+    </ScrollView>
+  );
+}
+
 export default function RotinaScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
@@ -76,7 +142,26 @@ export default function RotinaScreen() {
   const { pecs: customPecs, addPec } = useCustomPecs();
   const { itemsFor, addItem, removeItem } = useRoutine();
   const today = new Date().getDay();
-  const [selectedDay, setSelectedDay] = useState(today);
+  const onDayChange = useCallback(
+    (index: number) => {
+      haptic(Haptics.ImpactFeedbackStyle.Light);
+      speak(DAY_LABELS[index]);
+    },
+    [haptic, speak],
+  );
+  const {
+    selectedIndex: selectedDay,
+    pageSize,
+    chipScrollRef,
+    pagerRef,
+    contentOffset,
+    selectIndex,
+    onPagerScroll,
+    onPagerMomentumEnd,
+    onChipRowLayout,
+    onChipLayout,
+    onPagerLayout,
+  } = usePillPager(DAY_CHIPS.length, today, onDayChange);
   const [selectedPeriod, setSelectedPeriod] = useState<DayPeriod>(currentPeriod);
   const [removing, setRemoving] = useState<{ period: DayPeriod; item: RoutineItem } | null>(null);
   const [editing, setEditing] = useState(false);
@@ -219,8 +304,10 @@ export default function RotinaScreen() {
     <View className="flex-1 bg-white">
       <View className="bg-white">
         <ScrollView
+          ref={chipScrollRef}
           horizontal
           showsHorizontalScrollIndicator={false}
+          onLayout={onChipRowLayout}
           contentContainerStyle={{
             paddingHorizontal: 16,
             paddingVertical: 10,
@@ -239,10 +326,9 @@ export default function RotinaScreen() {
                   cancelEditing();
                   return;
                 }
-                setSelectedDay(index);
-                haptic(Haptics.ImpactFeedbackStyle.Light);
-                speak(DAY_LABELS[index]);
+                selectIndex(index, "chip");
               }}
+              onLayout={(event) => onChipLayout(index, event)}
             />
           ))}
         </ScrollView>
@@ -269,47 +355,59 @@ export default function RotinaScreen() {
         })}
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
-        <View
-          style={{
-            flexGrow: 1,
-            paddingHorizontal: 12,
-            paddingTop: 12,
-            paddingBottom: tabBarHeight + 16,
-          }}
-        >
-          {itemsFor(selectedDay, selectedPeriod).length > 0 ? (
-            chunkPairs(itemsFor(selectedDay, selectedPeriod)).map((row) => (
-                <View key={row.map((item) => item.id).join("-")} className="flex-row items-stretch">
-                  {row.map((item) => (
-                    <View key={item.id} className="w-1/2 self-stretch">
-                      <RoutinePecCard
-                        id={item.id}
-                        title={item.title}
-                        color={dayColor}
-                        image={imageById.get(item.pecId)}
-                        editing={editing}
-                        onLongPress={beginEditing}
-                        onCancelEditing={cancelEditing}
-                        onRemoveFrame={(frame) => rememberRemoveFrame(item.id, frame)}
-                        onRemove={() => {
-                          haptic();
-                          setRemoving({ period: selectedPeriod, item });
-                        }}
-                      />
-                    </View>
-                  ))}
-                </View>
-              ))
-          ) : (
-            <EmptyState
-              icon="clock"
-              title="Nada nesta parte do dia"
-              detail="Toque no lápis e escolha os PECs"
-            />
-          )}
-        </View>
-      </ScrollView>
+      <View className="flex-1" onLayout={onPagerLayout}>
+        {pageSize.width === 0 ? (
+          <RoutineDayPage
+            items={itemsFor(selectedDay, selectedPeriod)}
+            dayColor={dayColor}
+            imageById={imageById}
+            editing={editing}
+            tabBarHeight={tabBarHeight}
+            onBeginEditing={beginEditing}
+            onCancelEditing={cancelEditing}
+            onRemoveFrame={rememberRemoveFrame}
+            onRemove={(item) => {
+              haptic();
+              setRemoving({ period: selectedPeriod, item });
+            }}
+          />
+        ) : (
+          <ScrollView
+            ref={pagerRef}
+            horizontal
+            pagingEnabled
+            nestedScrollEnabled
+            directionalLockEnabled
+            scrollEnabled={!editing}
+            showsHorizontalScrollIndicator={false}
+            decelerationRate="fast"
+            onScroll={onPagerScroll}
+            onMomentumScrollEnd={onPagerMomentumEnd}
+            scrollEventThrottle={16}
+            contentOffset={contentOffset}
+            style={{ width: pageSize.width, height: pageSize.height }}
+          >
+            {DAY_CHIPS.map((day, index) => (
+              <View key={day} style={{ width: pageSize.width, height: pageSize.height }}>
+                <RoutineDayPage
+                  items={itemsFor(index, selectedPeriod)}
+                  dayColor={dayColor}
+                  imageById={imageById}
+                  editing={editing && index === selectedDay}
+                  tabBarHeight={tabBarHeight}
+                  onBeginEditing={beginEditing}
+                  onCancelEditing={cancelEditing}
+                  onRemoveFrame={rememberRemoveFrame}
+                  onRemove={(item) => {
+                    haptic();
+                    setRemoving({ period: selectedPeriod, item });
+                  }}
+                />
+              </View>
+            ))}
+          </ScrollView>
+        )}
+      </View>
 
       <FloatingButton
         icon="pen"

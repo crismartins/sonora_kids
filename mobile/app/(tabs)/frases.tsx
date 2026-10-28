@@ -14,6 +14,7 @@ import { PHRASES_MAIS_USADAS, PHRASES_TODAS } from "@/constants/phrases";
 import { useCategories } from "@/hooks/useCategories";
 import { useCustomPecs } from "@/hooks/useCustomPecs";
 import { useCustomPhrases } from "@/hooks/useCustomPhrases";
+import { usePillPager } from "@/hooks/usePillPager";
 import { customPecToItem } from "@/services/customPecs";
 import { CustomPhrase } from "@/services/customPhrases";
 import { PecItem, PhraseItem } from "@/types";
@@ -41,13 +42,76 @@ function pecImageSource(pec: PecItem): ImageSourcePropType | undefined {
   return { uri };
 }
 
+function PhrasePage({
+  phrases,
+  images,
+  tabBarHeight,
+  onManage,
+}: {
+  phrases: ListedPhrase[];
+  images: Map<string, ImageSourcePropType>;
+  tabBarHeight: number;
+  onManage: (customId: string) => void;
+}) {
+  if (phrases.length === 0) {
+    return (
+      <EmptyState
+        icon="chat-square-line"
+        title="Nenhuma frase aqui"
+        detail="Toque em + e monte uma frase com os PECs"
+      />
+    );
+  }
+
+  return (
+    <FlatList
+      data={phrases}
+      keyExtractor={(item) => item.key}
+      nestedScrollEnabled
+      directionalLockEnabled
+      style={{ flex: 1 }}
+      contentContainerStyle={{ paddingTop: 8, paddingBottom: tabBarHeight + 88 }}
+      showsVerticalScrollIndicator={false}
+      renderItem={({ item }) => {
+        const customId = item.customId;
+        return (
+          <PhraseCard
+            phrase={item.items}
+            images={images}
+            onManage={customId ? () => onManage(customId) : undefined}
+          />
+        );
+      }}
+    />
+  );
+}
+
 export default function FrasesScreen() {
   const insets = useSafeAreaInsets();
-  const { haptic } = useAppSettings();
+  const { haptic, speak } = useAppSettings();
   const { data: categories } = useCategories();
   const { pecs: customPecs } = useCustomPecs();
   const { phrases: customPhrases, addPhrase, updatePhrase, deletePhrase } = useCustomPhrases();
-  const [activeFilter, setActiveFilter] = useState<FilterTab>("MAIS USADAS");
+  const onFilterChange = useCallback(
+    (index: number) => {
+      haptic(Haptics.ImpactFeedbackStyle.Light);
+      speak(FILTER_TABS[index]);
+    },
+    [haptic, speak],
+  );
+  const {
+    selectedIndex,
+    pageSize,
+    chipScrollRef,
+    pagerRef,
+    contentOffset,
+    selectIndex,
+    onPagerScroll,
+    onPagerMomentumEnd,
+    onChipRowLayout,
+    onChipLayout,
+    onPagerLayout,
+  } = usePillPager(FILTER_TABS.length, 0, onFilterChange);
   const [menuPhrase, setMenuPhrase] = useState<CustomPhrase | null>(null);
   const [editingPhrase, setEditingPhrase] = useState<CustomPhrase | null>(null);
   const phraseFormOpen = useRef(false);
@@ -66,14 +130,6 @@ export default function FrasesScreen() {
     }));
   }, [categories, customPecs]);
 
-  const handleSelectFilter = useCallback(
-    (tab: FilterTab) => {
-      setActiveFilter(tab);
-      haptic(Haptics.ImpactFeedbackStyle.Light);
-    },
-    [haptic],
-  );
-
   const pecImages = useMemo(() => {
     const map = new Map<string, ImageSourcePropType>();
     for (const category of catalog ?? []) {
@@ -86,22 +142,18 @@ export default function FrasesScreen() {
     return map;
   }, [catalog]);
 
-  const phrases = useMemo(() => {
+  const phrasePages = useMemo(() => {
     const mine: ListedPhrase[] = customPhrases.map((phrase) => ({
       key: phrase.id,
       items: phrase.items,
       customId: phrase.id,
     }));
-    switch (activeFilter) {
-      case "MAIS USADAS":
-        return catalogRows(PHRASES_MAIS_USADAS[0].collection, "mais");
-      case "MINHAS FRASES":
-        return mine;
-      case "TODAS":
-      default:
-        return catalogRows(PHRASES_TODAS[0].collection, "todas");
-    }
-  }, [activeFilter, customPhrases]);
+    return {
+      "MAIS USADAS": catalogRows(PHRASES_MAIS_USADAS[0].collection, "mais"),
+      TODAS: catalogRows(PHRASES_TODAS[0].collection, "todas"),
+      "MINHAS FRASES": mine,
+    } satisfies Record<FilterTab, ListedPhrase[]>;
+  }, [customPhrases]);
 
   const tabBarHeight = tabBarClearance(insets.bottom);
 
@@ -142,8 +194,10 @@ export default function FrasesScreen() {
     <View className="flex-1 bg-white">
       <View className="bg-white">
         <ScrollView
+          ref={chipScrollRef}
           horizontal
           showsHorizontalScrollIndicator={false}
+          onLayout={onChipRowLayout}
           contentContainerStyle={{
             flexDirection: "row",
             alignItems: "center",
@@ -152,36 +206,54 @@ export default function FrasesScreen() {
             paddingVertical: 10,
           }}
         >
-          {FILTER_TABS.map((tab) => (
-            <FilterChip key={tab} label={tab} selected={tab === activeFilter} onPress={() => handleSelectFilter(tab)} />
+          {FILTER_TABS.map((tab, index) => (
+            <FilterChip
+              key={tab}
+              label={tab}
+              selected={index === selectedIndex}
+              onPress={() => selectIndex(index, "chip")}
+              onLayout={(event) => onChipLayout(index, event)}
+            />
           ))}
         </ScrollView>
       </View>
 
-      {phrases.length === 0 ? (
-        <EmptyState
-          icon="chat-square-line"
-          title="Nenhuma frase aqui"
-          detail="Toque em + e monte uma frase com os PECs"
-        />
-      ) : (
-        <FlatList
-          data={phrases}
-          keyExtractor={(item) => item.key}
-          contentContainerStyle={{ paddingTop: 8, paddingBottom: tabBarHeight + 88 }}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => {
-            const customId = item.customId;
-            return (
-              <PhraseCard
-                phrase={item.items}
-                images={pecImages}
-                onManage={customId ? () => openManage(customId) : undefined}
-              />
-            );
-          }}
-        />
-      )}
+      <View className="flex-1" onLayout={onPagerLayout}>
+        {pageSize.width === 0 ? (
+          <PhrasePage
+            phrases={phrasePages[FILTER_TABS[selectedIndex]]}
+            images={pecImages}
+            tabBarHeight={tabBarHeight}
+            onManage={openManage}
+          />
+        ) : (
+          <ScrollView
+            ref={pagerRef}
+            horizontal
+            pagingEnabled
+            nestedScrollEnabled
+            directionalLockEnabled
+            showsHorizontalScrollIndicator={false}
+            decelerationRate="fast"
+            onScroll={onPagerScroll}
+            onMomentumScrollEnd={onPagerMomentumEnd}
+            scrollEventThrottle={16}
+            contentOffset={contentOffset}
+            style={{ width: pageSize.width, height: pageSize.height }}
+          >
+            {FILTER_TABS.map((tab) => (
+              <View key={tab} style={{ width: pageSize.width, height: pageSize.height }}>
+                <PhrasePage
+                  phrases={phrasePages[tab]}
+                  images={pecImages}
+                  tabBarHeight={tabBarHeight}
+                  onManage={openManage}
+                />
+              </View>
+            ))}
+          </ScrollView>
+        )}
+      </View>
 
       <FloatingButton
         icon="chat-square-add"
@@ -192,7 +264,7 @@ export default function FrasesScreen() {
             categories: catalog,
             onSubmit: async (items) => {
               await addPhrase(items);
-              setActiveFilter("MINHAS FRASES");
+              selectIndex(FILTER_TABS.indexOf("MINHAS FRASES"), "chip");
             },
           });
         }}

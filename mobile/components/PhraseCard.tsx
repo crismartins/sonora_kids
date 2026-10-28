@@ -270,7 +270,12 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
       ]}
     >
       {needsScroll ? (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
+        <ScrollView
+          horizontal
+          nestedScrollEnabled
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
           {pieces}
         </ScrollView>
       ) : (
