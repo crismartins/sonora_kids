@@ -22,9 +22,10 @@ export default function RotinaItemScreen() {
       router.back();
       return;
     }
-    return navigation.addListener("beforeRemove", () => {
+    const unsubscribe = navigation.addListener("removed", () => {
       finishRoutineForm();
     });
+    return () => queueMicrotask(unsubscribe);
   }, [navigation, request]);
 
   if (!request) return null;

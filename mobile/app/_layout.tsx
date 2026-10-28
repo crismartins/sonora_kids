@@ -49,7 +49,6 @@ function RootNavigator() {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: colors.white },
-        statusBarStyle: "dark",
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -117,7 +116,7 @@ function AppShell({ initialOnboardingSeen }: { initialOnboardingSeen: boolean })
 
   return (
     <>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+      <StatusBar barStyle="dark-content" />
       <RootNavigator />
       {onboardingSeen ? null : (
         <OnboardingSlider

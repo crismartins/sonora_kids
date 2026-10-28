@@ -15,9 +15,10 @@ export default function PecScreen() {
       router.back();
       return;
     }
-    return navigation.addListener("beforeRemove", () => {
+    const unsubscribe = navigation.addListener("removed", () => {
       finishPecForm();
     });
+    return () => queueMicrotask(unsubscribe);
   }, [navigation, request]);
 
   if (!request) return null;

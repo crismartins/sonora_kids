@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
-import { View, Text, FlatList, ScrollView, Pressable, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
+import { View, Text, FlatList, ScrollView, Pressable, NativeSyntheticEvent, NativeScrollEvent, type ScrollViewInstance } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { SolarIcon } from "@/components/SolarIcon";
@@ -32,8 +32,8 @@ export default function PecsScreen() {
   const [editingPec, setEditingPec] = useState<CustomPec | null>(null);
   const pecFormOpen = useRef(false);
   const [pageSize, setPageSize] = useState({ width: 0, height: 0 });
-  const chipScrollRef = useRef<ScrollView>(null);
-  const pagerRef = useRef<ScrollView>(null);
+  const chipScrollRef = useRef<ScrollViewInstance>(null);
+  const pagerRef = useRef<ScrollViewInstance>(null);
   const chipLayouts = useRef<Record<number, { x: number; width: number }>>({});
   const chipViewportWidth = useRef(0);
   const selectedIndexRef = useRef(selectedIndex);

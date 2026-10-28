@@ -48,11 +48,16 @@ function asNumber(value: unknown) {
   return null;
 }
 
+type TextMetrics = {
+  fontSize?: number;
+  lineHeight?: number;
+};
+
 function scaleStyle(style: StyleProp<TextStyle> | undefined, scale: number) {
   if (scale === 1 || style == null) return style;
   const flat = StyleSheet.flatten(style);
   if (!flat) return style;
-  const patch: TextStyle = {};
+  const patch: TextMetrics = {};
   const fontSize = asNumber(flat.fontSize);
   const lineHeight = asNumber(flat.lineHeight);
   if (fontSize != null) patch.fontSize = Math.round(fontSize * scale);
@@ -61,8 +66,8 @@ function scaleStyle(style: StyleProp<TextStyle> | undefined, scale: number) {
 }
 
 function scaleClassName(className: string | undefined, scale: number) {
-  if (!className || scale === 1) return { className, fontStyle: undefined as TextStyle | undefined };
-  const fontStyle: TextStyle = {};
+  if (!className || scale === 1) return { className, fontStyle: undefined as TextMetrics | undefined };
+  const fontStyle: TextMetrics = {};
   const kept: string[] = [];
   for (const token of className.split(/\s+/)) {
     if (!token) continue;

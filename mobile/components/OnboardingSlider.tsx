@@ -7,6 +7,7 @@ import {
   NativeSyntheticEvent,
   Pressable,
   ScrollView,
+  type ScrollViewInstance,
   StyleSheet,
   Text,
   useWindowDimensions,
@@ -322,7 +323,7 @@ export function OnboardingSlider({ onDone }: { onDone: () => void }) {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { speak, stopSpeaking, haptic } = useAppSettings();
-  const pagerRef = useRef<ScrollView>(null);
+  const pagerRef = useRef<ScrollViewInstance>(null);
   const indexRef = useRef(0);
   const closing = useRef(false);
   const heardSlide = useRef(0);

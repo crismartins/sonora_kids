@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from "react";
-import { View, Image, Pressable, ImageSourcePropType } from "react-native";
+import { View, Image, Pressable, ImageSourcePropType, type ViewInstance } from "react-native";
 import { SolarIcon } from "@/components/SolarIcon";
 import Animated, {
   useSharedValue,
@@ -134,7 +134,7 @@ export function RoutinePecCard({
   const { settings, speak, haptic } = useAppSettings();
   const scale = useSharedValue(1);
   const wiggle = useSharedValue(0);
-  const removeRef = useRef<View>(null);
+  const removeRef = useRef<ViewInstance>(null);
   const onRemoveFrameRef = useRef(onRemoveFrame);
   onRemoveFrameRef.current = onRemoveFrame;
   const bg = settings.highContrast ? "#FFFFFF" : getCategoryBgColor(color);
@@ -244,7 +244,7 @@ export function RoutinePecCard({
               elevation: 3,
             }}
           >
-            <SolarIcon name="close" size={18} color={colors.danger} />
+            <SolarIcon name="close-circle" size={18} color={colors.danger} />
           </Pressable>
         </View>
       ) : null}

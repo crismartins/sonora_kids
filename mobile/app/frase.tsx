@@ -15,9 +15,10 @@ export default function FraseScreen() {
       router.back();
       return;
     }
-    return navigation.addListener("beforeRemove", () => {
+    const unsubscribe = navigation.addListener("removed", () => {
       finishPhraseForm();
     });
+    return () => queueMicrotask(unsubscribe);
   }, [navigation, request]);
 
   if (!request) return null;
