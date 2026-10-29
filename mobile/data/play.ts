@@ -1,9 +1,12 @@
+import { ImageSourcePropType } from "react-native";
 import { MOCK_CATEGORIES } from "@/data/categories";
+import { imageFromPec } from "@/data/pecImages";
 
 export type PlayPec = {
   id: string;
   title: string;
   colorName: string;
+  image: ImageSourcePropType;
 };
 
 const SKIP_SLUGS = new Set(["palavras"]);
@@ -38,7 +41,7 @@ export function playPecs(): PlayPec[] {
       const key = title.toLocaleLowerCase("pt-BR");
       if (seen.has(key)) continue;
       seen.add(key);
-      items.push({ id: node.id, title, colorName });
+      items.push({ id: node.id, title, colorName, image: imageFromPec(node) });
     }
   }
 

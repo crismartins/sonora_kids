@@ -1,12 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  Pressable,
+  ScrollView,
+  FlatList,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+  type FlatList as FlatListType,
+} from "react-native";
 import { SolarIcon } from "@/components/SolarIcon";
 import { IconButton } from "@/components/Button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone, ActivityPrompt, activityPadding } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
-import { STORIES, Story } from "@/data/stories";
+import { STORIES, Story, StoryPage } from "@/data/stories";
 
 export default function HistoriaScreen() {
   const [story, setStory] = useState<Story | null>(null);
@@ -32,7 +42,7 @@ function StoryList({ onOpen }: { onOpen: (story: Story) => void }) {
       contentContainerStyle={activityPadding(insets.bottom)}
       showsVerticalScrollIndicator={false}
     >
-      <ActivityPrompt instruction="Toque para ouvir a história" />
+      <ActivityPrompt instruction="Escolha uma história para ouvir" />
       <View className="gap-3">
         {STORIES.map((story) => {
           const color = getCategoryColor(story.colorName);
@@ -52,9 +62,7 @@ function StoryList({ onOpen }: { onOpen: (story: Story) => void }) {
                 borderColor: color,
               }}
             >
-              <View className="h-14 w-14 items-center justify-center rounded-[14px] bg-white">
-                <SolarIcon name={story.icon} size={30} color={color} />
-              </View>
+              <StoryCover source={story.cover} color={color} />
               <View className="flex-1 gap-0.5">
                 <Text className="font-quicksand text-[22px] text-dark">{story.title}</Text>
                 <Text className="font-quicksand text-base text-neutral-dark">{story.summary}</Text>
@@ -68,20 +76,99 @@ function StoryList({ onOpen }: { onOpen: (story: Story) => void }) {
   );
 }
 
+function StoryCover({ source, color }: { source?: Story["cover"]; color: string }) {
+  return (
+    <View className="h-14 w-14 items-center justify-center overflow-hidden rounded-[14px] bg-white">
+      {source ? (
+        <Image source={source} className="h-full w-full" resizeMode="cover" />
+      ) : (
+        <SolarIcon name="book" size={28} color={color} />
+      )}
+    </View>
+  );
+}
+
+function PageImage({ page }: { page: StoryPage }) {
+  return (
+    <View className="mb-6 aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-[22px] bg-white">
+      {page.image ? (
+        <Image source={page.image} className="h-full w-full" resizeMode="cover" />
+      ) : (
+        <SolarIcon name="gallery" size={56} color={colors.neutralDark} />
+      )}
+    </View>
+  );
+}
+
 function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) {
   const insets = useSafeAreaInsets();
-  const { settings, speak, haptic } = useAppSettings();
+  const { settings, speak, stopSpeaking, haptic } = useAppSettings();
   const [page, setPage] = useState(0);
   const [finished, setFinished] = useState(false);
+  const [pageWidth, setPageWidth] = useState(0);
+  const listRef = useRef<FlatListType<StoryPage>>(null);
+  const pageRef = useRef(0);
+  const fromButton = useRef(false);
+  const color = getCategoryColor(story.colorName);
+  const background = settings.highContrast ? colors.white : getCategoryBgColor(story.colorName);
   const current = story.pages[page];
-  const color = getCategoryColor(current?.colorName ?? "blue");
-  const background = settings.highContrast ? colors.white : getCategoryBgColor(current?.colorName ?? "blue");
+
+  useEffect(() => {
+    return () => stopSpeaking();
+  }, [stopSpeaking]);
 
   useEffect(() => {
     if (!current || finished) return;
     const handle = setTimeout(() => speak(current.text), 200);
     return () => clearTimeout(handle);
   }, [current, finished, speak, page, story.id]);
+
+  const settle = (offsetX: number) => {
+    if (pageWidth <= 0) return;
+    const next = Math.max(0, Math.min(story.pages.length - 1, Math.round(offsetX / pageWidth)));
+    if (next === pageRef.current) {
+      fromButton.current = false;
+      return;
+    }
+    if (!fromButton.current) haptic();
+    fromButton.current = false;
+    pageRef.current = next;
+    setPage(next);
+  };
+
+  const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (pageWidth <= 0) return;
+    const offset = event.nativeEvent.contentOffset.x;
+    const nearest = Math.round(offset / pageWidth) * pageWidth;
+    if (Math.abs(offset - nearest) > 12) return;
+    settle(offset);
+  };
+
+  const onScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    settle(event.nativeEvent.contentOffset.x);
+  };
+
+  const onScrollEndDrag = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const velocity = event.nativeEvent.velocity?.x ?? 0;
+    if (Math.abs(velocity) > 0.1) return;
+    settle(event.nativeEvent.contentOffset.x);
+  };
+
+  const go = (next: number) => {
+    if (next < 0) return;
+    if (next >= story.pages.length) {
+      haptic();
+      setFinished(true);
+      return;
+    }
+    fromButton.current = true;
+    haptic();
+    pageRef.current = next;
+    setPage(next);
+    if (pageWidth > 0) {
+      listRef.current?.scrollToIndex({ index: next, animated: true });
+    }
+  };
 
   if (finished || !current) {
     return (
@@ -91,6 +178,7 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
           detail={story.title}
           againLabel="Ler de novo"
           onAgain={() => {
+            pageRef.current = 0;
             setPage(0);
             setFinished(false);
           }}
@@ -101,37 +189,51 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
     );
   }
 
-  const go = (next: number) => {
-    haptic();
-    if (next >= story.pages.length) {
-      setFinished(true);
-      return;
-    }
-    setPage(next);
-  };
-
   return (
     <ActivityChrome title={story.title} onBack={onClose} announce={false}>
       <View className="flex-1" style={activityPadding(insets.bottom)}>
-        <Pressable
-          accessibilityLabel={current.text}
-          onPress={() => speak(current.text)}
-          className="flex-1 items-center justify-center rounded-[22px] px-6"
+        <View
+          className="flex-1 overflow-hidden rounded-[22px]"
           style={{
             backgroundColor: background,
             borderWidth: settings.highContrast ? 3 : 0,
             borderColor: color,
           }}
+          onLayout={(event) => {
+            const next = Math.round(event.nativeEvent.layout.width);
+            setPageWidth((value) => (value === next ? value : next));
+          }}
         >
-          <View className="mb-8 h-32 w-32 items-center justify-center rounded-full bg-white">
-            <SolarIcon name={current.icon} size={68} color={color} />
-          </View>
-          <Text className="text-center font-quicksand text-4xl text-dark">{current.text}</Text>
-          <View className="mt-6 flex-row items-center gap-2">
-            <SolarIcon name="volume-loud" size={20} color={colors.primary} />
-            <Text className="font-quicksand text-base text-primary">Toque para ouvir</Text>
-          </View>
-        </Pressable>
+          {pageWidth > 0 ? (
+            <FlatList
+              ref={listRef}
+              data={story.pages}
+              keyExtractor={(_, index) => `${story.id}-${index}`}
+              horizontal
+              pagingEnabled
+              bounces={false}
+              directionalLockEnabled
+              showsHorizontalScrollIndicator={false}
+              getItemLayout={(_, index) => ({ length: pageWidth, offset: pageWidth * index, index })}
+              scrollEventThrottle={16}
+              onScroll={onScroll}
+              onMomentumScrollEnd={onScrollEnd}
+              onScrollEndDrag={onScrollEndDrag}
+              renderItem={({ item }) => (
+                <View style={{ width: pageWidth }} className="h-full justify-center px-6 py-6">
+                  <Pressable accessibilityLabel={item.text} onPress={() => speak(item.text)} className="items-center">
+                    <PageImage page={item} />
+                    <Text className="text-center font-quicksand text-3xl leading-10 text-dark">{item.text}</Text>
+                    <View className="mt-6 flex-row items-center gap-2">
+                      <SolarIcon name="volume-loud" size={20} color={colors.primary} />
+                      <Text className="font-quicksand text-base text-primary">Toque para ouvir</Text>
+                    </View>
+                  </Pressable>
+                </View>
+              )}
+            />
+          ) : null}
+        </View>
 
         <View className="mt-4 h-14 flex-row items-center justify-between">
           <IconButton
@@ -144,9 +246,9 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
           />
 
           <View className="flex-row items-center gap-2">
-            {story.pages.map((item, index) => (
+            {story.pages.map((_, index) => (
               <View
-                key={`${story.id}-${item.text}`}
+                key={`${story.id}-dot-${index}`}
                 className="h-2.5 rounded-full"
                 style={{
                   width: index === page ? 22 : 10,

@@ -1,18 +1,22 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Image, Pressable, ScrollView } from "react-native";
 import * as Haptics from "expo-haptics";
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming } from "react-native-reanimated";
 import { Button } from "@/components/Button";
+import { PillText } from "@/components/PillText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone, ActivityPrompt, activityPadding } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { PHRASES_MAIS_USADAS } from "@/constants/phrases";
+import { pecImageForTitle } from "@/data/pecImages";
 import { sample, shuffle } from "@/data/play";
 import { recordWordUse } from "@/services/wordUsage";
 import { PhraseItem } from "@/types";
 
 const ROUND_COUNT = 4;
+const CHIP_WIDTH = 108;
+const CHIP_HEIGHT = 148;
 
 type Chip = PhraseItem & { id: string; order: number };
 
@@ -131,25 +135,9 @@ export default function FraseScreen() {
           showsVerticalScrollIndicator={false}
         >
           <ActivityPrompt
-            instruction="Toque as palavras na ordem"
+            instruction="Ouça e toque as palavras na ordem"
             progress={`${roundIndex + 1} de ${rounds.length}`}
           />
-
-          <Pressable
-            accessibilityLabel={`Ouvir ${spoken}`}
-            onPress={() => speak(spoken)}
-            className="mb-5 min-h-[72px] flex-row flex-wrap items-center justify-center gap-2 rounded-[22px] bg-canvas px-3 py-3"
-          >
-            {phrase.map((item, index) => (
-              <WordPill
-                key={`model-${index}`}
-                text={item.text}
-                colorName={item.color}
-                highContrast={settings.highContrast}
-                muted
-              />
-            ))}
-          </Pressable>
 
           <Text className="pb-2 text-center font-quicksand text-base text-neutral-dark">
             Monte aqui
@@ -161,7 +149,8 @@ export default function FraseScreen() {
                 return (
                   <View
                     key={`slot-${index}`}
-                    className="h-12 min-w-[88px] rounded-full border-2 border-dashed border-neutral-dark"
+                    className="rounded-2xl border-2 border-dashed border-neutral-dark"
+                    style={{ width: CHIP_WIDTH, height: CHIP_HEIGHT }}
                   />
                 );
               }
@@ -179,7 +168,7 @@ export default function FraseScreen() {
           <View className="mt-8 flex-row flex-wrap items-center justify-center gap-2">
             {bank.map((chip) => {
               const used = picked.some((item) => item.id === chip.id);
-              if (used) return <View key={chip.id} className="h-12 min-w-[88px]" />;
+              if (used) return <View key={chip.id} style={{ width: CHIP_WIDTH, height: CHIP_HEIGHT }} />;
               return (
                 <ShakeChip key={chip.id} trigger={shake.id === chip.id ? shake.count : 0}>
                   <Pressable accessibilityLabel={chip.text} onPress={() => place(chip)}>
@@ -223,29 +212,31 @@ function WordPill({
   text,
   colorName,
   highContrast,
-  muted,
   wrong,
 }: {
   text: string;
   colorName: string;
   highContrast: boolean;
-  muted?: boolean;
   wrong?: boolean;
 }) {
   const color = getCategoryColor(colorName);
   return (
     <View
-      className="h-12 items-center justify-center rounded-full px-4"
+      className="items-center rounded-2xl p-2"
       style={{
+        width: CHIP_WIDTH,
+        height: CHIP_HEIGHT,
         backgroundColor: highContrast ? colors.white : getCategoryBgColor(colorName),
         borderWidth: wrong || highContrast ? 2 : 0,
         borderColor: wrong ? colors.dark : color,
-        opacity: muted ? 0.55 : 1,
       }}
     >
-      <Text className="font-quicksand text-xl" style={{ color }}>
+      <View className="mb-1.5 aspect-square w-full overflow-hidden rounded-xl bg-white">
+        <Image source={pecImageForTitle(text)} className="h-full w-full" resizeMode="cover" />
+      </View>
+      <PillText size={14} numberOfLines={2} style={{ color: colors.dark }}>
         {text}
-      </Text>
+      </PillText>
     </View>
   );
 }

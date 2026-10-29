@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, Platform } from "react-native";
+import { View, Image, Pressable, Platform, ImageSourcePropType } from "react-native";
 import * as Haptics from "expo-haptics";
 import { SolarIcon } from "@/components/SolarIcon";
+import { PillText } from "@/components/PillText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone, ActivityPrompt, activityPadding } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
@@ -16,6 +17,7 @@ type MemoryCard = {
   pairId: string;
   title: string;
   colorName: string;
+  image: ImageSourcePropType;
   faceUp: boolean;
   matched: boolean;
 };
@@ -28,6 +30,7 @@ function deal(): MemoryCard[] {
       pairId: pec.id,
       title: pec.title,
       colorName: pec.colorName,
+      image: pec.image,
       faceUp: false,
       matched: false,
     })),
@@ -169,7 +172,7 @@ function MemoryTile({
     <Pressable
       accessibilityLabel={showing ? card.title : "Carta virada"}
       onPress={onPress}
-      className="flex-1 items-center justify-center rounded-[22px] px-3 active:opacity-90"
+      className={`flex-1 overflow-hidden rounded-[22px] active:opacity-90 ${showing ? "px-2 pb-2 pt-2" : "items-center justify-center"}`}
       style={{
         backgroundColor: showing ? background : colors.primary,
         borderWidth: showing && (card.matched || highContrast) ? 3 : 0,
@@ -177,9 +180,14 @@ function MemoryTile({
       }}
     >
       {showing ? (
-        <Text className="text-center font-quicksand text-2xl" style={{ color }} numberOfLines={2}>
-          {card.title}
-        </Text>
+        <View className="w-full flex-1 items-center">
+          <View className="mb-1.5 w-full flex-1 overflow-hidden rounded-2xl bg-white">
+            <Image source={card.image} className="h-full w-full" resizeMode="cover" />
+          </View>
+          <PillText size={16} numberOfLines={2} style={{ color: colors.dark }}>
+            {card.title}
+          </PillText>
+        </View>
       ) : (
         <SolarIcon name="star" size={36} color={colors.white} />
       )}

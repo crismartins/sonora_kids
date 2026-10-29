@@ -1,11 +1,12 @@
-import { SolarIconName } from "@/components/SolarIcon";
-
-export type StoryIcon = SolarIconName;
+import { ImageSourcePropType } from "react-native";
 
 export type StoryPage = {
   text: string;
-  icon: StoryIcon;
-  colorName: string;
+  /**
+   * Ilustração desta página. Sem imagem, a tela reserva o espaço.
+   * Exemplo: require("../assets/images/stories/chapeuzinho/01.png")
+   */
+  image?: ImageSourcePropType;
 };
 
 export type Story = {
@@ -13,65 +14,46 @@ export type Story = {
   title: string;
   summary: string;
   colorName: string;
-  icon: StoryIcon;
+  /** Capa da lista. O mesmo formato de `pages[].image`. */
+  cover?: ImageSourcePropType;
   pages: StoryPage[];
 };
 
+function page(text: string): StoryPage {
+  return { text };
+}
+
 export const STORIES: Story[] = [
   {
-    id: "bom-dia",
-    title: "Bom dia",
-    summary: "Acordar, comer e ir para a escola",
-    colorName: "amber",
-    icon: "sun",
+    id: "chapeuzinho",
+    title: "Chapeuzinho Vermelho",
+    summary: "O caminho até a casa da vovó",
+    colorName: "deepOrange",
     pages: [
-      { text: "Bom dia!", icon: "sun", colorName: "amber" },
-      { text: "Eu quero café da manhã.", icon: "chef-hat", colorName: "deepOrange" },
-      { text: "Agora, escovar os dentes.", icon: "smile", colorName: "cyan" },
-      { text: "Eu vou pra escola.", icon: "square-academic-cap", colorName: "blue" },
-      { text: "Tchau!", icon: "fallback", colorName: "greenAccent" },
+      page("Era uma vez uma menina chamada Chapeuzinho Vermelho. Ela morava perto da floresta."),
+      page("A mamãe preparou um bolo e disse: leve para a vovó, que está doente."),
+      page("No caminho, Chapeuzinho encontrou o lobo. Ele perguntou aonde ela ia."),
+      page("Chapeuzinho respondeu: vou para a casa da vovó."),
+      page("O lobo correu por um atalho e chegou primeiro. Ele vestiu a roupa da vovó e deitou na cama."),
+      page("Chapeuzinho chegou e estranhou: vovó, que olhos grandes você tem!"),
+      page("O lobo respondeu: é para te ver melhor. E que boca grande! É para te comer!"),
+      page("Um lenhador ouviu o susto e afugentou o lobo. Chapeuzinho e a vovó ficaram bem."),
     ],
   },
   {
-    id: "brincar",
-    title: "Hora de brincar",
-    summary: "Pedir o brinquedo e se divertir",
-    colorName: "purple",
-    icon: "gamepad",
+    id: "tres-porquinhos",
+    title: "Os Três Porquinhos",
+    summary: "Três casas e um lobo soprador",
+    colorName: "pink",
     pages: [
-      { text: "Eu quero brincar.", icon: "gamepad", colorName: "purple" },
-      { text: "Eu quero o brinquedo.", icon: "box", colorName: "blue" },
-      { text: "Eu estou feliz.", icon: "smile", colorName: "orange" },
-      { text: "Acabou.", icon: "check-circle", colorName: "teal" },
-      { text: "Obrigado.", icon: "heart", colorName: "greenAccent" },
-    ],
-  },
-  {
-    id: "pausa",
-    title: "Quero uma pausa",
-    summary: "Quando o barulho fica demais",
-    colorName: "teal",
-    icon: "leaf",
-    pages: [
-      { text: "Muito barulho.", icon: "volume-loud", colorName: "pink" },
-      { text: "Eu quero silêncio.", icon: "volume-cross", colorName: "pink" },
-      { text: "Eu quero o cantinho calmo.", icon: "leaf", colorName: "lightGreen" },
-      { text: "Eu estou calmo.", icon: "smile", colorName: "teal" },
-      { text: "Tudo bem.", icon: "heart", colorName: "greenAccent" },
-    ],
-  },
-  {
-    id: "dormir",
-    title: "Hora de dormir",
-    summary: "Banho, dentes e boa noite",
-    colorName: "indigo",
-    icon: "moon",
-    pages: [
-      { text: "Eu estou cansado.", icon: "moon", colorName: "indigo" },
-      { text: "Agora, tomar banho.", icon: "waterdrop", colorName: "cyan" },
-      { text: "Escovar os dentes.", icon: "smile", colorName: "blue" },
-      { text: "Hora de dormir.", icon: "bed", colorName: "deepPurple" },
-      { text: "Boa noite.", icon: "moon", colorName: "indigo" },
+      page("Era uma vez três porquinhos. Eles saíram para construir suas próprias casas."),
+      page("O primeiro porquinho fez uma casa de palha. Ficou pronta bem depressa."),
+      page("O segundo porquinho fez uma casa de madeira."),
+      page("O terceiro porquinho fez uma casa de tijolos. Demorou, mas ficou forte."),
+      page("O lobo chegou na casa de palha e soprou. A casa voou, e o porquinho correu."),
+      page("O lobo soprou a casa de madeira. Ela também caiu."),
+      page("Os dois correram para a casa de tijolos. O lobo soprou, soprou, e a casa não se mexeu."),
+      page("O lobo foi embora. Os três porquinhos estavam seguros e felizes."),
     ],
   },
 ];

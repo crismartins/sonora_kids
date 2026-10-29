@@ -214,7 +214,10 @@ export default function ProfileScreen() {
             ) : (
               <View className="flex-row flex-wrap gap-2">
                 {words.map((word) => (
-                  <View key={word.title} className="h-10 flex-row items-center gap-2 rounded-full bg-white py-1 pl-1 pr-3">
+                  <View
+                    key={word.title}
+                    className="h-10 flex-row items-center gap-2 rounded-full bg-white py-1 pl-1 pr-3"
+                  >
                     <View className="h-8 min-w-8 items-center justify-center rounded-full bg-primary-soft px-2">
                       <Text className="font-quicksand text-base text-dark">{word.count}</Text>
                     </View>

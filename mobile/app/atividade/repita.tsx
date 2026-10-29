@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, Platform } from "react-native";
+import { View, Image, Pressable, ScrollView, Platform } from "react-native";
 import * as Haptics from "expo-haptics";
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming } from "react-native-reanimated";
 import { SolarIcon } from "@/components/SolarIcon";
 import { Button } from "@/components/Button";
+import { PillText } from "@/components/PillText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone, ActivityPrompt, activityPadding } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
@@ -52,12 +53,6 @@ export default function RepitaScreen() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!round || finished) return;
-    const handle = setTimeout(() => speak(round.target.title), 280);
-    return () => clearTimeout(handle);
-  }, [round, finished, speak, index, session]);
-
   const celebrate = () => {
     if (!settings.haptics || Platform.OS === "web") return;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -78,7 +73,6 @@ export default function RepitaScreen() {
     if (pec.id !== round.target.id) {
       setWrongId(pec.id);
       haptic(Haptics.ImpactFeedbackStyle.Light);
-      speak(round.target.title);
       timer.current = setTimeout(() => setWrongId(null), 500);
       return;
     }
@@ -133,7 +127,7 @@ export default function RepitaScreen() {
 
           <View className="mt-auto pt-6">
             <Button
-              label="Ouvir de novo"
+              label="Ouvir"
               icon="volume-loud"
               iconSize={24}
               variant="neutral"
@@ -182,16 +176,21 @@ function ChoiceCard({
       <Pressable
         accessibilityLabel={pec.title}
         onPress={onPress}
-        className="min-h-[84px] flex-row items-center justify-center rounded-[22px] px-12 active:opacity-90"
+        className="min-h-[96px] flex-row items-center gap-3 rounded-[22px] py-3 pl-3 pr-12 active:opacity-90"
         style={{
           backgroundColor: highContrast ? colors.white : getCategoryBgColor(pec.colorName),
           borderWidth: selected || wrong || highContrast ? 3 : 0,
           borderColor: wrong ? colors.dark : color,
         }}
       >
-        <Text className="text-center font-quicksand text-3xl" style={{ color }}>
-          {pec.title}
-        </Text>
+        <View className="h-[72px] w-[72px] overflow-hidden rounded-2xl bg-white">
+          <Image source={pec.image} className="h-full w-full" resizeMode="cover" />
+        </View>
+        <View className="flex-1 items-center justify-center">
+          <PillText size={28} numberOfLines={2} style={{ color: colors.dark }}>
+            {pec.title}
+          </PillText>
+        </View>
         {selected ? (
           <View className="absolute right-4 h-8 w-8 items-center justify-center rounded-full bg-white">
             <SolarIcon name="check" size={20} color={color} />
