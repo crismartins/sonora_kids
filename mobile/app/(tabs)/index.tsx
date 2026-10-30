@@ -261,6 +261,7 @@ export default function PecsScreen() {
       {!isLoading && categories ? (
         <FloatingButton
           icon="widget-add"
+          tooltip="Adicionar"
           accessibilityLabel="Adicionar PEC"
           onPress={() => {
             if (!categories?.length) return;

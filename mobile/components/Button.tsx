@@ -1,6 +1,8 @@
-import { ActivityIndicator, Pressable, Text, ViewStyle } from "react-native";
+import { ActivityIndicator, Pressable, Text, View, ViewStyle } from "react-native";
+import Svg, { Path } from "react-native-svg";
 import { SolarIcon, SolarIconName } from "@/components/SolarIcon";
 import { colors } from "@/constants/colors";
+import { useAppSettings } from "@/context/AppSettingsContext";
 
 const ELEVATION: ViewStyle = {
   shadowColor: colors.dark,
@@ -145,6 +147,70 @@ export function IconButton({
   );
 }
 
+const BUBBLE_SHADOW: ViewStyle = {
+  shadowColor: "#1B2B41",
+  shadowOpacity: 0.14,
+  shadowRadius: 14,
+  shadowOffset: { width: 0, height: 6 },
+  elevation: 8,
+};
+
+const DOT_SHADOW: ViewStyle = {
+  shadowColor: "#1B2B41",
+  shadowOpacity: 0.16,
+  shadowRadius: 3,
+  shadowOffset: { width: 0, height: 1 },
+  elevation: 3,
+};
+
+function ThoughtBubble({ label }: { label: string }) {
+  return (
+    <View
+      pointerEvents="none"
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={{ paddingBottom: 22 }}
+    >
+      <View
+        style={{
+          backgroundColor: colors.white,
+          borderRadius: 24,
+          paddingHorizontal: 18,
+          paddingVertical: 12,
+          ...BUBBLE_SHADOW,
+        }}
+      >
+        <Text className="text-center font-quicksand text-base" style={{ color: colors.dark }}>
+          {label}
+        </Text>
+      </View>
+      <View
+        style={{
+          position: "absolute",
+          width: 20,
+          height: 20,
+          borderRadius: 20,
+          backgroundColor: colors.white,
+          bottom: 14,
+          right: 36,
+        }}
+      />
+      <View
+        style={{
+          position: "absolute",
+          width: 12,
+          height: 12,
+          borderRadius: 6,
+          backgroundColor: colors.white,
+          bottom: 4,
+          right: 24,
+          ...DOT_SHADOW,
+        }}
+      />
+    </View>
+  );
+}
+
 type FloatingButtonProps = {
   icon: SolarIconName;
   accessibilityLabel: string;
@@ -152,6 +218,7 @@ type FloatingButtonProps = {
   iconSize?: number;
   bottom?: number;
   className?: string;
+  tooltip?: string;
 };
 
 export function FloatingButton({
@@ -161,15 +228,31 @@ export function FloatingButton({
   iconSize = 32,
   bottom,
   className,
+  tooltip,
 }: FloatingButtonProps) {
+  const { speak } = useAppSettings();
+  const floating = bottom != null;
+
+  const handlePress = () => {
+    if (tooltip?.trim()) speak(tooltip);
+    onPress?.();
+  };
+
   return (
-    <Pressable
-      accessibilityLabel={accessibilityLabel}
-      onPress={onPress}
-      className={`h-16 w-16 items-center justify-center rounded-full bg-primary${bottom != null ? " absolute right-5" : ""}${className ? ` ${className}` : ""}`}
-      style={[ELEVATION, bottom != null ? { bottom } : undefined]}
+    <View
+      pointerEvents="box-none"
+      className={floating ? "absolute right-5 z-10 items-end" : "items-end"}
+      style={floating ? { bottom } : undefined}
     >
-      <SolarIcon name={icon} size={iconSize} color={colors.white} />
-    </Pressable>
+      {tooltip ? <ThoughtBubble label={tooltip} /> : null}
+      <Pressable
+        accessibilityLabel={accessibilityLabel}
+        onPress={handlePress}
+        className={`h-16 w-16 items-center justify-center rounded-full bg-primary${className ? ` ${className}` : ""}`}
+        style={ELEVATION}
+      >
+        <SolarIcon name={icon} size={iconSize} color={colors.white} />
+      </Pressable>
+    </View>
   );
 }

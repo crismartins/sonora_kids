@@ -9,7 +9,7 @@ import { profileAvatarSource } from "@/services/profile";
 
 const AVATAR_SIZE = 32;
 const AVATAR_RADIUS = 12;
-const AVATAR_BORDER = 3;
+const AVATAR_BORDER = 4;
 const AVATAR_RING = colors.light;
 const BAR_HEIGHT = Platform.OS === "ios" ? 44 : 64;
 

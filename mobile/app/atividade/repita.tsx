@@ -130,7 +130,6 @@ export default function RepitaScreen() {
               label="Ouvir"
               icon="volume-loud"
               iconSize={24}
-              variant="neutral"
               labelSize="md"
               onPress={() => speak(round.target.title)}
             />

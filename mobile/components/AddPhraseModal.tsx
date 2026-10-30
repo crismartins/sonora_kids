@@ -82,7 +82,10 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
   const selectedCategory = categories.find((category) => category.slug === categorySlug) ?? categories[0];
   const pecs = selectedCategory?.pECS?.nodes ?? [];
   const selectedColor = selectedCategory ? categoryColorName(selectedCategory) : "blue";
-  const phrase = items.map((item) => item.text).join(" ").trim();
+  const phrase = items
+    .map((item) => item.text)
+    .join(" ")
+    .trim();
   const canHear = phrase.length > 0;
   const canSave = canHear && !saving;
   const previewImages = useMemo(() => {
@@ -99,10 +102,7 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
       setError(`A frase pode ter até ${MAX_ITEMS} PECs.`);
       return;
     }
-    setItems((current) => [
-      ...current,
-      { text: pec.title, color: selectedColor, image: pecImageUri(pec) },
-    ]);
+    setItems((current) => [...current, { text: pec.title, color: selectedColor, image: pecImageUri(pec) }]);
     setError(null);
     speak(pec.title);
   };
@@ -128,9 +128,7 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
   return (
     <View className="flex-1 bg-white">
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 16 }}>
-        {items.length > 0 ? (
-          <PhraseCard phrase={items} images={previewImages} onRemoveItem={removeAt} />
-        ) : null}
+        {items.length > 0 ? <PhraseCard phrase={items} images={previewImages} onRemoveItem={removeAt} /> : null}
 
         <View className="mx-5 mt-5 h-px bg-line" />
 
@@ -177,7 +175,7 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
         <FormError message={error} className="mt-4 px-5" />
       </ScrollView>
 
-      <View className="flex-row gap-3 px-5 pt-2" style={{ paddingBottom: insets.bottom + 16 }}>
+      <View className="flex-row gap-3 px-5 pt-2" style={{ paddingBottom: insets.bottom }}>
         <Button
           label="Sair"
           icon="close-circle"
@@ -195,6 +193,7 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
           size="md"
           loading={saving}
           disabled={!canSave}
+          inactiveReason={items.length === 0 ? "Adicione um PEC" : undefined}
           className="flex-1"
           onPress={handleSave}
         />

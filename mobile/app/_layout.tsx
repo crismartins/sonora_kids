@@ -8,6 +8,7 @@ import { useFonts } from "expo-font";
 import { Quicksand_700Bold } from "@expo-google-fonts/quicksand";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { AnimatedSplash } from "@/components/AnimatedSplash";
 import { OnboardingSlider } from "@/components/OnboardingSlider";
 import { SilentModeToast } from "@/components/SilentModeToast";
 import { AppSettingsProvider, useAppSettings } from "@/context/AppSettingsContext";
@@ -17,7 +18,7 @@ import { colors } from "@/constants/colors";
 import { loadOnboardingSeen } from "@/services/onboarding";
 
 SplashScreen.preventAutoHideAsync();
-SystemUI.setBackgroundColorAsync(colors.white);
+SystemUI.setBackgroundColorAsync(colors.primary);
 
 function RootNavigator() {
   const { fontScale } = useAppSettings();
@@ -136,6 +137,7 @@ export default function RootLayout() {
     Quicksand_700Bold,
   });
   const [onboardingSeen, setOnboardingSeen] = useState<boolean | null>(null);
+  const [splashVisible, setSplashVisible] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -154,22 +156,26 @@ export default function RootLayout() {
   const ready = (fontsLoaded || fontError) && onboardingSeen !== null;
 
   useEffect(() => {
-    if (ready) SplashScreen.hideAsync();
-  }, [ready]);
-
-  if (!ready || onboardingSeen === null) {
-    return null;
-  }
+    if (!splashVisible) SystemUI.setBackgroundColorAsync(colors.white);
+  }, [splashVisible]);
 
   return (
-    <GestureHandlerRootView className="flex-1 bg-white">
-      <SafeAreaProvider>
-        <AppSettingsProvider>
-          <ProfileProvider>
-            <AppShell initialOnboardingSeen={onboardingSeen} />
-          </ProfileProvider>
-        </AppSettingsProvider>
-      </SafeAreaProvider>
+    <GestureHandlerRootView
+      className="flex-1"
+      style={{ backgroundColor: splashVisible ? colors.primary : colors.white }}
+    >
+      {ready && onboardingSeen !== null ? (
+        <SafeAreaProvider>
+          <AppSettingsProvider>
+            <ProfileProvider>
+              <AppShell initialOnboardingSeen={onboardingSeen} />
+            </ProfileProvider>
+          </AppSettingsProvider>
+        </SafeAreaProvider>
+      ) : null}
+      {splashVisible ? (
+        <AnimatedSplash hold={!ready} onHidden={() => setSplashVisible(false)} />
+      ) : null}
     </GestureHandlerRootView>
   );
 }

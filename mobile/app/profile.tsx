@@ -1,44 +1,31 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Alert,
-  View,
-  Text,
-  Image,
-  ScrollView,
-  Pressable,
-  Platform,
-  TextInput,
-  Linking,
-  KeyboardAvoidingView,
-} from "react-native";
+import { View, Text, Image, ScrollView, Pressable, Platform, TextInput, KeyboardAvoidingView } from "react-native";
 import { SolarIcon } from "@/components/SolarIcon";
 import { Button } from "@/components/Button";
 import { FormError } from "@/components/ScreenState";
+import { ImageSourcePicker } from "@/components/ImageSourcePicker";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as ImagePicker from "expo-image-picker";
 import { colors } from "@/constants/colors";
 import { FONT_FAMILY } from "@/constants/typography";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { useProfile } from "@/context/ProfileContext";
-import { inferVoiceGender, listSpeakableVoices, resolveSpeech } from "@/services/appSettings";
+import {
+  inferVoiceGender,
+  SpeechLanguage,
+  voiceSummary,
+  VoiceGender,
+} from "@/services/appSettings";
 import { AVATAR_V1, AVATAR_V2, AvatarChoice, profileAvatarSource } from "@/services/profile";
 import { loadTopWords, UsedWord } from "@/services/wordUsage";
-import { VOICE_PREVIEW } from "@/components/VoicePickerModal";
-
-const PICKER_OPTIONS: ImagePicker.ImagePickerOptions = {
-  mediaTypes: ["images"],
-  allowsEditing: true,
-  aspect: [1, 1],
-  quality: 0.7,
-};
+import { VoicePickerModal, VOICE_PREVIEW } from "@/components/VoicePickerModal";
 
 export default function ProfileScreen() {
   const { edit } = useLocalSearchParams<{ edit?: string }>();
   const editRequestHandled = useRef(edit === "1");
   const insets = useSafeAreaInsets();
   const { ready, profile, saveProfile } = useProfile();
-  const { settings, voices, updateSettings, speak } = useAppSettings();
+  const { settings, voices, updateSettings, speak, haptic } = useAppSettings();
   const [nickname, setNickname] = useState(profile.nickname);
   const [name, setName] = useState(profile.name);
   const [avatar, setAvatar] = useState<AvatarChoice>(profile.avatar);
@@ -48,6 +35,7 @@ export default function ProfileScreen() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [editing, setEditing] = useState(edit === "1");
+  const [voiceOpen, setVoiceOpen] = useState(false);
 
   useEffect(() => {
     if (editRequestHandled.current || edit !== "1") return;
@@ -85,9 +73,6 @@ export default function ProfileScreen() {
     return () => clearTimeout(timer);
   }, [saved]);
 
-  const voiceOptions = listSpeakableVoices(voices, settings.language);
-  const activeVoiceId = settings.voiceId ?? resolveSpeech(voices, settings).voice ?? null;
-
   const dirty =
     nickname.trim() !== profile.nickname ||
     name.trim() !== profile.name ||
@@ -108,50 +93,11 @@ export default function ProfileScreen() {
     setSaved(false);
   };
 
-  const pickFromGallery = async () => {
-    try {
-      if (Platform.OS !== "web") {
-        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!permission.granted) {
-          setError("Permita o acesso às fotos para escolher uma imagem.");
-          if (!permission.canAskAgain) Linking.openSettings().catch(() => undefined);
-          return;
-        }
-      }
-      const result = await ImagePicker.launchImageLibraryAsync(PICKER_OPTIONS);
-      const uri = result.canceled ? null : result.assets[0]?.uri;
-      if (!uri) return;
-      usePickedImage(uri);
-    } catch {
-      setError("Não foi possível abrir a galeria.");
-    }
-  };
-
-  const choosePhotoSource = () => {
-    Alert.alert("Foto do perfil", "Tire uma foto ou escolha uma da galeria.", [
-      { text: "Tirar foto", onPress: takePhoto },
-      { text: "Escolher da galeria", onPress: pickFromGallery },
-      { text: "Cancelar", style: "cancel" },
-    ]);
-  };
-
-  const takePhoto = async () => {
-    try {
-      if (Platform.OS !== "web") {
-        const permission = await ImagePicker.requestCameraPermissionsAsync();
-        if (!permission.granted) {
-          setError("Permita o uso da câmera para tirar a foto.");
-          if (!permission.canAskAgain) Linking.openSettings().catch(() => undefined);
-          return;
-        }
-      }
-      const result = await ImagePicker.launchCameraAsync(PICKER_OPTIONS);
-      const uri = result.canceled ? null : result.assets[0]?.uri;
-      if (!uri) return;
-      usePickedImage(uri);
-    } catch {
-      setError("Não foi possível abrir a câmera.");
-    }
+  const chooseGender = (gender: VoiceGender) => {
+    const patch = { voiceGender: gender, voiceId: null };
+    updateSettings(patch);
+    speak(VOICE_PREVIEW, patch);
+    haptic();
   };
 
   const chooseVoice = (voiceId: string) => {
@@ -160,6 +106,24 @@ export default function ProfileScreen() {
     const patch = { voiceId, voiceGender: inferred ?? settings.voiceGender };
     updateSettings(patch);
     speak(VOICE_PREVIEW, patch);
+    haptic();
+  };
+
+  const chooseLanguage = (language: SpeechLanguage) => {
+    const patch = { language, voiceId: null };
+    updateSettings(patch);
+    speak("Olá. Este é o idioma da voz.", patch);
+    haptic();
+  };
+
+  const handleCancel = () => {
+    setNickname(profile.nickname);
+    setName(profile.name);
+    setAvatar(profile.avatar);
+    setPhotoUri(profile.photoUri ?? null);
+    setError(null);
+    setSaved(false);
+    setEditing(false);
   };
 
   const handleSave = async () => {
@@ -193,7 +157,7 @@ export default function ProfileScreen() {
           contentContainerStyle={{ paddingTop: 28, paddingBottom: 24, alignItems: "center" }}
           showsVerticalScrollIndicator={false}
         >
-          <Image source={profileAvatarSource(profile)} className="h-28 w-28 rounded-3xl" />
+          <Image source={profileAvatarSource(profile)} className="h-28 w-28 rounded-3xl border-4 border-light" />
           <Text className="mt-4 font-quicksand text-3xl text-primary">{profile.nickname}</Text>
           <Text className="mt-1 px-6 text-center font-quicksand text-xl text-dark">{profile.name}</Text>
           <View
@@ -228,7 +192,7 @@ export default function ProfileScreen() {
             )}
           </View>
         </ScrollView>
-        <View className="bg-white px-4" style={{ paddingBottom: insets.bottom + 16 }}>
+        <View className="bg-white px-4" style={{ paddingBottom: insets.bottom }}>
           <Button
             label="Editar Perfil"
             icon="pen"
@@ -260,15 +224,23 @@ export default function ProfileScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ gap: 12, paddingHorizontal: 16 }}
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 12,
+            paddingHorizontal: 16,
+          }}
         >
-          <Pressable
+          <ImageSourcePicker
             accessibilityLabel="Adicionar foto do perfil"
-            onPress={choosePhotoSource}
-            className="h-[76px] w-[76px] items-center justify-center rounded-2xl bg-primary-soft"
-          >
-            <SolarIcon name="camera" size={32} color={colors.neutralDark} />
-          </Pressable>
+            alertTitle="Foto do perfil"
+            allowsEditing
+            aspect={[1, 1]}
+            className="h-[76px] w-[76px] rounded-2xl border-4 border-light"
+            onPicked={usePickedImage}
+            onError={setError}
+          />
           <AvatarChoiceButton label="Avatar 1" selected={avatar === "v1"} onPress={() => choosePreset("v1")}>
             <Image source={AVATAR_V1} className="h-full w-full" />
           </AvatarChoiceButton>
@@ -311,50 +283,63 @@ export default function ProfileScreen() {
           />
         </View>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ gap: 10, paddingHorizontal: 16 }}
+        <Pressable
+          accessibilityLabel={`Voz, ${voiceSummary(voices, settings)}`}
+          accessibilityHint="Abre a escolha de voz"
+          onPress={() => setVoiceOpen(true)}
+          className="mx-4 h-16 flex-row items-center gap-3 rounded-2xl border border-neutral bg-neutral-light px-4"
         >
-          {voiceOptions.length > 0
-            ? voiceOptions.map((voice, index) => (
-                <VoiceChip
-                  key={voice.identifier}
-                  label={`VOZ ${index + 1}`}
-                  selected={voice.identifier === activeVoiceId}
-                  onPress={() => chooseVoice(voice.identifier)}
-                />
-              ))
-            : (["feminine", "masculine"] as const).map((gender, index) => (
-                <VoiceChip
-                  key={gender}
-                  label={`VOZ ${index + 1}`}
-                  selected={!settings.voiceId && settings.voiceGender === gender}
-                  onPress={() => {
-                    const patch = { voiceGender: gender, voiceId: null };
-                    updateSettings(patch);
-                    speak(VOICE_PREVIEW, patch);
-                  }}
-                />
-              ))}
-        </ScrollView>
+          <View className="h-9 w-9 items-center justify-center rounded-full bg-primary-soft">
+            <SolarIcon name="volume" size={20} color={colors.primary} />
+          </View>
+          <View className="flex-1">
+            <Text className="font-quicksand text-base text-neutral-dark">Voz</Text>
+            <Text className="font-quicksand text-xl text-dark" numberOfLines={1}>
+              {voiceSummary(voices, settings)}
+            </Text>
+          </View>
+          <SolarIcon name="arrow-right" size={20} color={colors.neutralDark} />
+        </Pressable>
 
         <FormError message={error} className="px-4" />
       </ScrollView>
-      <View className="bg-white px-4" style={{ paddingBottom: insets.bottom + 16 }}>
+      <View className="flex-row gap-3 bg-white px-4" style={{ paddingBottom: insets.bottom }}>
         <Button
+          icon="close-circle"
+          label="Cancelar"
+          variant="neutral"
+          shape="rounded"
+          size="md"
+          disabled={saving}
+          accessibilityLabel="Cancelar edição"
+          className="flex-1"
+          onPress={handleCancel}
+        />
+        <Button
+          icon="check-circle"
           label={saved ? "Salvo" : "Salvar"}
           variant="primary"
           shape="rounded"
           size="md"
           loading={saving}
           disabled={!dirty}
+          inactiveReason={!dirty && !saved ? "Nenhuma alteração" : undefined}
           accessibilityLabel="Salvar perfil"
-          className="w-full"
+          className="flex-1"
           onPress={handleSave}
         />
       </View>
+      <VoicePickerModal
+        visible={voiceOpen}
+        voices={voices}
+        gender={settings.voiceGender}
+        voiceId={settings.voiceId}
+        language={settings.language}
+        onClose={() => setVoiceOpen(false)}
+        onSelectGender={chooseGender}
+        onSelectVoice={(voice) => chooseVoice(voice.identifier)}
+        onSelectLanguage={chooseLanguage}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -377,8 +362,8 @@ function AvatarChoiceButton({
       onPress={onPress}
       className="h-[76px] w-[76px] items-center justify-center overflow-hidden rounded-2xl bg-muted"
       style={{
-        borderWidth: selected ? 3 : 0,
-        borderColor: colors.primary,
+        borderWidth: 4,
+        borderColor: selected ? colors.primary : colors.light,
       }}
     >
       {children}
@@ -386,16 +371,3 @@ function AvatarChoiceButton({
   );
 }
 
-function VoiceChip({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
-  return (
-    <Pressable
-      accessibilityLabel={label}
-      accessibilityState={{ selected }}
-      onPress={onPress}
-      className={`h-14 flex-row items-center gap-2 rounded-full px-4 ${selected ? "bg-primary" : "bg-primary-soft"}`}
-    >
-      <SolarIcon name="volume" size={22} color={selected ? colors.white : colors.primary} />
-      <Text className={`font-quicksand text-xl ${selected ? "text-white" : "text-primary"}`}>{label}</Text>
-    </Pressable>
-  );
-}

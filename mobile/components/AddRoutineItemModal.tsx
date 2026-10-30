@@ -99,7 +99,10 @@ export function AddRoutineForm({
       .filter((extra) => extra.slug === categorySlug && !catalogPecs.some((item) => item.id === extra.pec.id))
       .map((extra) => extra.pec),
   ];
-  const spoken = selected.map((item) => item.title).join(" ").trim();
+  const spoken = selected
+    .map((item) => item.title)
+    .join(" ")
+    .trim();
   const canHear = spoken.length > 0;
   const canSave = !saving;
 
@@ -172,7 +175,7 @@ export function AddRoutineForm({
         </View>
 
         <IconButton
-          icon="volume"
+          icon="volume-loud"
           accessibilityLabel="Ouvir os itens da rotina"
           variant="primary"
           size="lg"
@@ -232,9 +235,9 @@ export function AddRoutineForm({
       </ScrollView>
 
       <View className="items-end px-5 pb-2">
-        <FloatingButton icon="widget-add" accessibilityLabel="Criar PEC" onPress={createPec} />
+        <FloatingButton icon="widget-add" tooltip="Adicionar" accessibilityLabel="Criar PEC" onPress={createPec} />
       </View>
-      <View className="flex-row gap-3 px-5 pt-2" style={{ paddingBottom: insets.bottom + 16 }}>
+      <View className="flex-row gap-3 px-5 pt-2" style={{ paddingBottom: insets.bottom }}>
         <Button
           label="Sair"
           icon="close-circle"

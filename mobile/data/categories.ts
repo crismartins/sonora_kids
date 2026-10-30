@@ -4,6 +4,13 @@ import { Category, PecItem } from "@/types";
 const AVATAR = require("../assets/images/avatar_default_v1.png");
 const AVATAR_2 = require("../assets/images/avatar_default_v2.png");
 
+const LEADING_CATEGORY_SLUGS = ["boas-maneiras", "pessoas", "palavras", "acoes-e-atividades"];
+
+function leadingRank(slug: string) {
+  const index = LEADING_CATEGORY_SLUGS.indexOf(slug);
+  return index === -1 ? LEADING_CATEGORY_SLUGS.length : index;
+}
+
 function pec(slug: string, title: string, index: number): PecItem {
   const image: ImageSourcePropType = index % 2 === 0 ? AVATAR : AVATAR_2;
   return {
@@ -492,4 +499,4 @@ export const MOCK_CATEGORIES: Category[] = [
       ]),
     },
   },
-];
+].sort((a, b) => leadingRank(a.slug) - leadingRank(b.slug));

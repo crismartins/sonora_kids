@@ -196,7 +196,7 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
               <IconButton
                 icon="close-circle"
                 accessibilityLabel={`Remover ${item.text}`}
-                variant="ghost"
+                variant="muted"
                 size="sm"
                 onPress={() => onRemoveItem(index)}
               />
@@ -254,7 +254,7 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
       }}
       style={[
         {
-          marginHorizontal: 16,
+          paddingHorizontal: 0,
           marginVertical: 5,
           ...Platform.select({
             ios: {

@@ -75,11 +75,7 @@ function PhrasePage({
       renderItem={({ item }) => {
         const customId = item.customId;
         return (
-          <PhraseCard
-            phrase={item.items}
-            images={images}
-            onManage={customId ? () => onManage(customId) : undefined}
-          />
+          <PhraseCard phrase={item.items} images={images} onManage={customId ? () => onManage(customId) : undefined} />
         );
       }}
     />
@@ -239,7 +235,7 @@ export default function FrasesScreen() {
             onMomentumScrollEnd={onPagerMomentumEnd}
             scrollEventThrottle={16}
             contentOffset={contentOffset}
-            style={{ width: pageSize.width, height: pageSize.height }}
+            style={{ width: pageSize.width, height: pageSize.height, paddingHorizontal: 16 }}
           >
             {FILTER_TABS.map((tab) => (
               <View key={tab} style={{ width: pageSize.width, height: pageSize.height }}>
@@ -257,6 +253,7 @@ export default function FrasesScreen() {
 
       <FloatingButton
         icon="chat-square-add"
+        tooltip="Adicionar"
         accessibilityLabel="Adicionar frase"
         onPress={() => {
           if (!catalog) return;

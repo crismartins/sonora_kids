@@ -242,6 +242,7 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
             size="md"
             accessibilityLabel="Página anterior"
             disabled={page === 0}
+            inactiveReason={page === 0 ? "Primeira página" : undefined}
             onPress={() => go(page - 1)}
           />
 

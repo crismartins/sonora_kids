@@ -334,7 +334,7 @@ export default function RotinaScreen() {
         </ScrollView>
       </View>
 
-      <View className="flex-row border-b border-line bg-white">
+      <View className="flex-row bg-white mx-5 rounded-full overflow-hidden">
         {PERIOD_TABS.map(({ period, icon }) => {
           const active = period === selectedPeriod;
           const tint = active ? colors.primary : colors.neutralDark;
@@ -344,7 +344,7 @@ export default function RotinaScreen() {
               accessibilityLabel={PERIOD_LABELS[period]}
               accessibilityState={{ selected: active }}
               onPress={() => selectPeriod(period)}
-              className={`flex-1 items-center justify-center gap-0.5 py-2 ${active ? "bg-primary-soft" : ""}`}
+              className={`flex-1 items-center justify-center gap-0 rounded-full py-3 ${active ? "bg-primary-soft" : ""}`}
             >
               <SolarIcon name={icon} size={24} color={tint} />
               <PillText size={16} style={{ color: tint }}>
@@ -412,6 +412,7 @@ export default function RotinaScreen() {
       <FloatingButton
         icon="pen"
         iconSize={26}
+        tooltip="Editar"
         accessibilityLabel={`Editar ${PERIOD_LABELS[selectedPeriod]}`}
         onPress={() => openPeriod(selectedPeriod)}
         bottom={tabBarHeight + 12}
