@@ -10,12 +10,7 @@ import { colors } from "@/constants/colors";
 import { FONT_FAMILY } from "@/constants/typography";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { useProfile } from "@/context/ProfileContext";
-import {
-  inferVoiceGender,
-  SpeechLanguage,
-  voiceSummary,
-  VoiceGender,
-} from "@/services/appSettings";
+import { inferVoiceGender, SpeechLanguage, voiceSummary, VoiceGender } from "@/services/appSettings";
 import { AVATAR_V1, AVATAR_V2, AvatarChoice, profileAvatarSource } from "@/services/profile";
 import { loadTopWords, UsedWord } from "@/services/wordUsage";
 import { VoicePickerModal, VOICE_PREVIEW } from "@/components/VoicePickerModal";
@@ -287,10 +282,10 @@ export default function ProfileScreen() {
           accessibilityLabel={`Voz, ${voiceSummary(voices, settings)}`}
           accessibilityHint="Abre a escolha de voz"
           onPress={() => setVoiceOpen(true)}
-          className="mx-4 h-16 flex-row items-center gap-3 rounded-2xl border border-neutral bg-neutral-light px-4"
+          className="mx-4 flex-row items-center gap-3 rounded-2xl border border-neutral bg-neutral-light px-4 py-3"
         >
           <View className="h-9 w-9 items-center justify-center rounded-full bg-primary-soft">
-            <SolarIcon name="volume" size={20} color={colors.primary} />
+            <SolarIcon name="volume-loud" size={20} color={colors.primary} />
           </View>
           <View className="flex-1">
             <Text className="font-quicksand text-base text-neutral-dark">Voz</Text>
@@ -370,4 +365,3 @@ function AvatarChoiceButton({
     </Pressable>
   );
 }
-
