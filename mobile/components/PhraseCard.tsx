@@ -26,6 +26,9 @@ const MIN_BODY = 80;
 const MAX_BODY = 140;
 const IMAGE_SIZE = 32;
 const PIECE_HEIGHT = 88;
+const LABEL_CHAR = 0.7;
+const LABEL_SLACK = 10;
+const LABEL_MAX = 220;
 
 interface PhraseCardProps {
   phrase: PhraseItem[];
@@ -114,6 +117,41 @@ function pieceImage(images: Map<string, ImageSourcePropType> | undefined, text: 
   return source ?? FALLBACK_IMAGE;
 }
 
+function labelSize(text: string, largeText: boolean) {
+  if (text.length > 16) return 14;
+  return largeText ? 18 : 16;
+}
+
+function widestLineLength(text: string) {
+  const words = text.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return 1;
+  if (words.length === 1) return words[0].length;
+  let best = words.join(" ").length;
+  for (let split = 1; split < words.length; split += 1) {
+    const left = words.slice(0, split).join(" ").length;
+    const right = words.slice(split).join(" ").length;
+    best = Math.min(best, Math.max(left, right));
+  }
+  return best;
+}
+
+function piecePadding(leftSocket: boolean, rightTab: boolean) {
+  const left = leftSocket ? TAB + 6 : 8;
+  const right = rightTab ? 8 : 6;
+  return left + right;
+}
+
+function bodyWidthForLabel(text: string, textSize: number, leftSocket: boolean) {
+  const textWidth = widestLineLength(text) * textSize * LABEL_CHAR + LABEL_SLACK;
+  const width = Math.ceil(textWidth + piecePadding(leftSocket, true));
+  return Math.max(MIN_BODY, Math.min(LABEL_MAX, width));
+}
+
+function pieceHeightFor(textSize: number) {
+  const lineHeight = textSize + 4;
+  return 16 + IMAGE_SIZE + 4 + lineHeight * 2 + 4;
+}
+
 export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCardProps) {
   const { width: windowWidth } = useWindowDimensions();
   const { settings, speak, stopSpeaking, haptic } = useAppSettings();
@@ -145,16 +183,27 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
   }, [haptic, onManage, stopSpeaking]);
 
   const available = rowWidth || Math.max(0, windowWidth - 32);
-  const count = Math.max(phrase.length, 1);
-  const natural = (available - SPEAKER_BODY) / count;
-  const needsScroll = natural < MIN_BODY;
-  const bodyWidth = needsScroll ? MIN_BODY : Math.min(MAX_BODY, natural);
-  const contentWidth = count * bodyWidth + SPEAKER_BODY;
+  const specs = phrase.map((item, index) => {
+    const textSize = labelSize(item.text, settings.largeText);
+    return {
+      textSize,
+      bodyWidth: bodyWidthForLabel(item.text, textSize, index > 0),
+    };
+  });
+  const pieceHeight = specs.reduce((height, spec) => Math.max(height, pieceHeightFor(spec.textSize)), PIECE_HEIGHT);
+  const preferredTotal = specs.reduce((sum, spec) => sum + spec.bodyWidth, 0) + SPEAKER_BODY;
+  const growBudget = specs.reduce((sum, spec) => sum + Math.max(0, MAX_BODY - spec.bodyWidth), 0);
+  const extra = Math.max(0, available - preferredTotal);
+  const grow = preferredTotal <= available && growBudget > 0 ? Math.min(1, extra / growBudget) : 0;
+  const bodyWidths = specs.map((spec) => spec.bodyWidth + Math.max(0, MAX_BODY - spec.bodyWidth) * grow);
+  const contentWidth = bodyWidths.reduce((sum, width) => sum + width, 0) + SPEAKER_BODY;
+  const sideInset = onRemoveItem ? 30 : 0;
+  const needsScroll = contentWidth + sideInset > available + 1;
   const stroke = settings.highContrast ? colors.dark : "rgba(0, 29, 74, 0.12)";
 
   const wordPieces = phrase.map((item, index) => {
-    const longLabel = item.text.length > 16;
-    const textSize = longLabel ? 14 : settings.largeText ? 18 : 16;
+    const textSize = specs[index]?.textSize ?? labelSize(item.text, settings.largeText);
+    const bodyWidth = bodyWidths[index] ?? MIN_BODY;
     const body = (
       <>
         <View
@@ -175,7 +224,7 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
         <PillText
           size={textSize}
           numberOfLines={2}
-          style={{ width: "100%", color: colors.dark, marginTop: 4, lineHeight: textSize + 4 }}
+          style={{ alignSelf: "stretch", color: colors.dark, marginTop: 4, lineHeight: textSize + 4 }}
         >
           {item.text}
         </PillText>
@@ -185,7 +234,7 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
       <PuzzlePiece
         key={`${item.text}-${index}`}
         bodyWidth={bodyWidth}
-        height={PIECE_HEIGHT}
+        height={pieceHeight}
         leftSocket={index > 0}
         rightTab
         fill={settings.highContrast ? colors.white : getCategoryBgColor(item.color)}
@@ -212,7 +261,7 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
   const speaker = (
     <PuzzlePiece
       bodyWidth={SPEAKER_BODY}
-      height={PIECE_HEIGHT}
+      height={pieceHeight}
       leftSocket={phrase.length > 0}
       rightTab={false}
       fill={colors.primaryWash}
@@ -269,18 +318,17 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
         animatedStyle,
       ]}
     >
-      {needsScroll ? (
-        <ScrollView
-          horizontal
-          nestedScrollEnabled
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ flexGrow: 1 }}
-        >
-          {pieces}
-        </ScrollView>
-      ) : (
-        pieces
-      )}
+      <ScrollView
+        horizontal
+        nestedScrollEnabled
+        directionalLockEnabled
+        scrollEnabled={needsScroll}
+        showsHorizontalScrollIndicator={false}
+        style={{ width: "100%" }}
+        contentContainerStyle={needsScroll ? undefined : { flexGrow: 1 }}
+      >
+        {pieces}
+      </ScrollView>
     </Animated.View>
   );
 }

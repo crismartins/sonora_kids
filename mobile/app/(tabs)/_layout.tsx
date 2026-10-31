@@ -10,7 +10,7 @@ import { FONT_FAMILY } from "@/constants/typography";
 import { useAppSettings } from "@/context/AppSettingsContext";
 
 const TAB_TITLES: Record<string, string> = {
-  index: "Pecs",
+  index: "PECS",
   frases: "Frases",
   aprender: "Aprender",
   rotina: "Rotina",

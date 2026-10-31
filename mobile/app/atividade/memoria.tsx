@@ -79,9 +79,7 @@ export default function MemoriaScreen() {
   const flip = (card: MemoryCard) => {
     if (lock.current || openRef.current?.key === card.key || card.faceUp || card.matched) return;
 
-    setCards((current) =>
-      current.map((item) => (item.key === card.key ? { ...item, faceUp: true } : item)),
-    );
+    setCards((current) => current.map((item) => (item.key === card.key ? { ...item, faceUp: true } : item)));
     speak(card.title);
     haptic(Haptics.ImpactFeedbackStyle.Light);
 
@@ -96,25 +94,28 @@ export default function MemoriaScreen() {
     const matched = first.pairId === card.pairId;
     const stamp = dealId.current;
 
-    timer.current = setTimeout(() => {
-      if (dealId.current !== stamp) return;
-      setCards((current) =>
-        current.map((item) => {
-          if (matched && item.pairId === first.pairId) {
-            return { ...item, faceUp: true, matched: true };
-          }
-          if (!matched && (item.key === first.key || item.key === card.key)) {
-            return { ...item, faceUp: false };
-          }
-          return item;
-        }),
-      );
-      lock.current = false;
-      if (matched) {
-        celebrate();
-        recordWordUse(first.title, first.colorName);
-      }
-    }, matched ? 420 : 900);
+    timer.current = setTimeout(
+      () => {
+        if (dealId.current !== stamp) return;
+        setCards((current) =>
+          current.map((item) => {
+            if (matched && item.pairId === first.pairId) {
+              return { ...item, faceUp: true, matched: true };
+            }
+            if (!matched && (item.key === first.key || item.key === card.key)) {
+              return { ...item, faceUp: false };
+            }
+            return item;
+          }),
+        );
+        lock.current = false;
+        if (matched) {
+          celebrate();
+          recordWordUse(first.title, first.colorName);
+        }
+      },
+      matched ? 420 : 900,
+    );
   };
 
   const rows: MemoryCard[][] = [];
@@ -123,7 +124,7 @@ export default function MemoriaScreen() {
   }
 
   return (
-    <ActivityChrome title="Memória com PECS">
+    <ActivityChrome title="Memória com Pecs">
       {finished ? (
         <ActivityDone
           title="Você achou todos!"
@@ -139,11 +140,7 @@ export default function MemoriaScreen() {
               <View key={row.map((card) => card.key).join("-")} className="flex-1 flex-row gap-3">
                 {row.map((card) => (
                   <View key={card.key} className="flex-1">
-                    <MemoryTile
-                      card={card}
-                      highContrast={settings.highContrast}
-                      onPress={() => flip(card)}
-                    />
+                    <MemoryTile card={card} highContrast={settings.highContrast} onPress={() => flip(card)} />
                   </View>
                 ))}
               </View>
@@ -155,15 +152,7 @@ export default function MemoriaScreen() {
   );
 }
 
-function MemoryTile({
-  card,
-  highContrast,
-  onPress,
-}: {
-  card: MemoryCard;
-  highContrast: boolean;
-  onPress: () => void;
-}) {
+function MemoryTile({ card, highContrast, onPress }: { card: MemoryCard; highContrast: boolean; onPress: () => void }) {
   const color = getCategoryColor(card.colorName);
   const background = highContrast ? colors.white : getCategoryBgColor(card.colorName);
   const showing = card.faceUp || card.matched;

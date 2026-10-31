@@ -75,7 +75,9 @@ function PhrasePage({
       renderItem={({ item }) => {
         const customId = item.customId;
         return (
-          <PhraseCard phrase={item.items} images={images} onManage={customId ? () => onManage(customId) : undefined} />
+          <View style={{ paddingHorizontal: 16 }}>
+            <PhraseCard phrase={item.items} images={images} onManage={customId ? () => onManage(customId) : undefined} />
+          </View>
         );
       }}
     />
@@ -235,7 +237,7 @@ export default function FrasesScreen() {
             onMomentumScrollEnd={onPagerMomentumEnd}
             scrollEventThrottle={16}
             contentOffset={contentOffset}
-            style={{ width: pageSize.width, height: pageSize.height, paddingHorizontal: 16 }}
+            style={{ width: pageSize.width, height: pageSize.height }}
           >
             {FILTER_TABS.map((tab) => (
               <View key={tab} style={{ width: pageSize.width, height: pageSize.height }}>
