@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
 import {
   AvatarChoice,
   ChildProfile,
+  ChildSex,
   commitProfile,
   DEFAULT_PROFILE,
   loadProfile,
@@ -14,6 +15,7 @@ interface ProfileContextValue {
     nickname: string;
     name: string;
     avatar: AvatarChoice;
+    sex: ChildSex;
     pendingPhotoUri?: string | null;
   }) => Promise<ChildProfile>;
 }
@@ -48,6 +50,7 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
       nickname: string;
       name: string;
       avatar: AvatarChoice;
+      sex: ChildSex;
       pendingPhotoUri?: string | null;
     }) => {
       const next = await commitProfile(profileRef.current, draft);

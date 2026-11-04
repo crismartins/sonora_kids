@@ -7,7 +7,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone, ActivityPrompt, activityPadding } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
+import { useProfile } from "@/context/ProfileContext";
 import { playPecs, sample, shuffle } from "@/data/play";
+import { pecLabel } from "@/data/pecLabels";
+import { ChildSex } from "@/services/profile";
 import { recordWordUse } from "@/services/wordUsage";
 
 const PAIR_COUNT = 4;
@@ -22,8 +25,8 @@ type MemoryCard = {
   matched: boolean;
 };
 
-function deal(): MemoryCard[] {
-  const picked = sample(playPecs(), PAIR_COUNT);
+function deal(sex: ChildSex): MemoryCard[] {
+  const picked = sample(playPecs(sex), PAIR_COUNT);
   const cards = picked.flatMap((pec, index) =>
     [0, 1].map((copy) => ({
       key: `${pec.id}-${index}-${copy}`,
@@ -41,11 +44,13 @@ function deal(): MemoryCard[] {
 export default function MemoriaScreen() {
   const insets = useSafeAreaInsets();
   const { settings, speak, haptic } = useAppSettings();
-  const [cards, setCards] = useState<MemoryCard[]>(() => deal());
+  const { profile } = useProfile();
+  const [cards, setCards] = useState<MemoryCard[]>(() => deal(profile.sex));
   const [finished, setFinished] = useState(false);
   const lock = useRef(false);
   const openRef = useRef<MemoryCard | null>(null);
   const dealId = useRef(0);
+  const dealtSex = useRef(profile.sex);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const found = cards.filter((card) => card.matched).length / 2;
@@ -55,6 +60,17 @@ export default function MemoriaScreen() {
       if (timer.current) clearTimeout(timer.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (dealtSex.current === profile.sex) return;
+    dealtSex.current = profile.sex;
+    dealId.current += 1;
+    lock.current = false;
+    openRef.current = null;
+    if (timer.current) clearTimeout(timer.current);
+    setFinished(false);
+    setCards(deal(profile.sex));
+  }, [profile.sex]);
 
   useEffect(() => {
     if (cards.length > 0 && cards.every((card) => card.matched)) {
@@ -73,14 +89,14 @@ export default function MemoriaScreen() {
     openRef.current = null;
     if (timer.current) clearTimeout(timer.current);
     setFinished(false);
-    setCards(deal());
+    setCards(deal(profile.sex));
   };
 
   const flip = (card: MemoryCard) => {
     if (lock.current || openRef.current?.key === card.key || card.faceUp || card.matched) return;
 
     setCards((current) => current.map((item) => (item.key === card.key ? { ...item, faceUp: true } : item)));
-    speak(card.title);
+    speak(pecLabel(card.title, profile.sex));
     haptic(Haptics.ImpactFeedbackStyle.Light);
 
     const first = openRef.current;
@@ -153,13 +169,15 @@ export default function MemoriaScreen() {
 }
 
 function MemoryTile({ card, highContrast, onPress }: { card: MemoryCard; highContrast: boolean; onPress: () => void }) {
+  const { profile } = useProfile();
+  const label = pecLabel(card.title, profile.sex);
   const color = getCategoryColor(card.colorName);
   const background = highContrast ? colors.white : getCategoryBgColor(card.colorName);
   const showing = card.faceUp || card.matched;
 
   return (
     <Pressable
-      accessibilityLabel={showing ? card.title : "Carta virada"}
+      accessibilityLabel={showing ? label : "Carta virada"}
       onPress={onPress}
       className={`flex-1 overflow-hidden rounded-[22px] active:opacity-90 ${showing ? "px-2 pb-2 pt-2" : "items-center justify-center"}`}
       style={{
@@ -174,7 +192,7 @@ function MemoryTile({ card, highContrast, onPress }: { card: MemoryCard; highCon
             <Image source={card.image} className="h-full w-full" resizeMode="cover" />
           </View>
           <PillText size={16} numberOfLines={2} style={{ color: colors.dark }}>
-            {card.title}
+            {label}
           </PillText>
         </View>
       ) : (

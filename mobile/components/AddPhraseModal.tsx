@@ -9,6 +9,10 @@ import { PhraseCard } from "@/components/PhraseCard";
 import { FormError } from "@/components/ScreenState";
 import { Category, PecItem, PhraseItem } from "@/types";
 import { getCategoryBgColor } from "@/constants/colors";
+import { pecLabel } from "@/data/pecLabels";
+import { imageFromPec } from "@/data/pecImages";
+import { usePecImageOverrides } from "@/hooks/usePecImageOverrides";
+import { useProfile } from "@/context/ProfileContext";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { CustomPhrase } from "@/services/customPhrases";
 
@@ -60,6 +64,8 @@ function pecImageUri(pec: PecItem) {
 export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: AddPhraseFormProps) {
   const insets = useSafeAreaInsets();
   const { settings, speak } = useAppSettings();
+  const { profile } = useProfile();
+  const pecImagesVersion = usePecImageOverrides();
   const [items, setItems] = useState<PhraseItem[]>(
     initialPhrase?.items.map((item) => ({ text: item.text, color: item.color, image: item.image })) ?? [],
   );
@@ -68,16 +74,15 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
   const [saving, setSaving] = useState(false);
 
   const imagesByTitle = useMemo(() => {
-    const map = new Map<string, string>();
+    const map = new Map<string, ImageSourcePropType>();
     for (const category of categories) {
       for (const pec of category.pECS?.nodes ?? []) {
-        const uri = pecImageUri(pec);
-        if (!uri) continue;
-        map.set(pec.title.trim().toLocaleLowerCase("pt-BR"), uri);
+        const key = pec.title.trim().toLocaleLowerCase("pt-BR");
+        if (!map.has(key)) map.set(key, imageFromPec(pec, profile.sex));
       }
     }
     return map;
-  }, [categories]);
+  }, [categories, pecImagesVersion, profile.sex]);
 
   const selectedCategory = categories.find((category) => category.slug === categorySlug) ?? categories[0];
   const pecs = selectedCategory?.pECS?.nodes ?? [];
@@ -89,10 +94,11 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
   const canHear = phrase.length > 0;
   const canSave = canHear && !saving;
   const previewImages = useMemo(() => {
-    const map = new Map<string, ImageSourcePropType>();
-    for (const [title, uri] of imagesByTitle) map.set(title, { uri });
+    const map = new Map(imagesByTitle);
     for (const item of items) {
-      if (item.image) map.set(item.text.trim().toLocaleLowerCase("pt-BR"), { uri: item.image });
+      const key = item.text.trim().toLocaleLowerCase("pt-BR");
+      if (map.has(key) || !item.image) continue;
+      map.set(key, { uri: item.image });
     }
     return map;
   }, [imagesByTitle, items]);
@@ -104,7 +110,7 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
     }
     setItems((current) => [...current, { text: pec.title, color: selectedColor, image: pecImageUri(pec) }]);
     setError(null);
-    speak(pec.title);
+    speak(pecLabel(pec.title, profile.sex));
   };
 
   const removeAt = (index: number) => {

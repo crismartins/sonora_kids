@@ -8,18 +8,21 @@ export const AVATAR_V1 = require("../assets/images/avatar_default_v1.png");
 export const AVATAR_V2 = require("../assets/images/avatar_default_v2.png");
 
 export type AvatarChoice = "v1" | "v2" | "photo";
+export type ChildSex = "menina" | "menino";
 
 export interface ChildProfile {
   nickname: string;
   name: string;
   avatar: AvatarChoice;
   photoUri?: string;
+  sex: ChildSex;
 }
 
 export const DEFAULT_PROFILE: ChildProfile = {
   nickname: "Joãozinho",
   name: "João Roberto Pereira da Silva",
   avatar: "v1",
+  sex: "menina",
 };
 
 export function profileAvatarSource(profile: ChildProfile): ImageSourcePropType {
@@ -30,14 +33,20 @@ export function profileAvatarSource(profile: ChildProfile): ImageSourcePropType 
 
 function isProfile(value: unknown): value is ChildProfile {
   if (!value || typeof value !== "object") return false;
-  const profile = value as ChildProfile;
+  const profile = value as Partial<ChildProfile>;
   const avatarOk = profile.avatar === "v1" || profile.avatar === "v2" || profile.avatar === "photo";
+  const sexOk = profile.sex === undefined || profile.sex === "menina" || profile.sex === "menino";
   return (
     typeof profile.nickname === "string" &&
     typeof profile.name === "string" &&
     avatarOk &&
+    sexOk &&
     (profile.photoUri === undefined || typeof profile.photoUri === "string")
   );
+}
+
+function withSex(profile: ChildProfile): ChildProfile {
+  return { ...profile, sex: profile.sex === "menino" ? "menino" : "menina" };
 }
 
 export async function loadProfile(): Promise<ChildProfile> {
@@ -45,8 +54,9 @@ export async function loadProfile(): Promise<ChildProfile> {
   if (!raw) return DEFAULT_PROFILE;
   const parsed: unknown = JSON.parse(raw);
   if (!isProfile(parsed)) return DEFAULT_PROFILE;
-  if (parsed.avatar === "photo" && !parsed.photoUri) return { ...parsed, avatar: "v1" };
-  return parsed;
+  const profile = withSex(parsed);
+  if (profile.avatar === "photo" && !profile.photoUri) return { ...profile, avatar: "v1" };
+  return profile;
 }
 
 async function saveProfile(profile: ChildProfile): Promise<void> {
@@ -143,17 +153,19 @@ export async function commitProfile(
     nickname: string;
     name: string;
     avatar: AvatarChoice;
+    sex: ChildSex;
     pendingPhotoUri?: string | null;
   },
 ): Promise<ChildProfile> {
   const nickname = draft.nickname.trim();
   const name = draft.name.trim();
+  const sex: ChildSex = draft.sex === "menino" ? "menino" : "menina";
   if (!nickname) throw new Error("Escreva o apelido.");
   if (!name) throw new Error("Escreva o nome.");
 
   if (draft.avatar !== "photo") {
     if (current.photoUri) deleteStoredFile(current.photoUri);
-    const next: ChildProfile = { nickname, name, avatar: draft.avatar };
+    const next: ChildProfile = { nickname, name, avatar: draft.avatar, sex };
     await saveProfile(next);
     return next;
   }
@@ -167,7 +179,7 @@ export async function commitProfile(
     if (current.photoUri && current.photoUri !== photoUri) deleteStoredFile(current.photoUri);
   }
 
-  const next: ChildProfile = { nickname, name, avatar: "photo", photoUri };
+  const next: ChildProfile = { nickname, name, avatar: "photo", photoUri, sex };
   await saveProfile(next);
   return next;
 }

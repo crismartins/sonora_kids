@@ -16,6 +16,7 @@ import { ProfileProvider } from "@/context/ProfileContext";
 import { FONT_FAMILY } from "@/constants/typography";
 import { colors } from "@/constants/colors";
 import { loadOnboardingSeen } from "@/services/onboarding";
+import { ensurePecImageOverridesLoaded } from "@/services/pecImageOverrides";
 
 SplashScreen.preventAutoHideAsync();
 SystemUI.setBackgroundColorAsync(colors.primary);
@@ -138,6 +139,7 @@ export default function RootLayout() {
   });
   const [onboardingSeen, setOnboardingSeen] = useState<boolean | null>(null);
   const [splashVisible, setSplashVisible] = useState(true);
+  const [imagesReady, setImagesReady] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -148,12 +150,15 @@ export default function RootLayout() {
       .catch(() => {
         if (active) setOnboardingSeen(true);
       });
+    ensurePecImageOverridesLoaded().finally(() => {
+      if (active) setImagesReady(true);
+    });
     return () => {
       active = false;
     };
   }, []);
 
-  const ready = (fontsLoaded || fontError) && onboardingSeen !== null;
+  const ready = (fontsLoaded || fontError) && onboardingSeen !== null && imagesReady;
 
   useEffect(() => {
     if (!splashVisible) SystemUI.setBackgroundColorAsync(colors.white);

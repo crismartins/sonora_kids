@@ -1,4 +1,4 @@
-import { Alert, Image, Linking, Platform, Pressable } from "react-native";
+import { Alert, Image, ImageSourcePropType, Linking, Platform, Pressable } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { SolarIcon } from "@/components/SolarIcon";
 import { colors } from "@/constants/colors";
@@ -9,6 +9,7 @@ type ImageSourcePickerProps = {
   onPicked: (uri: string) => void;
   onError?: (message: string) => void;
   previewUri?: string | null;
+  previewSource?: ImageSourcePropType | null;
   onPreviewError?: () => void;
   allowsEditing?: boolean;
   aspect?: [number, number];
@@ -43,6 +44,7 @@ export function ImageSourcePicker({
   onPicked,
   onError,
   previewUri,
+  previewSource,
   onPreviewError,
   allowsEditing,
   aspect,
@@ -50,6 +52,7 @@ export function ImageSourcePicker({
   iconSize = 32,
 }: ImageSourcePickerProps) {
   const options = pickerOptions(allowsEditing, aspect);
+  const source = previewUri ? { uri: previewUri } : previewSource ?? null;
 
   const pickFromGallery = async () => {
     try {
@@ -97,8 +100,8 @@ export function ImageSourcePicker({
       onPress={chooseSource}
       className={`items-center justify-center overflow-hidden bg-primary-soft border-4 border-light ${className ? ` ${className}` : ""}`}
     >
-      {previewUri ? (
-        <Image source={{ uri: previewUri }} onError={onPreviewError} className="h-full w-full" />
+      {source ? (
+        <Image source={source} onError={onPreviewError} className="h-full w-full" />
       ) : (
         <SolarIcon name="camera" size={iconSize} color={colors.neutralDark} />
       )}

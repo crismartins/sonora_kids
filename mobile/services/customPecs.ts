@@ -44,12 +44,16 @@ export async function saveCustomPecs(pecs: CustomPec[]): Promise<void> {
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(pecs));
 }
 
-function customPecsDir() {
-  const dir = new Directory(Paths.document, "custom-pecs");
+function imageDirectory(name: string) {
+  const dir = new Directory(Paths.document, name);
   if (!dir.exists) {
     dir.create({ intermediates: true, idempotent: true });
   }
   return dir;
+}
+
+function customPecsDir() {
+  return imageDirectory("custom-pecs");
 }
 
 function extensionFromUri(uri: string) {
@@ -120,11 +124,20 @@ async function persistWebImage(uri: string): Promise<string> {
   });
 }
 
-async function persistPickedImage(id: string, sourceUri: string): Promise<string> {
+export async function savePickedImage(folder: string, id: string, sourceUri: string): Promise<string> {
   if (Platform.OS === "web") return persistWebImage(sourceUri);
-  const destination = new File(customPecsDir(), `${id}.${extensionFromUri(sourceUri)}`);
+  const safeId = id.replace(/[^a-zA-Z0-9_-]/g, "_");
+  const destination = new File(imageDirectory(folder), `${safeId}.${extensionFromUri(sourceUri)}`);
   await new File(sourceUri).copy(destination, { overwrite: true });
   return destination.uri;
+}
+
+async function persistPickedImage(id: string, sourceUri: string): Promise<string> {
+  return savePickedImage("custom-pecs", id, sourceUri);
+}
+
+export function removeStoredImage(uri?: string) {
+  deleteStoredFile(uri);
 }
 
 function deleteStoredFile(uri?: string) {

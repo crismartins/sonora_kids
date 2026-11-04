@@ -7,12 +7,16 @@ import { SolarIcon, SolarIconName } from "@/components/SolarIcon";
 import { BottomSheet } from "@/components/AppModal";
 import { Button, FloatingButton } from "@/components/Button";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { useProfile } from "@/context/ProfileContext";
 import { useCategories } from "@/hooks/useCategories";
 import { useCustomPecs } from "@/hooks/useCustomPecs";
 import { useRoutine } from "@/hooks/useRoutine";
 import { usePillPager } from "@/hooks/usePillPager";
 import { RoutinePecCard } from "@/components/PecCard";
-import { openRoutineForm, RoutinePecOption, RoutinePick } from "@/components/AddRoutineItemModal";
+import { openRoutineForm, RoutinePick } from "@/components/AddRoutineItemModal";
+import { pecLabel } from "@/data/pecLabels";
+import { imageFromPec, pecImageForTitle } from "@/data/pecImages";
+import { usePecImageOverrides } from "@/hooks/usePecImageOverrides";
 import { FilterChip } from "@/components/FilterChip";
 import { PillText } from "@/components/PillText";
 import { EmptyState } from "@/components/ScreenState";
@@ -20,7 +24,6 @@ import { colors } from "@/constants/colors";
 import { tabBarClearance } from "@/constants/tabBar";
 import { customPecToItem } from "@/services/customPecs";
 import { DAY_LABELS, DAY_PERIODS, DayPeriod, PERIOD_LABELS, RoutineItem } from "@/services/routine";
-import { PecItem } from "@/types";
 
 const DAY_CHIPS = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
 const DIA_A_DIA = "dia-a-dia";
@@ -61,12 +64,6 @@ function frameContains(frame: RemoveFrame, pageX: number, pageY: number) {
     pageY >= frame.y - pad &&
     pageY <= frame.y + frame.height + pad
   );
-}
-
-function pecImage(item: PecItem): ImageSourcePropType | undefined {
-  if (item.localImage) return item.localImage;
-  const uri = item.featuredImage?.node?.sourceUrl;
-  return uri ? { uri } : undefined;
 }
 
 function RoutineDayPage({
@@ -115,7 +112,7 @@ function RoutineDayPage({
                     id={item.id}
                     title={item.title}
                     color={dayColor}
-                    image={imageById.get(item.pecId)}
+                    image={imageById.get(item.pecId) ?? pecImageForTitle(item.title)}
                     editing={editing}
                     onLongPress={onBeginEditing}
                     onCancelEditing={onCancelEditing}
@@ -138,6 +135,8 @@ export default function RotinaScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { speak, haptic } = useAppSettings();
+  const { profile } = useProfile();
+  const pecImagesVersion = usePecImageOverrides();
   const { data: categories } = useCategories();
   const { pecs: customPecs, addPec } = useCustomPecs();
   const { itemsFor, addItem, removeItem } = useRoutine();
@@ -186,23 +185,15 @@ export default function RotinaScreen() {
   const catalogRef = useRef(catalog);
   catalogRef.current = catalog;
 
-  const options = useMemo(() => {
-    const catalog = dayCategory?.pECS.nodes ?? [];
-    const custom = customPecs.filter((pec) => pec.categorySlug === DIA_A_DIA).map(customPecToItem);
-    const byId = new Map<string, RoutinePecOption>();
-    for (const item of [...catalog, ...custom]) {
-      byId.set(item.id, { id: item.id, title: item.title, image: pecImage(item) });
-    }
-    return [...byId.values()];
-  }, [customPecs, dayCategory]);
-
   const imageById = useMemo(() => {
     const map = new Map<string, ImageSourcePropType>();
-    for (const option of options) {
-      if (option.image) map.set(option.id, option.image);
+    for (const category of catalog) {
+      for (const item of category.pECS.nodes) {
+        map.set(item.id, imageFromPec(item, profile.sex));
+      }
     }
     return map;
-  }, [options]);
+  }, [catalog, pecImagesVersion, profile.sex]);
 
   const tabBarHeight = tabBarClearance(insets.bottom);
 
@@ -254,11 +245,11 @@ export default function RotinaScreen() {
       return {
         id: pecId,
         title,
-        image: pec.featuredImage?.node?.sourceUrl,
+        image: imageFromPec(pec, profile.sex),
         color: category.categoriasDePec?.configuracoesCategorias?.cor ?? "blue",
       };
     }
-    return { id: pecId, title, color: dayColor };
+    return { id: pecId, title, image: pecImageForTitle(title, profile.sex), color: dayColor };
   };
 
   const openPeriod = (period: DayPeriod) => {
@@ -437,7 +428,7 @@ export default function RotinaScreen() {
 
       <BottomSheet
         visible={!!removing}
-        title={removing?.item.title}
+        title={removing ? pecLabel(removing.item.title, profile.sex) : undefined}
         onClose={() => {
           setRemoving(null);
           cancelEditing();

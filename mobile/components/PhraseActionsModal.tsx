@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { BottomSheet } from "@/components/AppModal";
 import { ManageActions } from "@/components/ManageActions";
+import { useProfile } from "@/context/ProfileContext";
+import { pecPhrase } from "@/data/pecLabels";
 import { CustomPhrase } from "@/services/customPhrases";
 
 interface PhraseActionsModalProps {
@@ -11,9 +13,10 @@ interface PhraseActionsModalProps {
 }
 
 export function PhraseActionsModal({ phrase, onClose, onEdit, onDelete }: PhraseActionsModalProps) {
+  const { profile } = useProfile();
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const label = phrase?.items.map((item) => item.text).join(" ");
+  const label = phrase ? pecPhrase(phrase.items.map((item) => item.text), profile.sex) : undefined;
 
   useEffect(() => {
     setConfirming(false);

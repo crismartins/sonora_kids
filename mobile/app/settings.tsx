@@ -79,7 +79,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 const GUIDE_STEPS = [
   "Toque em um PEC para ouvir a palavra.",
-  "Segure um PEC que você criou para editar ou apagar.",
+  "Segure um PEC para trocar a imagem. Nos que você criou, também dá para editar ou apagar.",
   "Em Frases, toque em + e monte a frase com os PECs.",
   "Aqui você escolhe a voz, a velocidade e a vibração.",
 ];

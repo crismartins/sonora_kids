@@ -9,7 +9,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone, ActivityPrompt, activityPadding } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
+import { useProfile } from "@/context/ProfileContext";
 import { playPecs, sample, shuffle, PlayPec } from "@/data/play";
+import { pecLabel } from "@/data/pecLabels";
+import { ChildSex } from "@/services/profile";
 import { recordWordUse } from "@/services/wordUsage";
 
 const ROUND_COUNT = 5;
@@ -19,8 +22,8 @@ type Round = {
   options: PlayPec[];
 };
 
-function makeRounds(): Round[] {
-  const pool = playPecs();
+function makeRounds(sex: ChildSex): Round[] {
+  const pool = playPecs(sex);
   return sample(pool, ROUND_COUNT).map((target) => ({
     target,
     options: shuffle([
@@ -36,8 +39,9 @@ function makeRounds(): Round[] {
 export default function RepitaScreen() {
   const insets = useSafeAreaInsets();
   const { settings, speak, haptic } = useAppSettings();
+  const { profile } = useProfile();
   const [session, setSession] = useState(0);
-  const rounds = useMemo(() => makeRounds(), [session]);
+  const rounds = useMemo(() => makeRounds(profile.sex), [session, profile.sex]);
   const [index, setIndex] = useState(0);
   const [pickedId, setPickedId] = useState<string | null>(null);
   const [wrongId, setWrongId] = useState<string | null>(null);
@@ -81,8 +85,8 @@ export default function RepitaScreen() {
     setPickedId(pec.id);
     setWrongId(null);
     celebrate();
-    speak(pec.title);
-    recordWordUse(pec.title, pec.colorName);
+    speak(pecLabel(pec.title, profile.sex));
+    recordWordUse(pecLabel(pec.title, profile.sex), pec.colorName);
 
     timer.current = setTimeout(() => {
       lock.current = false;
@@ -131,7 +135,7 @@ export default function RepitaScreen() {
               icon="volume-loud"
               iconSize={24}
               labelSize="md"
-              onPress={() => speak(round.target.title)}
+              onPress={() => speak(pecLabel(round.target.title, profile.sex))}
             />
           </View>
         </ScrollView>
@@ -153,6 +157,8 @@ function ChoiceCard({
   wrong: boolean;
   onPress: () => void;
 }) {
+  const { profile } = useProfile();
+  const label = pecLabel(pec.title, profile.sex);
   const color = getCategoryColor(pec.colorName);
   const x = useSharedValue(0);
 
@@ -173,7 +179,7 @@ function ChoiceCard({
   return (
     <Animated.View style={animatedStyle}>
       <Pressable
-        accessibilityLabel={pec.title}
+        accessibilityLabel={label}
         onPress={onPress}
         className="min-h-[96px] flex-row items-center gap-3 rounded-[22px] py-3 pl-3 pr-12 active:opacity-90"
         style={{
@@ -187,7 +193,7 @@ function ChoiceCard({
         </View>
         <View className="flex-1 items-center justify-center">
           <PillText size={28} numberOfLines={2} style={{ color: colors.dark }}>
-            {pec.title}
+            {label}
           </PillText>
         </View>
         {selected ? (

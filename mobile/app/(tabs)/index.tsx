@@ -8,7 +8,10 @@ import { EmptyState } from "@/components/ScreenState";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { useCategories } from "@/hooks/useCategories";
 import { useCustomPecs } from "@/hooks/useCustomPecs";
+import { imageFromPec } from "@/data/pecImages";
+import { useProfile } from "@/context/ProfileContext";
 import { CustomPec, customPecToItem } from "@/services/customPecs";
+import { clearPecImageOverride, pecImageOverride, setPecImageOverride } from "@/services/pecImageOverrides";
 import { PecCard } from "@/components/PecCard";
 import { openPecForm } from "@/components/AddPecModal";
 import { PecActionsModal } from "@/components/PecActionsModal";
@@ -20,6 +23,7 @@ import { Category, PecItem } from "@/types";
 export default function PecsScreen() {
   const insets = useSafeAreaInsets();
   const { settings, speak, stopSpeaking, haptic } = useAppSettings();
+  const { profile } = useProfile();
   const { data: categories, isLoading, error, refetch } = useCategories();
   const { pecs: customPecs, addPec, updatePec, deletePec } = useCustomPecs();
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -250,7 +254,33 @@ export default function PecsScreen() {
                 tabBarHeight={tabBarHeight}
                 onManageItem={(item) => {
                   const pec = customPecs.find((entry) => entry.id === item.id);
-                  if (pec) setMenuPec(pec);
+                  if (pec) {
+                    setMenuPec(pec);
+                    return;
+                  }
+                  if (!categories) return;
+                  const customUri = pecImageOverride(item.id, item.title);
+                  openPecForm({
+                    categories,
+                    initialCategorySlug: category.slug,
+                    initialPec: {
+                      id: item.id,
+                      title: item.title,
+                      categorySlug: category.slug,
+                      imageUrl: "",
+                    },
+                    imageOnly: true,
+                    initialPreview: imageFromPec(item, profile.sex),
+                    onSubmit: async (input) => {
+                      if (!input.localUri) return;
+                      await setPecImageOverride(item.id, item.title, input.localUri);
+                    },
+                    onRestore: customUri
+                      ? async () => {
+                          await clearPecImageOverride(item.id);
+                        }
+                      : undefined,
+                  });
                 }}
               />
             ))}
@@ -342,7 +372,7 @@ function CategoryPage({
                     item={item}
                     backgroundColor={backgroundColor}
                     colorName={colorName}
-                    onLongPressManage={item.id.startsWith("custom-") ? () => onManageItem(item) : undefined}
+                    onLongPressManage={() => onManageItem(item)}
                   />
                 </View>
               ))}

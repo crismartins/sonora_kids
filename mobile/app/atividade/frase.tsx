@@ -7,9 +7,12 @@ import { PillText } from "@/components/PillText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone, ActivityPrompt, activityPadding } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { useProfile } from "@/context/ProfileContext";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { PHRASES_MAIS_USADAS } from "@/constants/phrases";
+import { pecLabel, pecPhrase } from "@/data/pecLabels";
 import { pecImageForTitle } from "@/data/pecImages";
+import { usePecImageOverrides } from "@/hooks/usePecImageOverrides";
 import { sample, shuffle } from "@/data/play";
 import { recordWordUse } from "@/services/wordUsage";
 import { PhraseItem } from "@/types";
@@ -21,9 +24,7 @@ const CHIP_HEIGHT = 148;
 type Chip = PhraseItem & { id: string; order: number };
 
 function pickPhrases(): PhraseItem[][] {
-  const pool = PHRASES_MAIS_USADAS[0].collection.filter(
-    (phrase) => phrase.length >= 2 && phrase.length <= 4,
-  );
+  const pool = PHRASES_MAIS_USADAS[0].collection.filter((phrase) => phrase.length >= 2 && phrase.length <= 4);
   return sample(pool, ROUND_COUNT);
 }
 
@@ -40,6 +41,7 @@ function chipsFor(phrase: PhraseItem[]): Chip[] {
 export default function FraseScreen() {
   const insets = useSafeAreaInsets();
   const { settings, speak, haptic } = useAppSettings();
+  const { profile } = useProfile();
   const [session, setSession] = useState(0);
   const rounds = useMemo(() => pickPhrases(), [session]);
   const [roundIndex, setRoundIndex] = useState(0);
@@ -55,7 +57,7 @@ export default function FraseScreen() {
   const roundKey = `${session}-${roundIndex}`;
   const [pickedKey, setPickedKey] = useState(roundKey);
   const bank = useMemo(() => chipsFor(phrase), [phrase]);
-  const spoken = phrase.map((item) => item.text).join(" ");
+  const spoken = pecPhrase(phrase.map((item) => item.text), profile.sex);
 
   if (pickedKey !== roundKey) {
     setPickedKey(roundKey);
@@ -83,7 +85,7 @@ export default function FraseScreen() {
       setWrongId(chip.id);
       haptic(Haptics.ImpactFeedbackStyle.Light);
       const expected = phrase[picked.length];
-      if (expected) speak(expected.text);
+      if (expected) speak(pecLabel(expected.text, profile.sex));
       if (wrongTimer.current) clearTimeout(wrongTimer.current);
       wrongTimer.current = setTimeout(() => setWrongId(null), 500);
       return;
@@ -92,9 +94,9 @@ export default function FraseScreen() {
     const next = [...picked, chip];
     setPicked(next);
     setWrongId(null);
-    speak(chip.text);
+    speak(pecLabel(chip.text, profile.sex));
     haptic();
-    recordWordUse(chip.text, chip.color);
+    recordWordUse(pecLabel(chip.text, profile.sex), chip.color);
 
     if (next.length === phrase.length) {
       setSolved(true);
@@ -139,9 +141,7 @@ export default function FraseScreen() {
             progress={`${roundIndex + 1} de ${rounds.length}`}
           />
 
-          <Text className="pb-2 text-center font-quicksand text-base text-neutral-dark">
-            Monte aqui
-          </Text>
+          <Text className="pb-2 text-center font-quicksand text-base text-neutral-dark">Monte aqui</Text>
           <View className="min-h-[64px] flex-row flex-wrap items-center justify-center gap-2">
             {phrase.map((item, index) => {
               const chip = picked[index];
@@ -155,12 +155,7 @@ export default function FraseScreen() {
                 );
               }
               return (
-                <WordPill
-                  key={chip.id}
-                  text={chip.text}
-                  colorName={chip.color}
-                  highContrast={settings.highContrast}
-                />
+                <WordPill key={chip.id} text={chip.text} colorName={chip.color} highContrast={settings.highContrast} />
               );
             })}
           </View>
@@ -196,7 +191,6 @@ export default function FraseScreen() {
                 label="Ouvir a frase"
                 icon="volume-loud"
                 iconSize={24}
-                variant="neutral"
                 labelSize="md"
                 onPress={() => speak(spoken)}
               />
@@ -220,6 +214,8 @@ function WordPill({
   wrong?: boolean;
 }) {
   const color = getCategoryColor(colorName);
+  const { profile } = useProfile();
+  usePecImageOverrides();
   return (
     <View
       className="items-center rounded-2xl p-2"
@@ -232,10 +228,10 @@ function WordPill({
       }}
     >
       <View className="mb-1.5 aspect-square w-full overflow-hidden rounded-xl bg-white">
-        <Image source={pecImageForTitle(text)} className="h-full w-full" resizeMode="cover" />
+        <Image source={pecImageForTitle(text, profile.sex)} className="h-full w-full" resizeMode="cover" />
       </View>
       <PillText size={14} numberOfLines={2} style={{ color: colors.dark }}>
-        {text}
+        {pecLabel(text, profile.sex)}
       </PillText>
     </View>
   );

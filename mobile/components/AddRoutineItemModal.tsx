@@ -9,7 +9,10 @@ import { FormError } from "@/components/ScreenState";
 import { openPecForm } from "@/components/AddPecModal";
 import { Category, PecItem } from "@/types";
 import { getCategoryBgColor } from "@/constants/colors";
+import { pecLabel, pecPhrase } from "@/data/pecLabels";
+import { imageFromPec } from "@/data/pecImages";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { useProfile } from "@/context/ProfileContext";
 import { CustomPec, NewCustomPec } from "@/services/customPecs";
 import { DayPeriod, PERIOD_LABELS, DAY_LABELS } from "@/services/routine";
 
@@ -25,7 +28,7 @@ export interface RoutinePecOption {
 export type RoutinePick = {
   id: string;
   title: string;
-  image?: string;
+  image?: ImageSourcePropType;
   color: string;
 };
 
@@ -68,10 +71,6 @@ function categoryColorName(category: Category) {
   return category.categoriasDePec?.configuracoesCategorias?.cor ?? "blue";
 }
 
-function pecImageUri(pec: PecItem) {
-  return pec.featuredImage?.node?.sourceUrl || undefined;
-}
-
 export function AddRoutineForm({
   initialSelected,
   getCategories,
@@ -81,6 +80,7 @@ export function AddRoutineForm({
 }: Omit<RoutineFormRequest, "day" | "period" | "onClose"> & { onClose: () => void }) {
   const insets = useSafeAreaInsets();
   const { settings, speak } = useAppSettings();
+  const { profile } = useProfile();
   const categories = getCategories();
   const [selected, setSelected] = useState<RoutinePick[]>(initialSelected);
   const [extras, setExtras] = useState<{ slug: string; pec: PecItem }[]>([]);
@@ -99,19 +99,19 @@ export function AddRoutineForm({
       .filter((extra) => extra.slug === categorySlug && !catalogPecs.some((item) => item.id === extra.pec.id))
       .map((extra) => extra.pec),
   ];
-  const spoken = selected
-    .map((item) => item.title)
-    .join(" ")
-    .trim();
+  const spoken = pecPhrase(
+    selected.map((item) => item.title),
+    profile.sex,
+  ).trim();
   const canHear = spoken.length > 0;
   const canSave = !saving;
 
   const addPick = (pec: PecItem, color = selectedColor) => {
     setSelected((current) => {
       if (current.some((item) => item.id === pec.id)) return current;
-      return [...current, { id: pec.id, title: pec.title, image: pecImageUri(pec), color }];
+      return [...current, { id: pec.id, title: pec.title, image: imageFromPec(pec, profile.sex), color }];
     });
-    speak(pec.title);
+    speak(pecLabel(pec.title, profile.sex));
   };
 
   const createPec = () => {
@@ -157,17 +157,17 @@ export function AddRoutineForm({
               className="h-14 flex-row items-center gap-1.5 rounded-full py-1 pl-1 pr-1"
               style={{ backgroundColor: getCategoryBgColor(item.color) }}
             >
-              <Image source={item.image ? { uri: item.image } : FALLBACK_IMAGE} className="h-10 w-10 rounded-full" />
-              <View className="h-9 max-w-[140px] items-center justify-center rounded-xl bg-white px-3">
+              <Image source={item.image ?? FALLBACK_IMAGE} className="h-10 w-10 rounded-full" />
+              <View className="max-w-[140px] items-center justify-center rounded-xl">
                 <Text className="font-quicksand text-lg text-dark" numberOfLines={1}>
-                  {item.title}
+                  {pecLabel(item.title, profile.sex)}
                 </Text>
               </View>
               <IconButton
                 icon="close-circle"
                 variant="ghost"
                 size="sm"
-                accessibilityLabel={`Remover ${item.title}`}
+                accessibilityLabel={`Remover ${pecLabel(item.title, profile.sex)}`}
                 onPress={() => setSelected((current) => current.filter((entry) => entry.id !== item.id))}
               />
             </View>

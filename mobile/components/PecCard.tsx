@@ -13,7 +13,11 @@ import Animated, {
 import { PecItem } from "@/types";
 import { colors, getCategoryBgColor } from "@/constants/colors";
 import { PillText } from "@/components/PillText";
+import { pecLabel } from "@/data/pecLabels";
+import { imageFromPec } from "@/data/pecImages";
+import { usePecImageOverrides } from "@/hooks/usePecImageOverrides";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { useProfile } from "@/context/ProfileContext";
 import { recordWordUse } from "@/services/wordUsage";
 
 interface PecCardProps {
@@ -29,6 +33,9 @@ const FALLBACK_IMAGE = require("../assets/images/avatar_default_v1.png");
 
 export function PecCard({ item, backgroundColor, colorName = "blue", onLongPressManage, onPress, compact = false }: PecCardProps) {
   const { settings, speak, stopSpeaking, haptic } = useAppSettings();
+  const { profile } = useProfile();
+  usePecImageOverrides();
+  const label = pecLabel(item.title, profile.sex);
   const scale = useSharedValue(1);
   const longPressed = useRef(false);
 
@@ -51,9 +58,9 @@ export function PecCard({ item, backgroundColor, colorName = "blue", onLongPress
       return;
     }
     haptic();
-    speak(item.title);
-    recordWordUse(item.title, colorName);
-  }, [colorName, haptic, item.title, onPress, scale, speak]);
+    speak(label);
+    recordWordUse(label, colorName);
+  }, [colorName, haptic, label, onPress, scale, speak]);
 
   const handleLongPress = useCallback(() => {
     longPressed.current = true;
@@ -62,13 +69,11 @@ export function PecCard({ item, backgroundColor, colorName = "blue", onLongPress
     onLongPressManage?.();
   }, [haptic, onLongPressManage, stopSpeaking]);
 
-  const imageUri = item.featuredImage?.node?.sourceUrl;
-  const imageSource =
-    item.localImage ?? (imageUri ? { uri: imageUri } : FALLBACK_IMAGE);
+  const imageSource = imageFromPec(item, profile.sex);
 
   return (
     <Pressable
-      accessibilityLabel={item.title}
+      accessibilityLabel={label}
       onPress={handlePress}
       onLongPress={onLongPressManage ? handleLongPress : undefined}
       delayLongPress={450}
@@ -103,7 +108,7 @@ export function PecCard({ item, backgroundColor, colorName = "blue", onLongPress
         </View>
         <View className="max-w-full items-center justify-center px-3 py-1">
           <PillText size={compact ? 14 : 20} numberOfLines={2} style={{ color: colors.dark }}>
-            {item.title}
+            {label}
           </PillText>
         </View>
       </Animated.View>
@@ -132,6 +137,8 @@ export function RoutinePecCard({
   onRemoveFrame?: (frame: { x: number; y: number; width: number; height: number }) => void;
 }) {
   const { settings, speak, haptic } = useAppSettings();
+  const { profile } = useProfile();
+  const label = pecLabel(title, profile.sex);
   const scale = useSharedValue(1);
   const wiggle = useSharedValue(0);
   const removeRef = useRef<ViewInstance>(null);
@@ -188,14 +195,14 @@ export function RoutinePecCard({
       withSpring(1, { damping: 10, stiffness: 200 })
     );
     haptic();
-    speak(title);
-    recordWordUse(title, color);
-  }, [color, editing, haptic, onCancelEditing, scale, speak, title]);
+    speak(label);
+    recordWordUse(label, color);
+  }, [color, editing, haptic, label, onCancelEditing, scale, speak]);
 
   return (
     <View className="m-1.5 self-stretch" style={{ flexGrow: 1 }}>
       <Pressable
-        accessibilityLabel={title}
+        accessibilityLabel={label}
         onPress={handlePress}
         onLongPress={onLongPress}
         delayLongPress={450}
@@ -225,7 +232,7 @@ export function RoutinePecCard({
           </View>
           <View className="max-w-full items-center justify-center px-3 py-1">
             <PillText size={20} numberOfLines={2} style={{ color: colors.dark }}>
-              {title}
+              {label}
             </PillText>
           </View>
         </Animated.View>
@@ -233,7 +240,7 @@ export function RoutinePecCard({
       {editing && onRemove ? (
         <View ref={removeRef} collapsable={false} className="absolute right-1 top-1" onLayout={reportRemoveFrame}>
           <Pressable
-            accessibilityLabel={`Tirar ${title} da rotina`}
+            accessibilityLabel={`Tirar ${label} da rotina`}
             onPress={onRemove}
             className="h-8 w-8 items-center justify-center rounded-full bg-white"
             style={{

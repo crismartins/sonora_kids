@@ -29,6 +29,7 @@ import { MicrophoneIcon } from "@solar-icons/react-native/bold-duotone/microphon
 import { MoonIcon } from "@solar-icons/react-native/bold-duotone/moon";
 import { PenIcon } from "@solar-icons/react-native/bold-duotone/pen";
 import { QuestionCircleIcon } from "@solar-icons/react-native/bold-duotone/question-circle";
+import { RefreshIcon } from "@solar-icons/react-native/bold-duotone/refresh";
 import { SettingsIcon } from "@solar-icons/react-native/bold-duotone/settings";
 import { SmileCircleIcon } from "@solar-icons/react-native/bold-duotone/smile-circle";
 import { SmartphoneVibrationIcon } from "@solar-icons/react-native/bold-duotone/smartphone-vibration";
@@ -90,6 +91,7 @@ const ICONS = {
   microphone: MicrophoneIcon,
   moon: MoonIcon,
   pen: PenIcon,
+  refresh: RefreshIcon,
   settings: SettingsIcon,
   smile: SmileCircleIcon,
   speedometer: SpeedometerMiddleIcon,

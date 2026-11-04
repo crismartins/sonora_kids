@@ -11,7 +11,7 @@ import { FONT_FAMILY } from "@/constants/typography";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { useProfile } from "@/context/ProfileContext";
 import { inferVoiceGender, SpeechLanguage, voiceSummary, VoiceGender } from "@/services/appSettings";
-import { AVATAR_V1, AVATAR_V2, AvatarChoice, profileAvatarSource } from "@/services/profile";
+import { AVATAR_V1, AVATAR_V2, AvatarChoice, ChildSex, profileAvatarSource } from "@/services/profile";
 import { loadTopWords, UsedWord } from "@/services/wordUsage";
 import { VoicePickerModal, VOICE_PREVIEW } from "@/components/VoicePickerModal";
 
@@ -24,6 +24,7 @@ export default function ProfileScreen() {
   const [nickname, setNickname] = useState(profile.nickname);
   const [name, setName] = useState(profile.name);
   const [avatar, setAvatar] = useState<AvatarChoice>(profile.avatar);
+  const [sex, setSex] = useState<ChildSex>(profile.sex);
   const [photoUri, setPhotoUri] = useState<string | null>(profile.photoUri ?? null);
   const [words, setWords] = useState<UsedWord[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +44,7 @@ export default function ProfileScreen() {
     setNickname(profile.nickname);
     setName(profile.name);
     setAvatar(profile.avatar);
+    setSex(profile.sex);
     setPhotoUri(profile.photoUri ?? null);
   }, [ready, profile]);
 
@@ -72,6 +74,7 @@ export default function ProfileScreen() {
     nickname.trim() !== profile.nickname ||
     name.trim() !== profile.name ||
     avatar !== profile.avatar ||
+    sex !== profile.sex ||
     (avatar === "photo" && photoUri !== (profile.photoUri ?? null));
 
   const choosePreset = (choice: AvatarChoice) => {
@@ -84,6 +87,12 @@ export default function ProfileScreen() {
   const usePickedImage = (uri: string) => {
     setAvatar("photo");
     setPhotoUri(uri);
+    setError(null);
+    setSaved(false);
+  };
+
+  const chooseSex = (next: ChildSex) => {
+    setSex(next);
     setError(null);
     setSaved(false);
   };
@@ -115,6 +124,7 @@ export default function ProfileScreen() {
     setNickname(profile.nickname);
     setName(profile.name);
     setAvatar(profile.avatar);
+    setSex(profile.sex);
     setPhotoUri(profile.photoUri ?? null);
     setError(null);
     setSaved(false);
@@ -129,11 +139,13 @@ export default function ProfileScreen() {
         nickname,
         name,
         avatar,
+        sex,
         pendingPhotoUri: avatar === "photo" && photoUri !== profile.photoUri ? photoUri : null,
       });
       setNickname(next.nickname);
       setName(next.name);
       setAvatar(next.avatar);
+      setSex(next.sex);
       setPhotoUri(next.photoUri ?? null);
       setSaved(true);
       setEditing(false);
@@ -155,6 +167,9 @@ export default function ProfileScreen() {
           <Image source={profileAvatarSource(profile)} className="h-28 w-28 rounded-3xl border-4 border-light" />
           <Text className="mt-4 font-quicksand text-3xl text-primary">{profile.nickname}</Text>
           <Text className="mt-1 px-6 text-center font-quicksand text-xl text-dark">{profile.name}</Text>
+          <Text className="mt-1 font-quicksand text-lg text-neutral-dark">
+            {profile.sex === "menino" ? "Menino" : "Menina"}
+          </Text>
           <View
             className="mx-4 mt-6 gap-3.5 self-stretch rounded-3xl bg-primary p-5"
             style={{
@@ -249,6 +264,11 @@ export default function ProfileScreen() {
           ) : null}
         </ScrollView>
 
+        <View className="flex-row gap-3 px-4">
+          <SexChoice label="Menina" selected={sex === "menina"} onPress={() => chooseSex("menina")} />
+          <SexChoice label="Menino" selected={sex === "menino"} onPress={() => chooseSex("menino")} />
+        </View>
+
         <View className="gap-3 px-4">
           <TextInput
             accessibilityLabel="Nome"
@@ -336,6 +356,24 @@ export default function ProfileScreen() {
         onSelectLanguage={chooseLanguage}
       />
     </KeyboardAvoidingView>
+  );
+}
+
+function SexChoice({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
+  return (
+    <Pressable
+      accessibilityLabel={label}
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      className="h-16 flex-1 items-center justify-center rounded-2xl"
+      style={{
+        borderWidth: 4,
+        borderColor: selected ? colors.primary : colors.light,
+        backgroundColor: selected ? colors.primarySoft : colors.neutralLight,
+      }}
+    >
+      <Text className="font-quicksand text-xl text-dark">{label}</Text>
+    </Pressable>
   );
 }
 

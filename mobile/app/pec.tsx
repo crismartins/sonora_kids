@@ -7,7 +7,9 @@ export default function PecScreen() {
   const request = useRef(currentPecForm()).current;
 
   useLayoutEffect(() => {
-    navigation.setOptions({ title: request?.initialPec ? "Editar PEC" : "Novo PEC" });
+    navigation.setOptions({
+      title: request?.imageOnly ? "Trocar imagem" : request?.initialPec ? "Editar PEC" : "Novo PEC",
+    });
   }, [navigation, request]);
 
   useEffect(() => {
@@ -28,7 +30,10 @@ export default function PecScreen() {
       categories={request.categories}
       initialCategorySlug={request.initialCategorySlug}
       initialPec={request.initialPec}
+      imageOnly={request.imageOnly}
+      initialPreview={request.initialPreview}
       onSubmit={request.onSubmit}
+      onRestore={request.onRestore}
       onClose={() => router.back()}
     />
   );

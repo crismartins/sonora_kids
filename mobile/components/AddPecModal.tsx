@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Pressable, ScrollView, Platform, KeyboardAvoidingView } from "react-native";
+import { View, Text, TextInput, Pressable, ScrollView, Platform, KeyboardAvoidingView, ImageSourcePropType } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, IconButton } from "@/components/Button";
@@ -17,7 +17,10 @@ export type PecFormRequest = {
   categories: Category[];
   initialCategorySlug: string;
   initialPec?: CustomPec | null;
+  imageOnly?: boolean;
+  initialPreview?: ImageSourcePropType | null;
   onSubmit: (input: NewCustomPec) => Promise<void>;
+  onRestore?: () => Promise<void>;
   onClose?: () => void;
 };
 
@@ -46,39 +49,82 @@ interface AddPecFormProps {
   categories: Category[];
   initialCategorySlug: string;
   initialPec?: CustomPec | null;
+  imageOnly?: boolean;
+  initialPreview?: ImageSourcePropType | null;
   onClose: () => void;
   onSubmit: (input: NewCustomPec) => Promise<void>;
+  onRestore?: () => Promise<void>;
 }
 
 function existingImage(pec?: CustomPec | null) {
   return pec?.localUri || pec?.imageUrl || "";
 }
 
-function pecSaveReason(name: string, categorySlug: string, previewUri: string | null) {
+function pecSaveReason(name: string, categorySlug: string, previewUri: string | null, imageOnly = false) {
+  if (imageOnly) return previewUri ? undefined : "Escolha uma foto";
   if (!name) return "Escreva o nome";
   if (!categorySlug) return "Escolha uma categoria";
   if (!previewUri) return "Escolha uma foto";
   return undefined;
 }
 
-export function AddPecForm({ categories, initialCategorySlug, initialPec, onClose, onSubmit }: AddPecFormProps) {
+export function AddPecForm({
+  categories,
+  initialCategorySlug,
+  initialPec,
+  imageOnly = false,
+  initialPreview,
+  onClose,
+  onSubmit,
+  onRestore,
+}: AddPecFormProps) {
   const insets = useSafeAreaInsets();
   const { speak } = useAppSettings();
   const [title, setTitle] = useState(initialPec?.title ?? "");
   const [categorySlug, setCategorySlug] = useState(initialPec?.categorySlug ?? initialCategorySlug);
-  const [localUri, setLocalUri] = useState<string | null>(existingImage(initialPec) || null);
+  const [localUri, setLocalUri] = useState<string | null>(imageOnly ? null : existingImage(initialPec) || null);
   const [imageChanged, setImageChanged] = useState(false);
   const [previewFailed, setPreviewFailed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const previewUri = localUri && !previewFailed ? localUri : null;
+  const pickedUri = imageChanged ? previewUri : null;
   const name = title.trim();
   const canHear = name.length > 0;
-  const canSave = canHear && !!categorySlug && !!previewUri && !saving;
+  const canSave = imageOnly ? !!pickedUri && !saving : canHear && !!categorySlug && !!previewUri && !saving;
+
+  const handleRestore = async () => {
+    if (!onRestore || saving) return;
+    setSaving(true);
+    setError(null);
+    try {
+      await onRestore();
+      onClose();
+    } catch {
+      setError("Não foi possível voltar à imagem original.");
+      setSaving(false);
+    }
+  };
 
   const handleSave = async () => {
     const name = title.trim();
+    if (imageOnly) {
+      if (!imageChanged || !localUri) {
+        setError("Escolha uma foto.");
+        return;
+      }
+      setSaving(true);
+      setError(null);
+      try {
+        await onSubmit({ title: name, categorySlug, localUri });
+        onClose();
+      } catch {
+        setError("Não foi possível salvar. Tente de novo.");
+        setSaving(false);
+      }
+      return;
+    }
     if (!name) {
       setError("Escreva o nome do PEC.");
       return;
@@ -134,12 +180,28 @@ export function AddPecForm({ categories, initialCategorySlug, initialPec, onClos
           accessibilityLabel="Adicionar foto do PEC"
           alertTitle="Foto do PEC"
           previewUri={previewUri}
+          previewSource={imageOnly && !previewUri ? initialPreview : null}
           onPreviewError={() => setPreviewFailed(true)}
           className="h-24 w-24 self-center rounded-3xl"
           iconSize={36}
           onPicked={usePickedImage}
           onError={setError}
         />
+        {imageOnly && onRestore ? (
+          <View className="px-5">
+            <Button
+              label="Redefinir imagem"
+              icon="refresh"
+              variant="muted"
+              shape="rounded"
+              size="md"
+              disabled={saving}
+              onPress={handleRestore}
+            />
+          </View>
+        ) : null}
+        {imageOnly ? null : (
+        <>
         <View className="px-5">
           <TextInput
             value={title}
@@ -180,6 +242,8 @@ export function AddPecForm({ categories, initialCategorySlug, initialPec, onClos
             })}
           </View>
         </ScrollView>
+        </>
+        )}
 
         <IconButton
           icon="volume-loud"
@@ -215,7 +279,7 @@ export function AddPecForm({ categories, initialCategorySlug, initialPec, onClos
           size="md"
           loading={saving}
           disabled={!canSave}
-          inactiveReason={pecSaveReason(name, categorySlug, previewUri)}
+          inactiveReason={pecSaveReason(name, categorySlug, imageOnly ? pickedUri : previewUri, imageOnly)}
           className="flex-1"
           onPress={handleSave}
         />

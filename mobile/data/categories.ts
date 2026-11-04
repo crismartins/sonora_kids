@@ -1,8 +1,8 @@
 import { ImageSourcePropType } from "react-native";
+import { imageForPecTitle } from "@/data/pecLocalImages";
 import { Category, PecItem } from "@/types";
 
 const AVATAR = require("../assets/images/avatar_default_v1.png");
-const AVATAR_2 = require("../assets/images/avatar_default_v2.png");
 
 const LEADING_CATEGORY_SLUGS = ["boas-maneiras", "pessoas", "palavras", "acoes-e-atividades"];
 
@@ -11,12 +11,15 @@ function leadingRank(slug: string) {
   return index === -1 ? LEADING_CATEGORY_SLUGS.length : index;
 }
 
+function pecImage(title: string): ImageSourcePropType {
+  return imageForPecTitle(title) ?? AVATAR;
+}
+
 function pec(slug: string, title: string, index: number): PecItem {
-  const image: ImageSourcePropType = index % 2 === 0 ? AVATAR : AVATAR_2;
   return {
     id: `pec-${slug}-${index + 1}`,
     title,
-    localImage: image,
+    localImage: pecImage(title),
   };
 }
 
@@ -37,12 +40,12 @@ export const MOCK_CATEGORIES: Category[] = [
     },
     pECS: {
       nodes: [
-        { id: "cG9zdDo1", title: "Oi", localImage: AVATAR },
-        { id: "cG9zdDo9", title: "Tchau", localImage: AVATAR_2 },
-        { id: "cG9zdDozMg==", title: "Bom Dia", localImage: AVATAR },
-        { id: "cG9zdDozMQ==", title: "Obrigado", localImage: AVATAR },
-        { id: "cG9zdDozMw==", title: "Boa Tarde", localImage: AVATAR_2 },
-        { id: "cG9zdDozNA==", title: "Boa Noite", localImage: AVATAR_2 },
+        { id: "cG9zdDo1", title: "Oi", localImage: pecImage("Oi") },
+        { id: "cG9zdDo9", title: "Tchau", localImage: pecImage("Tchau") },
+        { id: "cG9zdDozMg==", title: "Bom Dia", localImage: pecImage("Bom Dia") },
+        { id: "cG9zdDozMQ==", title: "Obrigado", localImage: pecImage("Obrigado") },
+        { id: "cG9zdDozMw==", title: "Boa Tarde", localImage: pecImage("Boa Tarde") },
+        { id: "cG9zdDozNA==", title: "Boa Noite", localImage: pecImage("Boa Noite") },
         ...pecs(
           "boas-maneiras",
           [
@@ -95,8 +98,8 @@ export const MOCK_CATEGORIES: Category[] = [
     },
     pECS: {
       nodes: [
-        { id: "cG9zdDozNQ==", title: "Maçã", localImage: AVATAR },
-        { id: "cG9zdDoxOQ==", title: "Pão de Queijo", localImage: AVATAR_2 },
+        { id: "cG9zdDozNQ==", title: "Maçã", localImage: pecImage("Maçã") },
+        { id: "cG9zdDoxOQ==", title: "Pão de Queijo", localImage: pecImage("Pão de Queijo") },
         ...pecs(
           "comida-e-bebida",
           [

@@ -11,6 +11,9 @@ import { openPhraseForm } from "@/components/AddPhraseModal";
 import { PhraseActionsModal } from "@/components/PhraseActionsModal";
 import { tabBarClearance } from "@/constants/tabBar";
 import { PHRASES_MAIS_USADAS, PHRASES_TODAS } from "@/constants/phrases";
+import { imageFromPec } from "@/data/pecImages";
+import { usePecImageOverrides } from "@/hooks/usePecImageOverrides";
+import { useProfile } from "@/context/ProfileContext";
 import { useCategories } from "@/hooks/useCategories";
 import { useCustomPecs } from "@/hooks/useCustomPecs";
 import { useCustomPhrases } from "@/hooks/useCustomPhrases";
@@ -35,11 +38,9 @@ function catalogRows(collection: PhraseItem[][], prefix: string): ListedPhrase[]
   }));
 }
 
-function pecImageSource(pec: PecItem): ImageSourcePropType | undefined {
-  if (pec.localImage) return pec.localImage;
-  const uri = pec.featuredImage?.node?.sourceUrl;
-  if (!uri) return undefined;
-  return { uri };
+function pecImageSource(pec: PecItem, sex: "menina" | "menino"): ImageSourcePropType | undefined {
+  const source = imageFromPec(pec, sex);
+  return source;
 }
 
 function PhrasePage({
@@ -87,6 +88,8 @@ function PhrasePage({
 export default function FrasesScreen() {
   const insets = useSafeAreaInsets();
   const { haptic, speak } = useAppSettings();
+  const { profile } = useProfile();
+  const pecImagesVersion = usePecImageOverrides();
   const { data: categories } = useCategories();
   const { pecs: customPecs } = useCustomPecs();
   const { phrases: customPhrases, addPhrase, updatePhrase, deletePhrase } = useCustomPhrases();
@@ -132,13 +135,13 @@ export default function FrasesScreen() {
     const map = new Map<string, ImageSourcePropType>();
     for (const category of catalog ?? []) {
       for (const pec of category.pECS.nodes) {
-        const source = pecImageSource(pec);
+        const source = pecImageSource(pec, profile.sex);
         if (!source) continue;
         map.set(pec.title.trim().toLocaleLowerCase("pt-BR"), source);
       }
     }
     return map;
-  }, [catalog]);
+  }, [catalog, pecImagesVersion, profile.sex]);
 
   const phrasePages = useMemo(() => {
     const mine: ListedPhrase[] = customPhrases.map((phrase) => ({

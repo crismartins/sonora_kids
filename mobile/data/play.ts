@@ -1,6 +1,7 @@
 import { ImageSourcePropType } from "react-native";
 import { MOCK_CATEGORIES } from "@/data/categories";
 import { imageFromPec } from "@/data/pecImages";
+import { ChildSex } from "@/services/profile";
 
 export type PlayPec = {
   id: string;
@@ -27,7 +28,7 @@ export function sample<T>(items: readonly T[], count: number): T[] {
 }
 
 /** Concrete, speakable PECS. Skips short function words like "de" and "em". */
-export function playPecs(): PlayPec[] {
+export function playPecs(sex: ChildSex = "menina"): PlayPec[] {
   const seen = new Set<string>();
   const items: PlayPec[] = [];
 
@@ -41,7 +42,7 @@ export function playPecs(): PlayPec[] {
       const key = title.toLocaleLowerCase("pt-BR");
       if (seen.has(key)) continue;
       seen.add(key);
-      items.push({ id: node.id, title, colorName, image: imageFromPec(node) });
+      items.push({ id: node.id, title, colorName, image: imageFromPec(node, sex) });
     }
   }
 
