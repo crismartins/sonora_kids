@@ -1,5 +1,6 @@
-import { Alert, Image, ImageSourcePropType, Linking, Platform, Pressable } from "react-native";
+import { Alert, Image, ImageSourcePropType, Linking, Platform, Pressable, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { IconButton } from "@/components/Button";
 import { SolarIcon } from "@/components/SolarIcon";
 import { colors } from "@/constants/colors";
 
@@ -52,7 +53,7 @@ export function ImageSourcePicker({
   iconSize = 32,
 }: ImageSourcePickerProps) {
   const options = pickerOptions(allowsEditing, aspect);
-  const source = previewUri ? { uri: previewUri } : previewSource ?? null;
+  const source = previewUri ? { uri: previewUri } : (previewSource ?? null);
 
   const pickFromGallery = async () => {
     try {
@@ -95,16 +96,30 @@ export function ImageSourcePicker({
   };
 
   return (
-    <Pressable
-      accessibilityLabel={accessibilityLabel}
-      onPress={chooseSource}
-      className={`items-center justify-center overflow-hidden bg-primary-soft border-4 border-light ${className ? ` ${className}` : ""}`}
-    >
+    <View className="relative self-center" style={source ? { paddingRight: 16, paddingBottom: 0 } : undefined}>
+      <Pressable
+        accessibilityLabel={accessibilityLabel}
+        onPress={chooseSource}
+        className={`items-center justify-center overflow-hidden bg-primary-soft border-4 border-light ${className ? ` ${className}` : ""}`}
+      >
+        {source ? (
+          <Image source={source} onError={onPreviewError} className="h-full w-full" />
+        ) : (
+          <SolarIcon name="camera" size={iconSize} color={colors.neutralDark} />
+        )}
+      </Pressable>
       {source ? (
-        <Image source={source} onError={onPreviewError} className="h-full w-full" />
-      ) : (
-        <SolarIcon name="camera" size={iconSize} color={colors.neutralDark} />
-      )}
-    </Pressable>
+        <View className="absolute bottom-0 right-0" pointerEvents="box-none">
+          <IconButton
+            icon="pen"
+            accessibilityLabel="Editar imagem"
+            variant="neutral"
+            size="sm"
+            iconSize={20}
+            onPress={chooseSource}
+          />
+        </View>
+      ) : null}
+    </View>
   );
 }
