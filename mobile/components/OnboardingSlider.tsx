@@ -16,12 +16,11 @@ import {
 import * as Haptics from "expo-haptics";
 import Animated, { FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { CategoryIcon } from "@/components/CategoryIcon";
 import { CategoryPill } from "@/components/CategoryPill";
 import { FilterChip } from "@/components/FilterChip";
 import { PhraseCard } from "@/components/PhraseCard";
 import { SolarIcon, type SolarIconName } from "@/components/SolarIcon";
-import { colors, getCategoryBgColor } from "@/constants/colors";
+import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { FONT_FAMILY } from "@/constants/typography";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { useProfile } from "@/context/ProfileContext";
@@ -31,6 +30,7 @@ import { imageFromPec, pecImageForTitle } from "@/data/pecImages";
 import { usePecImageOverrides } from "@/hooks/usePecImageOverrides";
 import { markOnboardingSeen } from "@/services/onboarding";
 import { PecItem, PhraseItem } from "@/types";
+import { PillText } from "@/components/PillText";
 import { IconButton } from "./Button";
 
 const BODY_COLOR = "#4A5D73";
@@ -53,7 +53,7 @@ const SLIDES = [
   {
     key: "comunicar",
     title: "Aprenda a se comunicar",
-    body: "Aprenda brincando com nossos mini-games.",
+    body: "Aprenda brincando com nossas atividades.",
   },
   {
     key: "rotina",
@@ -64,30 +64,22 @@ const SLIDES = [
 
 type SlideKey = (typeof SLIDES)[number]["key"];
 
-const WORD_ICON_ROWS = [
-  ["boas-maneiras", "sentimentos", "animais", "objetos-e-brinquedos", "pessoas"],
-  ["acoes-e-atividades", "perguntas-e-respostas", "lugares", "necessidades", "transporte"],
-  ["datas-e-eventos", "formas-e-cores", "dia-a-dia", "roupas-e-acessorios", "comida-e-bebida"],
-] as const;
+const WORDS_IMAGE = require("../assets/images/onboarding-palavras.png");
+const WORDS_ASPECT = 914 / 901;
 
-function WordsArt({ width }: { width: number }) {
-  const artWidth = Math.min(width - 48, 332);
-  const gap = 18;
-  const icon = Math.floor((artWidth - gap * 4) / 5);
+function WordsArt({ width, height }: { width: number; height: number }) {
+  const maxWidth = Math.max(1, width - 40);
+  const maxHeight = Math.max(1, height - 8);
+  let drawWidth = maxWidth;
+  let drawHeight = drawWidth / WORDS_ASPECT;
+  if (drawHeight > maxHeight) {
+    drawHeight = maxHeight;
+    drawWidth = drawHeight * WORDS_ASPECT;
+  }
 
   return (
-    <View
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-      style={{ width: icon * 5 + gap * 4, gap }}
-    >
-      {WORD_ICON_ROWS.map((row) => (
-        <View key={row[0]} style={{ flexDirection: "row", gap }}>
-          {row.map((slug) => (
-            <CategoryIcon key={slug} slug={slug} size={icon} />
-          ))}
-        </View>
-      ))}
+    <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <Image source={WORDS_IMAGE} style={{ width: drawWidth, height: drawHeight }} resizeMode="contain" />
     </View>
   );
 }
@@ -263,27 +255,112 @@ function PhraseArt({ width, height }: { width: number; height: number }) {
   );
 }
 
-function LearnArt() {
+const ACTIVITY_DESIGN_WIDTH = 520;
+
+const ACTIVITY_ROWS: { icon: SolarIconName; title: string; description: string; tag: string; color: string; background: string }[] = [
+  {
+    icon: "gamepad",
+    title: "Memória com PECS",
+    description: "Encontre os pares de palavras",
+    tag: "Jogo",
+    color: colors.primary,
+    background: colors.primaryWash,
+  },
+  {
+    icon: "volume-loud",
+    title: "Ache a Palavra",
+    description: "Ouça e toque na palavra",
+    tag: "Ouvir",
+    color: getCategoryColor("greenAccent"),
+    background: getCategoryBgColor("greenAccent"),
+  },
+  {
+    icon: "microphone",
+    title: "Repita Comigo",
+    description: "Ouça e fale a palavra",
+    tag: "Fala",
+    color: getCategoryColor("pink"),
+    background: getCategoryBgColor("pink"),
+  },
+  {
+    icon: "text-field",
+    title: "Monte a Frase",
+    description: "Ouça e toque as palavras na ordem",
+    tag: "Frase",
+    color: getCategoryColor("purple"),
+    background: getCategoryBgColor("purple"),
+  },
+  {
+    icon: "book",
+    title: "História do Dia",
+    description: "Ouça o conto e passe a página",
+    tag: "Leitura",
+    color: getCategoryColor("orange"),
+    background: getCategoryBgColor("orange"),
+  },
+];
+
+function ActivitiesPreview({ width }: { width: number }) {
   return (
     <View
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
       style={{
-        width: 96,
-        height: 96,
-        borderRadius: 48,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: colors.primary,
-        shadowColor: colors.primary,
-        shadowOpacity: 0.32,
-        shadowRadius: 16,
-        shadowOffset: { width: 0, height: 8 },
-        elevation: 8,
+        width,
+        borderRadius: 28,
+        borderWidth: 1,
+        borderColor: colors.line,
+        backgroundColor: colors.canvas,
+        paddingHorizontal: 18,
+        paddingVertical: 8,
       }}
     >
-      <SolarIcon name="microphone" size={44} color="#FFFFFF" />
+      {ACTIVITY_ROWS.map((activity, index) => (
+        <View key={activity.title}>
+          {index > 0 ? <View style={{ height: 1, backgroundColor: colors.line }} /> : null}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 14, paddingVertical: 14 }}>
+            <View
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 16,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: activity.background,
+              }}
+            >
+              <SolarIcon name={activity.icon} size={30} color={activity.color} />
+            </View>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={{ fontFamily: FONT_FAMILY, fontSize: 24, color: colors.dark }}>{activity.title}</Text>
+              <Text style={{ fontFamily: FONT_FAMILY, fontSize: 18, lineHeight: 22, color: colors.neutralDark }}>
+                {activity.description}
+              </Text>
+            </View>
+            <View
+              style={{
+                height: 32,
+                paddingHorizontal: 12,
+                borderRadius: 16,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: activity.background,
+              }}
+            >
+              <PillText size={16} style={{ color: activity.color }}>
+                {activity.tag}
+              </PillText>
+            </View>
+          </View>
+        </View>
+      ))}
     </View>
+  );
+}
+
+function ActivitiesArt({ width, height }: { width: number; height: number }) {
+  return (
+    <FittedPreview width={width} height={height} designWidth={ACTIVITY_DESIGN_WIDTH}>
+      <ActivitiesPreview width={ACTIVITY_DESIGN_WIDTH} />
+    </FittedPreview>
   );
 }
 
@@ -393,11 +470,11 @@ function RoutineArt({ width, height }: { width: number; height: number }) {
 function SlideArt({ slideKey, width, height }: { slideKey: SlideKey; width: number; height: number }) {
   switch (slideKey) {
     case "palavras":
-      return <WordsArt width={width} />;
+      return <WordsArt width={width} height={height} />;
     case "frases":
       return <PhraseArt width={width} height={height} />;
     case "comunicar":
-      return <LearnArt />;
+      return <ActivitiesArt width={width} height={height} />;
     case "rotina":
       return <RoutineArt width={width} height={height} />;
   }

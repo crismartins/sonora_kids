@@ -7,6 +7,7 @@ export const categoryIconBySlug: Record<string, ImageSourcePropType> = {
   necessidades: require("../assets/images/categories/necessidades.png"),
   "objetos-e-brinquedos": require("../assets/images/categories/objetos.png"),
   pessoas: require("../assets/images/categories/pessoas.png"),
+  palavras: require("../assets/images/categories/palavras.png"),
   "dia-a-dia": require("../assets/images/categories/dia-a-dia.png"),
   animais: require("../assets/images/categories/animais.png"),
   "perguntas-e-respostas": require("../assets/images/categories/perguntas.png"),
