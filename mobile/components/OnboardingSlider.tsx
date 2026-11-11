@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   BackHandler,
   Image,
@@ -17,20 +17,24 @@ import * as Haptics from "expo-haptics";
 import Animated, { FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CategoryIcon } from "@/components/CategoryIcon";
-import { SolarIcon } from "@/components/SolarIcon";
-import { colors } from "@/constants/colors";
+import { CategoryPill } from "@/components/CategoryPill";
+import { FilterChip } from "@/components/FilterChip";
+import { PhraseCard } from "@/components/PhraseCard";
+import { SolarIcon, type SolarIconName } from "@/components/SolarIcon";
+import { colors, getCategoryBgColor } from "@/constants/colors";
 import { FONT_FAMILY } from "@/constants/typography";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { useProfile } from "@/context/ProfileContext";
 import { MOCK_CATEGORIES } from "@/data/categories";
+import { pecLabel } from "@/data/pecLabels";
+import { imageFromPec, pecImageForTitle } from "@/data/pecImages";
+import { usePecImageOverrides } from "@/hooks/usePecImageOverrides";
 import { markOnboardingSeen } from "@/services/onboarding";
+import { PecItem, PhraseItem } from "@/types";
 import { IconButton } from "./Button";
-
-const AVATAR = require("../assets/images/avatar_default_v1.png");
-const AVATAR_2 = require("../assets/images/avatar_default_v2.png");
 
 const BODY_COLOR = "#4A5D73";
 const DOT_IDLE = "#D5E2EE";
-const SPEAKER_BG = colors.primaryWash;
 
 const LIBRARY_SIZE =
   Math.floor(MOCK_CATEGORIES.reduce((total, category) => total + category.pECS.nodes.length, 0) / 10) * 10;
@@ -60,39 +64,6 @@ const SLIDES = [
 
 type SlideKey = (typeof SLIDES)[number]["key"];
 
-function CakeArt({ size }: { size: number }) {
-  return (
-    <View style={{ width: size, height: size, alignItems: "center", justifyContent: "flex-end" }}>
-      <View
-        style={{
-          width: Math.max(3, size * 0.1),
-          height: size * 0.22,
-          borderRadius: 2,
-          backgroundColor: "#FFD54F",
-        }}
-      />
-      <View
-        style={{
-          width: size * 0.72,
-          height: size * 0.2,
-          marginTop: -1,
-          borderRadius: size,
-          backgroundColor: "#F48FB1",
-        }}
-      />
-      <View
-        style={{
-          width: size * 0.88,
-          height: size * 0.36,
-          borderBottomLeftRadius: size * 0.16,
-          borderBottomRightRadius: size * 0.16,
-          backgroundColor: "#C4A484",
-        }}
-      />
-    </View>
-  );
-}
-
 const WORD_ICON_ROWS = [
   ["boas-maneiras", "sentimentos", "animais", "objetos-e-brinquedos", "pessoas"],
   ["acoes-e-atividades", "perguntas-e-respostas", "lugares", "necessidades", "transporte"],
@@ -121,96 +92,174 @@ function WordsArt({ width }: { width: number }) {
   );
 }
 
-function TokenChip({
-  label,
-  backgroundColor,
-  leading,
-}: {
-  label: string;
-  backgroundColor: string;
-  leading: ReactNode;
-}) {
+const PHRASE_PREVIEW: PhraseItem[] = [
+  { text: "Eu", color: "teal" },
+  { text: "Quero", color: "amber" },
+  { text: "Brincar", color: "purple" },
+];
+
+const PHRASE_CARD_TITLES = ["Brincar", "Comer", "Beber"];
+const PHRASE_PILL_SLUGS = ["acoes-e-atividades", "sentimentos", "comida-e-bebida", "necessidades"];
+
+// Wide enough for the puzzle row, the remove buttons, and the category pill to sit
+// fully inside the frame. PhraseArt scales this down to the slide.
+const PHRASE_DESIGN_WIDTH = 540;
+
+function categoryBySlug(slug: string) {
+  return MOCK_CATEGORIES.find((category) => category.slug === slug);
+}
+
+function pecByTitle(title: string) {
+  for (const category of MOCK_CATEGORIES) {
+    const found = category.pECS.nodes.find((node) => node.title === title);
+    if (found) return found;
+  }
+  return undefined;
+}
+
+function PreviewPecCard({ item, backgroundColor }: { item: PecItem; backgroundColor: string }) {
+  const { profile } = useProfile();
+  const label = pecLabel(item.title, profile.sex);
+
   return (
     <View
       style={{
-        height: 40,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 6,
-        borderRadius: 20,
-        paddingLeft: 6,
-        paddingRight: 10,
+        flex: 1,
+        borderRadius: 22,
         backgroundColor,
+        padding: 12,
       }}
     >
-      {leading}
-      <Text style={{ fontFamily: FONT_FAMILY, fontSize: 16, color: colors.dark }}>{label}</Text>
+      <View
+        style={{
+          width: "100%",
+          aspectRatio: 1,
+          borderRadius: 16,
+          overflow: "hidden",
+          backgroundColor: colors.white,
+        }}
+      >
+        <Image source={imageFromPec(item, profile.sex)} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+      </View>
+      <Text
+        numberOfLines={1}
+        style={{
+          marginTop: 10,
+          textAlign: "center",
+          fontFamily: FONT_FAMILY,
+          fontSize: 22,
+          color: colors.dark,
+        }}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
 
-function PhraseArt({ width }: { width: number }) {
-  const cardWidth = Math.min(340, width - 48);
+function PhrasePreview({ width }: { width: number }) {
+  const { profile } = useProfile();
+  const imageVersion = usePecImageOverrides();
+  const images = useMemo(() => {
+    const map = new Map<string, ImageSourcePropType>();
+    for (const item of PHRASE_PREVIEW) {
+      map.set(item.text.toLocaleLowerCase("pt-BR"), pecImageForTitle(item.text, profile.sex));
+    }
+    return map;
+  }, [imageVersion, profile.sex]);
+
+  const cards = PHRASE_CARD_TITLES.map(pecByTitle).filter((item): item is PecItem => item != null);
+  const pills = PHRASE_PILL_SLUGS.map(categoryBySlug).filter((category) => category != null);
+  const cardColor = getCategoryBgColor("purple");
+
+  return (
+    <View style={{ width }}>
+      <PhraseCard phrase={PHRASE_PREVIEW} images={images} onRemoveItem={() => undefined} />
+      <View style={{ height: 1, marginHorizontal: 8, marginTop: 8, backgroundColor: colors.line }} />
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 16 }}>
+        {pills.map((category, index) => (
+          <CategoryPill
+            key={category.slug}
+            slug={category.slug}
+            name={category.name}
+            colorName={category.categoriasDePec.configuracoesCategorias.cor}
+            selected={index === 0}
+            highContrast={false}
+            size="lg"
+            onPress={() => undefined}
+          />
+        ))}
+      </View>
+      <View style={{ flexDirection: "row", gap: 12, marginTop: 16 }}>
+        {cards.map((item) => (
+          <PreviewPecCard key={item.id} item={item} backgroundColor={cardColor} />
+        ))}
+      </View>
+    </View>
+  );
+}
+
+function FittedPreview({
+  width,
+  height,
+  designWidth,
+  children,
+}: {
+  width: number;
+  height: number;
+  designWidth: number;
+  children: ReactNode;
+}) {
+  const [natural, setNatural] = useState({ width: 0, height: 0 });
+  const maxWidth = Math.max(1, width - 8);
+  const maxHeight = Math.max(1, height - 4);
+  const fitted = natural.width > 0 && natural.height > 0;
+  const scale = fitted ? Math.min(maxWidth / natural.width, maxHeight / natural.height, 1) : 1;
 
   return (
     <View
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={{ width: cardWidth, alignItems: "center", gap: 14 }}
+      style={{
+        width: fitted ? natural.width * scale : designWidth,
+        height: fitted ? natural.height * scale : undefined,
+        opacity: fitted ? 1 : 0,
+      }}
     >
-      <View style={{ width: "100%", height: 76, flexDirection: "row", overflow: "hidden", borderRadius: 18 }}>
-        <View
-          style={{
-            flex: 1.35,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 10,
-            paddingHorizontal: 12,
-            backgroundColor: "#FDE8F4",
-          }}
-        >
-          <Image source={AVATAR} style={{ width: 40, height: 40, borderRadius: 20 }} />
-          <Text style={{ fontFamily: FONT_FAMILY, fontSize: 16, color: colors.dark }}>Eu quero</Text>
-        </View>
-        <View
-          style={{
-            width: 78,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#E7F8EE",
-          }}
-        >
-          <CakeArt size={34} />
-          <Text style={{ fontFamily: FONT_FAMILY, fontSize: 13, color: colors.dark, marginTop: 1 }}>Bolo</Text>
-        </View>
-        <View
-          style={{
-            width: 54,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: SPEAKER_BG,
-          }}
-        >
-          <SolarIcon name="volume-loud" size={22} color={colors.primary} />
-        </View>
-      </View>
-
-      <View style={{ alignItems: "center", gap: 8 }}>
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          <TokenChip
-            label="Eu"
-            backgroundColor="#EDE4FF"
-            leading={<Image source={AVATAR_2} style={{ width: 26, height: 26, borderRadius: 13 }} />}
-          />
-          <TokenChip
-            label="quero"
-            backgroundColor="#FDE8F4"
-            leading={<Image source={AVATAR} style={{ width: 26, height: 26, borderRadius: 13 }} />}
-          />
-        </View>
-        <TokenChip label="Bolo" backgroundColor="#E7F8EE" leading={<CakeArt size={24} />} />
+      <View
+        pointerEvents="none"
+        onLayout={(event) => {
+          const nextWidth = Math.round(event.nativeEvent.layout.width);
+          const nextHeight = Math.round(event.nativeEvent.layout.height);
+          setNatural((current) =>
+            current.width === nextWidth && current.height === nextHeight
+              ? current
+              : { width: nextWidth, height: nextHeight },
+          );
+        }}
+        style={
+          fitted
+            ? {
+                position: "absolute",
+                width: natural.width,
+                left: (natural.width * (scale - 1)) / 2,
+                top: (natural.height * (scale - 1)) / 2,
+                transform: [{ scale }],
+              }
+            : undefined
+        }
+      >
+        {children}
       </View>
     </View>
+  );
+}
+
+function PhraseArt({ width, height }: { width: number; height: number }) {
+  return (
+    <FittedPreview width={width} height={height} designWidth={PHRASE_DESIGN_WIDTH}>
+      <PhrasePreview width={PHRASE_DESIGN_WIDTH} />
+    </FittedPreview>
   );
 }
 
@@ -238,71 +287,119 @@ function LearnArt() {
   );
 }
 
-function RoutineCard({ title, source, width }: { title: string; source: ImageSourcePropType; width: number }) {
+const ROUTINE_DAYS = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
+const ROUTINE_PERIODS: { label: string; icon: SolarIconName }[] = [
+  { label: "Manhã", icon: "sun" },
+  { label: "Tarde", icon: "cloud-sun" },
+  { label: "Noite", icon: "moon" },
+];
+const ROUTINE_CARD_TITLES = ["Acordar", "Escovar os dentes"];
+const ROUTINE_DESIGN_WIDTH = 600;
+
+function RoutinePreviewCard({ item, backgroundColor }: { item: PecItem; backgroundColor: string }) {
+  const { profile } = useProfile();
+  const label = pecLabel(item.title, profile.sex);
+
   return (
     <View
       style={{
-        width,
-        alignItems: "center",
-        borderRadius: 18,
-        backgroundColor: "#D8F8E4",
-        padding: 10,
+        flex: 1,
+        borderRadius: 22,
+        backgroundColor,
+        padding: 12,
       }}
     >
-      <Image source={source} style={{ width: "100%", aspectRatio: 1, borderRadius: 12 }} resizeMode="cover" />
-      <Text style={{ marginTop: 8, fontFamily: FONT_FAMILY, fontSize: 16, color: colors.dark }}>{title}</Text>
+      <View
+        style={{
+          width: "100%",
+          aspectRatio: 1,
+          borderRadius: 16,
+          overflow: "hidden",
+          backgroundColor: colors.white,
+        }}
+      >
+        <Image source={imageFromPec(item, profile.sex)} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+      </View>
+      <Text
+        numberOfLines={2}
+        style={{
+          marginTop: 12,
+          minHeight: 56,
+          textAlign: "center",
+          fontFamily: FONT_FAMILY,
+          fontSize: 26,
+          lineHeight: 28,
+          color: colors.dark,
+        }}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
 
-function RoutineArt({ width }: { width: number }) {
-  const gap = 12;
-  const peek = 28;
-  const cardWidth = Math.min(148, Math.round((width - gap * 2 - peek - 24) / 2));
-  const rowInset = Math.max(12, width - cardWidth * 2 - gap * 2 - peek);
+function RoutinePreview({ width }: { width: number }) {
+  usePecImageOverrides();
+  const cards = ROUTINE_CARD_TITLES.map(pecByTitle).filter((item): item is PecItem => item != null);
+  const cardColor = getCategoryBgColor("deepPurple");
 
   return (
-    <View
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-      style={{ width, paddingLeft: rowInset }}
-    >
-      <View style={{ width: cardWidth * 2 + gap, marginBottom: 10 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", alignSelf: "flex-end", gap: 8 }}>
-          <View
-            style={{
-              borderRadius: 999,
-              backgroundColor: colors.primary,
-              paddingHorizontal: 10,
-              paddingVertical: 4,
-            }}
-          >
-            <Text style={{ fontFamily: FONT_FAMILY, fontSize: 13, color: "#FFFFFF" }}>8:00</Text>
-          </View>
-          <Text style={{ fontFamily: FONT_FAMILY, fontSize: 13, color: colors.primary, letterSpacing: 0.4 }}>
-            ROTINA MANHÃ
-          </Text>
-        </View>
+    <View style={{ width }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        {ROUTINE_DAYS.map((day, index) => (
+          <FilterChip key={day} label={day} selected={index === 0} onPress={() => undefined} />
+        ))}
       </View>
-      <View style={{ flexDirection: "row", gap }}>
-        <RoutineCard title="Oi" source={AVATAR} width={cardWidth} />
-        <RoutineCard title="Tchau" source={AVATAR_2} width={cardWidth} />
-        <RoutineCard title="Bom dia" source={AVATAR} width={cardWidth} />
+      <View style={{ flexDirection: "row", marginTop: 18 }}>
+        {ROUTINE_PERIODS.map((period, index) => {
+          const active = index === 0;
+          const tint = active ? colors.primary : colors.neutralDark;
+          return (
+            <View
+              key={period.label}
+              style={{
+                flex: 1,
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 2,
+                borderRadius: 999,
+                paddingVertical: 12,
+                backgroundColor: active ? colors.primarySoft : "transparent",
+              }}
+            >
+              <SolarIcon name={period.icon} size={28} color={tint} />
+              <Text style={{ fontFamily: FONT_FAMILY, fontSize: 18, color: tint }}>{period.label}</Text>
+            </View>
+          );
+        })}
+      </View>
+      <View style={{ flexDirection: "row", alignItems: "stretch", gap: 12, marginTop: 18 }}>
+        {cards.map((item) => (
+          <RoutinePreviewCard key={item.id} item={item} backgroundColor={cardColor} />
+        ))}
       </View>
     </View>
   );
 }
 
-function SlideArt({ slideKey, width }: { slideKey: SlideKey; width: number }) {
+function RoutineArt({ width, height }: { width: number; height: number }) {
+  return (
+    <FittedPreview width={width} height={height} designWidth={ROUTINE_DESIGN_WIDTH}>
+      <RoutinePreview width={ROUTINE_DESIGN_WIDTH} />
+    </FittedPreview>
+  );
+}
+
+function SlideArt({ slideKey, width, height }: { slideKey: SlideKey; width: number; height: number }) {
   switch (slideKey) {
     case "palavras":
       return <WordsArt width={width} />;
     case "frases":
-      return <PhraseArt width={width} />;
+      return <PhraseArt width={width} height={height} />;
     case "comunicar":
       return <LearnArt />;
     case "rotina":
-      return <RoutineArt width={width} />;
+      return <RoutineArt width={width} height={height} />;
   }
 }
 
@@ -329,6 +426,7 @@ export function OnboardingSlider({ onDone }: { onDone: () => void }) {
   const heardSlide = useRef(0);
   const [index, setIndex] = useState(0);
   const [pageHeight, setPageHeight] = useState(0);
+  const [artHeight, setArtHeight] = useState(0);
   indexRef.current = index;
 
   const finish = useCallback(async () => {
@@ -456,10 +554,17 @@ export function OnboardingSlider({ onDone }: { onDone: () => void }) {
                     flex: 1,
                     alignItems: "center",
                     justifyContent: "flex-end",
-                    paddingBottom: 28,
+                  }}
+                  onLayout={(event) => {
+                    const next = Math.round(event.nativeEvent.layout.height);
+                    setArtHeight((current) => (current === next ? current : next));
                   }}
                 >
-                  <SlideArt slideKey={slide.key} width={width} />
+                  {artHeight > 0 ? (
+                    <View style={{ paddingBottom: 28, alignItems: "center" }}>
+                      <SlideArt slideKey={slide.key} width={width} height={Math.max(0, artHeight - 28)} />
+                    </View>
+                  ) : null}
                 </View>
                 <View style={{ minHeight: 176, paddingHorizontal: 32, paddingBottom: 12 }}>
                   <Text
