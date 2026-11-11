@@ -45,7 +45,14 @@
         {
           "photosPermission": "O Sonora Kids usa suas fotos para o perfil e para criar PECs personalizados.",
           "cameraPermission": "O Sonora Kids usa a câmera para a foto do perfil e dos PECs.",
-          "microphonePermission": false
+          "microphonePermission": "O Sonora Kids usa o microfone para ouvir quando você repete a palavra."
+        }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "O Sonora Kids usa o microfone para ouvir quando você repete a palavra.",
+          "speechRecognitionPermission": "O Sonora Kids usa o reconhecimento de voz para saber se você falou a palavra."
         }
       ]
     ],
