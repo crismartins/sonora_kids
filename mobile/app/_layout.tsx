@@ -12,9 +12,11 @@ import { AnimatedSplash } from "@/components/AnimatedSplash";
 import { OnboardingSlider } from "@/components/OnboardingSlider";
 import { SilentModeToast } from "@/components/SilentModeToast";
 import { AppSettingsProvider, useAppSettings } from "@/context/AppSettingsContext";
+import { PremiumProvider } from "@/context/PremiumContext";
 import { ProfileProvider } from "@/context/ProfileContext";
 import { FONT_FAMILY } from "@/constants/typography";
 import { colors } from "@/constants/colors";
+import { useI18n } from "@/i18n";
 import { loadOnboardingSeen } from "@/services/onboarding";
 import { ensurePecImageOverridesLoaded } from "@/services/pecImageOverrides";
 
@@ -23,6 +25,7 @@ SystemUI.setBackgroundColorAsync(colors.primary);
 
 function RootNavigator() {
   const { fontScale } = useAppSettings();
+  const copy = useI18n();
   const headerTitleStyle = {
     fontFamily: FONT_FAMILY,
     fontSize: Math.round(22 * fontScale),
@@ -59,7 +62,7 @@ function RootNavigator() {
         options={{
           presentation: "modal",
           headerShown: true,
-          title: "Perfil",
+          title: copy.nav.profile,
           headerTitleStyle,
           headerTintColor: colors.dark,
           ...androidHeader,
@@ -70,7 +73,7 @@ function RootNavigator() {
         options={{
           presentation: "modal",
           headerShown: true,
-          title: "Configurações",
+          title: copy.nav.settings,
           headerTitleStyle,
           headerTintColor: colors.dark,
           ...androidHeader,
@@ -81,7 +84,7 @@ function RootNavigator() {
         options={{
           presentation: "modal",
           headerShown: true,
-          title: "Novo PEC",
+          title: copy.nav.newPec,
           headerTitleStyle,
           headerTintColor: colors.dark,
           ...androidHeader,
@@ -92,7 +95,7 @@ function RootNavigator() {
         options={{
           presentation: "modal",
           headerShown: true,
-          title: "Nova frase",
+          title: copy.nav.newPhrase,
           headerTitleStyle,
           headerTintColor: colors.dark,
           ...androidHeader,
@@ -103,10 +106,19 @@ function RootNavigator() {
         options={{
           presentation: "modal",
           headerShown: true,
-          title: "Rotina",
+          title: copy.nav.routine,
           headerTitleStyle,
           headerTintColor: colors.dark,
           ...androidHeader,
+        }}
+      />
+      <Stack.Screen
+        name="premium"
+        options={{
+          presentation: "transparentModal",
+          animation: "fade",
+          headerShown: false,
+          contentStyle: { backgroundColor: "transparent" },
         }}
       />
     </Stack>
@@ -172,9 +184,11 @@ export default function RootLayout() {
       {ready && onboardingSeen !== null ? (
         <SafeAreaProvider>
           <AppSettingsProvider>
-            <ProfileProvider>
-              <AppShell initialOnboardingSeen={onboardingSeen} />
-            </ProfileProvider>
+            <PremiumProvider>
+              <ProfileProvider>
+                <AppShell initialOnboardingSeen={onboardingSeen} />
+              </ProfileProvider>
+            </PremiumProvider>
           </AppSettingsProvider>
         </SafeAreaProvider>
       ) : null}

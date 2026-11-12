@@ -1,5 +1,6 @@
 import { Text, View } from "react-native";
 import { Button } from "@/components/Button";
+import { useI18n } from "@/i18n";
 
 export function ManageActions({
   confirming,
@@ -22,28 +23,29 @@ export function ManageActions({
   onCancelConfirm: () => void;
   onClose: () => void;
 }) {
+  const copy = useI18n();
   if (confirming) {
     return (
       <View className="gap-3">
         <Text className="text-center font-quicksand text-xl text-neutral-dark">{message}</Text>
         <Button
-          label="Excluir"
+          label={copy.common.delete}
           icon="trash"
           variant="danger"
           loading={deleting}
-          accessibilityLabel="Confirmar exclusão"
+          accessibilityLabel={copy.pec.confirmDelete}
           onPress={onConfirmDelete}
         />
-        <Button label="Voltar" variant="muted" onPress={onCancelConfirm} />
+        <Button label={copy.common.back} variant="muted" onPress={onCancelConfirm} />
       </View>
     );
   }
 
   return (
     <View className="gap-3">
-      <Button label="Editar" icon="pen" variant="soft" accessibilityLabel={editLabel} onPress={onEdit} />
-      <Button label="Excluir" icon="trash" variant="dangerSoft" accessibilityLabel="Excluir" onPress={onAskDelete} />
-      <Button label="Cancelar" variant="muted" onPress={onClose} />
+      <Button label={copy.common.edit} icon="pen" variant="soft" accessibilityLabel={editLabel} onPress={onEdit} />
+      <Button label={copy.common.delete} icon="trash" variant="dangerSoft" accessibilityLabel={copy.common.delete} onPress={onAskDelete} />
+      <Button label={copy.common.cancel} variant="muted" onPress={onClose} />
     </View>
   );
 }

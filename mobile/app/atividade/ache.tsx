@@ -8,6 +8,7 @@ import { PillText } from "@/components/PillText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone, ActivityPrompt, activityPadding } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { useI18n } from "@/i18n";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { useProfile } from "@/context/ProfileContext";
 import { playPecs, sample, shuffle, PlayPec } from "@/data/play";
@@ -39,6 +40,7 @@ function makeRounds(sex: ChildSex): Round[] {
 export default function AcheScreen() {
   const insets = useSafeAreaInsets();
   const { settings, speak, haptic } = useAppSettings();
+  const copy = useI18n();
   const { profile } = useProfile();
   const [session, setSession] = useState(0);
   const rounds = useMemo(() => makeRounds(profile.sex), [session, profile.sex]);
@@ -86,7 +88,7 @@ export default function AcheScreen() {
     setWrongId(null);
     celebrate();
     speak(pecLabel(pec.title, profile.sex));
-    recordWordUse(pecLabel(pec.title, profile.sex), pec.colorName);
+    recordWordUse(pec.title, pec.colorName);
 
     timer.current = setTimeout(() => {
       lock.current = false;
@@ -100,12 +102,12 @@ export default function AcheScreen() {
   };
 
   return (
-    <ActivityChrome title="Ache a Palavra">
+    <ActivityChrome title={copy.learn.find}>
       {finished || !round ? (
         <ActivityDone
-          title="Mandou bem!"
-          detail="Você praticou todas as palavras"
-          againLabel="Praticar de novo"
+          title={copy.learn.findDone}
+          detail={copy.learn.findDoneDetail}
+          againLabel={copy.learn.practiceAgain}
           onAgain={restart}
         />
       ) : (
@@ -114,7 +116,7 @@ export default function AcheScreen() {
           contentContainerStyle={{ ...activityPadding(insets.bottom), flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
         >
-          <ActivityPrompt instruction="Ouça e toque na palavra" progress={`${index + 1} de ${rounds.length}`} />
+          <ActivityPrompt instruction={copy.learn.findDetail} progress={copy.common.of(index + 1, rounds.length)} />
 
           <View className="gap-3">
             {round.options.map((pec) => (
@@ -131,7 +133,7 @@ export default function AcheScreen() {
 
           <View className="mt-auto pt-6">
             <Button
-              label="Ouvir"
+              label={copy.common.listen}
               icon="volume-loud"
               iconSize={24}
               labelSize="md"

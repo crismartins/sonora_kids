@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   DayPeriod,
   RoutineItem,
+  countRoutineItems,
   loadRoutine,
   routineSlotKey,
   saveRoutine,
@@ -64,5 +65,12 @@ export function useRoutine() {
     [slots],
   );
 
-  return { itemsFor, addItem, removeItem };
+  const itemsNow = useCallback(
+    (day: number, period: DayPeriod) => slotsRef.current[routineSlotKey(day, period)] ?? [],
+    [],
+  );
+
+  const countItems = useCallback(() => countRoutineItems(slotsRef.current), []);
+
+  return { itemsFor, itemsNow, countItems, addItem, removeItem };
 }

@@ -12,6 +12,7 @@ import { PillText } from "@/components/PillText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone, ActivityPrompt, activityPadding } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { useI18n } from "@/i18n";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { useProfile } from "@/context/ProfileContext";
 import { playPecs, sample, PlayPec } from "@/data/play";
@@ -43,6 +44,7 @@ function stopRecognizer() {
 export default function RepitaListening() {
   const insets = useSafeAreaInsets();
   const { settings, speak, stopSpeaking, haptic } = useAppSettings();
+  const copy = useI18n();
   const { profile } = useProfile();
   const [session, setSession] = useState(0);
   const rounds = useMemo(() => makeRounds(profile.sex), [session, profile.sex]);
@@ -98,7 +100,7 @@ export default function RepitaListening() {
     if (settings.haptics && Platform.OS !== "web") {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    recordWordUse(pecLabel(pec.title, profile.sex), pec.colorName);
+    recordWordUse(pec.title, pec.colorName);
     stopRecognizer();
 
     timer.current = setTimeout(() => {
@@ -134,7 +136,7 @@ export default function RepitaListening() {
       accept(pec, transcripts[0] ?? current);
       return;
     }
-    reject(transcripts[0] ?? "", transcripts[0] ? "Quase! Tente de novo" : "Não ouvi. Tente de novo");
+    reject(transcripts[0] ?? "", transcripts[0] ? copy.learn.almost : copy.learn.didntHear);
   });
 
   useSpeechRecognitionEvent("error", (event) => {
@@ -145,10 +147,10 @@ export default function RepitaListening() {
       return;
     }
     if (event.error === "no-speech" || event.error === "speech-timeout") {
-      reject("", "Não ouvi. Tente de novo");
+      reject("", copy.learn.didntHear);
       return;
     }
-    reject("", "Não consegui ouvir. Tente de novo");
+    reject("", copy.learn.miss);
   });
 
   useSpeechRecognitionEvent("end", () => {
@@ -216,26 +218,26 @@ export default function RepitaListening() {
     } catch {
       phaseRef.current = "miss";
       setPhase("miss");
-      setMissNote("Não consegui ouvir. Tente de novo");
+      setMissNote(copy.learn.miss);
     }
   };
 
   const prompt =
     phase === "listening"
-      ? "Estou ouvindo..."
+      ? copy.learn.listening
       : phase === "matched"
-        ? "Isso!"
+        ? copy.learn.matched
         : phase === "miss"
           ? missNote
-          : "Toque no microfone e fale";
+          : copy.learn.speakNow;
 
   return (
-    <ActivityChrome title="Repita Comigo">
+    <ActivityChrome title={copy.learn.repeat}>
       {finished || !target ? (
         <ActivityDone
-          title="Mandou bem!"
-          detail="Você falou todas as palavras"
-          againLabel="Praticar de novo"
+          title={copy.learn.findDone}
+          detail={copy.learn.repeatDoneDetail}
+          againLabel={copy.learn.practiceAgain}
           onAgain={restart}
         />
       ) : (
@@ -244,7 +246,7 @@ export default function RepitaListening() {
           contentContainerStyle={{ ...activityPadding(insets.bottom), flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
         >
-          <ActivityPrompt instruction="Ouça e fale a palavra" progress={`${index + 1} de ${rounds.length}`} />
+          <ActivityPrompt instruction={copy.learn.repeatPrompt} progress={copy.common.of(index + 1, rounds.length)} />
 
           <WordCard pec={target} label={label} highContrast={settings.highContrast} phase={phase} missTick={missTick} />
 
@@ -254,7 +256,7 @@ export default function RepitaListening() {
             </PillText>
             {heard && phase !== "idle" ? (
               <PillText size={18} style={{ color: colors.neutralDark, marginTop: 6 }}>
-                {`Ouvi: ${heard}`}
+                {copy.learn.heard(heard)}
               </PillText>
             ) : null}
           </View>
@@ -263,12 +265,12 @@ export default function RepitaListening() {
             {phase === "denied" || phase === "unavailable" ? (
               <PillText size={18} style={{ color: colors.dark, marginBottom: 8 }}>
                 {phase === "denied"
-                  ? "Libere o microfone e o reconhecimento de voz nos Ajustes do celular."
-                  : "Este aparelho não consegue reconhecer a voz."}
+                  ? copy.learn.micDenied
+                  : copy.learn.micUnavailable}
               </PillText>
             ) : null}
             <Button
-              label={phase === "listening" ? "Parar" : "Falar"}
+              label={phase === "listening" ? copy.common.stop : copy.common.speak}
               icon="microphone"
               iconSize={24}
               labelSize="md"
@@ -277,12 +279,12 @@ export default function RepitaListening() {
                 listen().catch(() => {
                   phaseRef.current = "miss";
                   setPhase("miss");
-                  setMissNote("Não consegui ouvir. Tente de novo");
+                  setMissNote(copy.learn.miss);
                 });
               }}
             />
             <Button
-              label="Ouvir"
+              label={copy.common.listen}
               icon="volume-loud"
               iconSize={24}
               labelSize="md"

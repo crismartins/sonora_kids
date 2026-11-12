@@ -7,6 +7,7 @@ import { PillText } from "@/components/PillText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone, ActivityPrompt, activityPadding } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { useI18n } from "@/i18n";
 import { useProfile } from "@/context/ProfileContext";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { PHRASES_MAIS_USADAS } from "@/constants/phrases";
@@ -41,6 +42,7 @@ function chipsFor(phrase: PhraseItem[]): Chip[] {
 export default function FraseScreen() {
   const insets = useSafeAreaInsets();
   const { settings, speak, haptic } = useAppSettings();
+  const copy = useI18n();
   const { profile } = useProfile();
   const [session, setSession] = useState(0);
   const rounds = useMemo(() => pickPhrases(), [session]);
@@ -96,7 +98,7 @@ export default function FraseScreen() {
     setWrongId(null);
     speak(pecLabel(chip.text, profile.sex));
     haptic();
-    recordWordUse(pecLabel(chip.text, profile.sex), chip.color);
+    recordWordUse(chip.text, chip.color);
 
     if (next.length === phrase.length) {
       setSolved(true);
@@ -122,12 +124,12 @@ export default function FraseScreen() {
   };
 
   return (
-    <ActivityChrome title="Monte a Frase">
+    <ActivityChrome title={copy.learn.build}>
       {finished ? (
         <ActivityDone
-          title="Frases prontas!"
-          detail="Você montou todas na ordem"
-          againLabel="Montar de novo"
+          title={copy.learn.buildDone}
+          detail={copy.learn.buildDoneDetail}
+          againLabel={copy.learn.buildAgain}
           onAgain={restart}
         />
       ) : (
@@ -137,11 +139,11 @@ export default function FraseScreen() {
           showsVerticalScrollIndicator={false}
         >
           <ActivityPrompt
-            instruction="Ouça e toque as palavras na ordem"
-            progress={`${roundIndex + 1} de ${rounds.length}`}
+            instruction={copy.learn.buildDetail}
+            progress={copy.common.of(roundIndex + 1, rounds.length)}
           />
 
-          <Text className="pb-2 text-center font-quicksand text-base text-neutral-dark">Monte aqui</Text>
+          <Text className="pb-2 text-center font-quicksand text-base text-neutral-dark">{copy.learn.buildHere}</Text>
           <View className="min-h-[64px] flex-row flex-wrap items-center justify-center gap-2">
             {phrase.map((item, index) => {
               const chip = picked[index];
@@ -182,13 +184,13 @@ export default function FraseScreen() {
           <View className="mt-auto pt-6">
             {solved ? (
               <Button
-                label={roundIndex + 1 >= rounds.length ? "Concluir" : "Próxima frase"}
+                label={roundIndex + 1 >= rounds.length ? copy.common.done : copy.learn.nextPhrase}
                 labelSize="md"
                 onPress={nextRound}
               />
             ) : (
               <Button
-                label="Ouvir a frase"
+                label={copy.phrases.listen}
                 icon="volume-loud"
                 iconSize={24}
                 labelSize="md"

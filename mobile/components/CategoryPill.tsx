@@ -1,8 +1,10 @@
 import { LayoutChangeEvent, Pressable, View } from "react-native";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { PillText } from "@/components/PillText";
+import { localizeName } from "@/i18n";
 import { categoryIconBySlug } from "@/constants/categoryIcons";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
+import { useAppSettings } from "@/context/AppSettingsContext";
 
 const SIZE = {
   md: { pill: 44, icon: 28, label: 14, pad: 10, gap: 6 },
@@ -29,12 +31,14 @@ export function CategoryPill({
   onLayout?: (event: LayoutChangeEvent) => void;
 }) {
   const scale = SIZE[size];
+  const { settings } = useAppSettings();
   const color = getCategoryColor(colorName);
   const labelColor = highContrast ? colors.white : color;
+  const label = localizeName(name, settings.language);
 
   return (
     <Pressable
-      accessibilityLabel={name}
+      accessibilityLabel={label}
       accessibilityState={{ selected }}
       onPress={onPress}
       onLayout={onLayout}
@@ -55,13 +59,13 @@ export function CategoryPill({
           <CategoryIcon slug={slug} size={scale.icon} />
         ) : (
           <PillText size={scale.label} style={{ color: labelColor }}>
-            {name.slice(0, 1)}
+            {label.slice(0, 1)}
           </PillText>
         )}
       </View>
       {selected ? (
         <PillText size={scale.label} style={{ color: labelColor, letterSpacing: 0.4 }}>
-          {name.toUpperCase()}
+          {label.toUpperCase()}
         </PillText>
       ) : null}
     </Pressable>

@@ -18,12 +18,14 @@ import { CloseCircleIcon } from "@solar-icons/react-native/bold-duotone/close-ci
 import { CloudCrossIcon } from "@solar-icons/react-native/bold-duotone/cloud-cross";
 import { CloudDownloadIcon } from "@solar-icons/react-native/bold-duotone/cloud-download";
 import { CloudSunIcon } from "@solar-icons/react-native/bold-duotone/cloud-sun";
+import { CrownIcon } from "@solar-icons/react-native/bold-duotone/crown";
 import { FlagIcon } from "@solar-icons/react-native/bold-duotone/flag";
 import { GalleryIcon } from "@solar-icons/react-native/bold-duotone/gallery";
 import { GamepadIcon } from "@solar-icons/react-native/bold-duotone/gamepad";
 import { HeartIcon } from "@solar-icons/react-native/bold-duotone/heart";
 import { LeafIcon } from "@solar-icons/react-native/bold-duotone/leaf";
 import { MagnifierIcon } from "@solar-icons/react-native/bold-duotone/magnifier";
+import { MenIcon } from "@solar-icons/react-native/bold-duotone/men";
 import { MenuDotsVerticalIcon } from "@solar-icons/react-native/bold-duotone/menu-dots-vertical";
 import { MicrophoneIcon } from "@solar-icons/react-native/bold-duotone/microphone";
 import { MoonIcon } from "@solar-icons/react-native/bold-duotone/moon";
@@ -44,6 +46,7 @@ import { VolumeIcon } from "@solar-icons/react-native/bold-duotone/volume";
 import { VolumeCrossIcon } from "@solar-icons/react-native/bold-duotone/volume-cross";
 import { VolumeLoudIcon } from "@solar-icons/react-native/bold-duotone/volume-loud";
 import { VolumeSmallIcon } from "@solar-icons/react-native/bold-duotone/volume-small";
+import { WomenIcon } from "@solar-icons/react-native/bold-duotone/women";
 import { WaterdropIcon } from "@solar-icons/react-native/bold-duotone/waterdrop";
 import { WidgetIcon } from "@solar-icons/react-native/bold-duotone/widget";
 import { RoundArrowLeftIcon } from "@solar-icons/react-native/bold-duotone/round-arrow-left";
@@ -76,6 +79,7 @@ const ICONS = {
   "check-circle": CheckCircleIcon,
   "chef-hat": ChefHatIcon,
   clock: ClockCircleIcon,
+  crown: CrownIcon,
   "cloud-cross": CloudCrossIcon,
   "cloud-download": CloudDownloadIcon,
   "cloud-sun": CloudSunIcon,
@@ -87,6 +91,7 @@ const ICONS = {
   heart: HeartIcon,
   leaf: LeafIcon,
   magnifier: MagnifierIcon,
+  men: MenIcon,
   "menu-dots-vertical": MenuDotsVerticalIcon,
   microphone: MicrophoneIcon,
   moon: MoonIcon,
@@ -107,6 +112,7 @@ const ICONS = {
   "volume-loud": VolumeLoudIcon,
   "volume-small": VolumeSmallIcon,
   waterdrop: WaterdropIcon,
+  women: WomenIcon,
   widget: WidgetIcon,
 } satisfies Record<string, IconComponent>;
 

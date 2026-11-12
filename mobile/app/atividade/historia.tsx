@@ -17,24 +17,29 @@ import { ActivityChrome, ActivityDone, ActivityPrompt, activityPadding } from "@
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { STORIES, Story, StoryPage } from "@/data/stories";
+import { localizedStory } from "@/i18n/stories";
+import { useI18n } from "@/i18n";
 
 export default function HistoriaScreen() {
   const [story, setStory] = useState<Story | null>(null);
+  const copy = useI18n();
+  const { settings } = useAppSettings();
 
   if (!story) {
     return (
-      <ActivityChrome title="História do Dia">
+      <ActivityChrome title={copy.learn.story}>
         <StoryList onOpen={setStory} />
       </ActivityChrome>
     );
   }
 
-  return <StoryReader story={story} onClose={() => setStory(null)} />;
+  return <StoryReader story={localizedStory(story, settings.language)} onClose={() => setStory(null)} />;
 }
 
 function StoryList({ onOpen }: { onOpen: (story: Story) => void }) {
   const insets = useSafeAreaInsets();
   const { settings, haptic } = useAppSettings();
+  const copy = useI18n();
 
   return (
     <ScrollView
@@ -42,9 +47,10 @@ function StoryList({ onOpen }: { onOpen: (story: Story) => void }) {
       contentContainerStyle={activityPadding(insets.bottom)}
       showsVerticalScrollIndicator={false}
     >
-      <ActivityPrompt instruction="Escolha uma história para ouvir" />
+      <ActivityPrompt instruction={copy.learn.storyPick} />
       <View className="gap-3">
-        {STORIES.map((story) => {
+        {STORIES.map((item) => {
+          const story = localizedStory(item, settings.language);
           const color = getCategoryColor(story.colorName);
           const background = settings.highContrast ? colors.white : getCategoryBgColor(story.colorName);
           return (
@@ -53,7 +59,7 @@ function StoryList({ onOpen }: { onOpen: (story: Story) => void }) {
               accessibilityLabel={story.title}
               onPress={() => {
                 haptic();
-                onOpen(story);
+                onOpen(item);
               }}
               className="min-h-[92px] flex-row items-center gap-4 rounded-[22px] px-4 py-4 active:opacity-90"
               style={{
@@ -103,6 +109,7 @@ function PageImage({ page }: { page: StoryPage }) {
 function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) {
   const insets = useSafeAreaInsets();
   const { settings, speak, stopSpeaking, haptic } = useAppSettings();
+  const copy = useI18n();
   const [page, setPage] = useState(0);
   const [finished, setFinished] = useState(false);
   const [pageWidth, setPageWidth] = useState(0);
@@ -174,15 +181,15 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
     return (
       <ActivityChrome title={story.title} onBack={onClose} announce={false}>
         <ActivityDone
-          title="Fim da história"
+          title={copy.learn.storyEnd}
           detail={story.title}
-          againLabel="Ler de novo"
+          againLabel={copy.learn.readAgain}
           onAgain={() => {
             pageRef.current = 0;
             setPage(0);
             setFinished(false);
           }}
-          secondaryLabel="Outra história"
+          secondaryLabel={copy.learn.anotherStory}
           onSecondary={onClose}
         />
       </ActivityChrome>
@@ -226,7 +233,7 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
                     <Text className="text-center font-quicksand text-3xl leading-10 text-dark">{item.text}</Text>
                     <View className="mt-6 flex-row items-center gap-2">
                       <SolarIcon name="volume-loud" size={20} color={colors.primary} />
-                      <Text className="font-quicksand text-base text-primary">Toque para ouvir</Text>
+                      <Text className="font-quicksand text-base text-primary">{copy.learn.tapToHear}</Text>
                     </View>
                   </Pressable>
                 </View>
@@ -240,9 +247,9 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
             icon="arrow-left"
             variant="neutral"
             size="md"
-            accessibilityLabel="Página anterior"
+            accessibilityLabel={copy.learn.previousPage}
             disabled={page === 0}
-            inactiveReason={page === 0 ? "Primeira página" : undefined}
+            inactiveReason={page === 0 ? copy.learn.firstPage : undefined}
             onPress={() => go(page - 1)}
           />
 
@@ -263,7 +270,7 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
             icon={page === story.pages.length - 1 ? "check" : "arrow-right"}
             variant="primary"
             size="md"
-            accessibilityLabel={page === story.pages.length - 1 ? "Terminar história" : "Próxima página"}
+            accessibilityLabel={page === story.pages.length - 1 ? copy.learn.finishStory : copy.learn.nextPage}
             onPress={() => go(page + 1)}
           />
         </View>

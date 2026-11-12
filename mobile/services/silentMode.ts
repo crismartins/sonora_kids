@@ -1,8 +1,7 @@
 import { Platform } from "react-native";
 import { canDetectSilentMode, isSilentModeEnabled } from "speech-silence";
-
-const DETECTED_MESSAGE = "Modo silencioso ativado. Desative para ouvir a voz.";
-const UNKNOWN_MESSAGE = "Se o modo silencioso estiver ligado, a voz não sai. Desative para ouvir.";
+import { UI } from "@/i18n/messages";
+import { getActiveLocale } from "@/i18n/locale";
 const TOAST_MS = 5200;
 const CACHE_MS = 3000;
 
@@ -73,12 +72,12 @@ export function warnIfSilentModeBlocksSpeech() {
   if (!canDetectSilentMode()) {
     if (hintedWithoutDetector) return;
     hintedWithoutDetector = true;
-    showSilentModeToast(UNKNOWN_MESSAGE);
+    showSilentModeToast(UI[getActiveLocale()].silent.unknown);
     return;
   }
 
   void readSilent().then((silenced) => {
-    if (silenced) showSilentModeToast(DETECTED_MESSAGE);
+    if (silenced) showSilentModeToast(UI[getActiveLocale()].silent.detected);
     else if (silenced === false) hideSilentModeToast();
   });
 }

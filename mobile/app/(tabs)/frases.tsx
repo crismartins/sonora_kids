@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { FloatingButton } from "@/components/Button";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { usePremium } from "@/context/PremiumContext";
 import { PhraseCard } from "@/components/PhraseCard";
 import { FilterChip } from "@/components/FilterChip";
 import { EmptyState } from "@/components/ScreenState";
@@ -18,6 +19,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { useCustomPecs } from "@/hooks/useCustomPecs";
 import { useCustomPhrases } from "@/hooks/useCustomPhrases";
 import { usePillPager } from "@/hooks/usePillPager";
+import { useI18n } from "@/i18n";
 import { customPecToItem } from "@/services/customPecs";
 import { CustomPhrase } from "@/services/customPhrases";
 import { PecItem, PhraseItem } from "@/types";
@@ -54,12 +56,13 @@ function PhrasePage({
   tabBarHeight: number;
   onManage: (customId: string) => void;
 }) {
+  const copy = useI18n();
   if (phrases.length === 0) {
     return (
       <EmptyState
         icon="chat-square-line"
-        title="Nenhuma frase aqui"
-        detail="Toque em + e monte uma frase com os PECs"
+        title={copy.phrases.emptyTitle}
+        detail={copy.phrases.emptyDetail}
       />
     );
   }
@@ -88,6 +91,8 @@ function PhrasePage({
 export default function FrasesScreen() {
   const insets = useSafeAreaInsets();
   const { haptic, speak } = useAppSettings();
+  const { canAdd, openPaywall } = usePremium();
+  const copy = useI18n();
   const { profile } = useProfile();
   const pecImagesVersion = usePecImageOverrides();
   const { data: categories } = useCategories();
@@ -96,7 +101,7 @@ export default function FrasesScreen() {
   const onFilterChange = useCallback(
     (index: number) => {
       haptic(Haptics.ImpactFeedbackStyle.Light);
-      speak(FILTER_TABS[index]);
+      speak(copy.phrases.filters[index]);
     },
     [haptic, speak],
   );
@@ -210,7 +215,7 @@ export default function FrasesScreen() {
           {FILTER_TABS.map((tab, index) => (
             <FilterChip
               key={tab}
-              label={tab}
+              label={copy.phrases.filters[index]}
               selected={index === selectedIndex}
               onPress={() => selectIndex(index, "chip")}
               onLayout={(event) => onChipLayout(index, event)}
@@ -258,10 +263,14 @@ export default function FrasesScreen() {
 
       <FloatingButton
         icon="chat-square-add"
-        tooltip="Adicionar"
-        accessibilityLabel="Adicionar frase"
+        tooltip={copy.common.add}
+        accessibilityLabel={copy.phrases.add}
         onPress={() => {
           if (!catalog) return;
+          if (!canAdd("phrase", customPhrases.length)) {
+            openPaywall();
+            return;
+          }
           openPhraseForm({
             categories: catalog,
             onSubmit: async (items) => {

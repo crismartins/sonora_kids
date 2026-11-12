@@ -10,16 +10,28 @@ import { colors } from "@/constants/colors";
 import { FONT_FAMILY } from "@/constants/typography";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { useProfile } from "@/context/ProfileContext";
-import { inferVoiceGender, SpeechLanguage, voiceSummary, VoiceGender } from "@/services/appSettings";
+import { pecLabel } from "@/data/pecLabels";
+import { useI18n } from "@/i18n";
+import {
+  inferVoiceGender,
+  languagePreview,
+  ratePreview,
+  SpeechLanguage,
+  SpeechRate,
+  voicePreview,
+  voiceSummary,
+  VoiceGender,
+} from "@/services/appSettings";
 import { AVATAR_V1, AVATAR_V2, AvatarChoice, ChildSex, profileAvatarSource } from "@/services/profile";
 import { loadTopWords, UsedWord } from "@/services/wordUsage";
-import { VoicePickerModal, VOICE_PREVIEW } from "@/components/VoicePickerModal";
+import { VoicePickerModal } from "@/components/VoicePickerModal";
 
 export default function ProfileScreen() {
   const { edit } = useLocalSearchParams<{ edit?: string }>();
   const editRequestHandled = useRef(edit === "1");
   const insets = useSafeAreaInsets();
   const { ready, profile, saveProfile } = useProfile();
+  const copy = useI18n();
   const { settings, voices, updateSettings, speak, haptic } = useAppSettings();
   const [nickname, setNickname] = useState(profile.nickname);
   const [name, setName] = useState(profile.name);
@@ -70,6 +82,10 @@ export default function ProfileScreen() {
     return () => clearTimeout(timer);
   }, [saved]);
 
+  const voiceLabel = voiceSummary(voices, settings)
+    .replace("Feminina", copy.voice.feminine)
+    .replace("Masculina", copy.voice.masculine);
+
   const dirty =
     nickname.trim() !== profile.nickname ||
     name.trim() !== profile.name ||
@@ -100,7 +116,7 @@ export default function ProfileScreen() {
   const chooseGender = (gender: VoiceGender) => {
     const patch = { voiceGender: gender, voiceId: null };
     updateSettings(patch);
-    speak(VOICE_PREVIEW, patch);
+    speak(voicePreview(settings.language), patch);
     haptic();
   };
 
@@ -109,14 +125,20 @@ export default function ProfileScreen() {
     const inferred = voice ? inferVoiceGender(voice) : null;
     const patch = { voiceId, voiceGender: inferred ?? settings.voiceGender };
     updateSettings(patch);
-    speak(VOICE_PREVIEW, patch);
+    speak(voicePreview(settings.language), patch);
     haptic();
   };
 
   const chooseLanguage = (language: SpeechLanguage) => {
     const patch = { language, voiceId: null };
     updateSettings(patch);
-    speak("Olá. Este é o idioma da voz.", patch);
+    speak(languagePreview(language), patch);
+    haptic();
+  };
+
+  const chooseRate = (speechRate: SpeechRate) => {
+    updateSettings({ speechRate });
+    speak(ratePreview(settings.language), { speechRate });
     haptic();
   };
 
@@ -150,7 +172,7 @@ export default function ProfileScreen() {
       setSaved(true);
       setEditing(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Não foi possível salvar.");
+      setError(err instanceof Error ? err.message : copy.common.saveFailed);
     } finally {
       setSaving(false);
     }
@@ -168,7 +190,7 @@ export default function ProfileScreen() {
           <Text className="mt-4 font-quicksand text-3xl text-primary">{profile.nickname}</Text>
           <Text className="mt-1 px-6 text-center font-quicksand text-xl text-dark">{profile.name}</Text>
           <Text className="mt-1 font-quicksand text-lg text-neutral-dark">
-            {profile.sex === "menino" ? "Menino" : "Menina"}
+            {profile.sex === "menino" ? copy.common.boy : copy.common.girl}
           </Text>
           <View
             className="mx-4 mt-6 gap-3.5 self-stretch rounded-3xl bg-primary p-5"
@@ -180,11 +202,9 @@ export default function ProfileScreen() {
               elevation: 6,
             }}
           >
-            <Text className="font-quicksand text-2xl text-white">Palavras mais usadas</Text>
+            <Text className="font-quicksand text-2xl text-white">{copy.profile.topWords}</Text>
             {words.length === 0 ? (
-              <Text className="font-quicksand text-lg text-white/85">
-                As 10 palavras mais faladas aparecem aqui conforme os PECS forem usados.
-              </Text>
+              <Text className="font-quicksand text-lg text-white/85">{copy.profile.topWordsEmpty}</Text>
             ) : (
               <View className="flex-row flex-wrap gap-2">
                 {words.map((word) => (
@@ -195,7 +215,7 @@ export default function ProfileScreen() {
                     <View className="h-8 min-w-8 items-center justify-center rounded-full bg-primary-soft px-2">
                       <Text className="font-quicksand text-base text-dark">{word.count}</Text>
                     </View>
-                    <Text className="font-quicksand text-base text-dark">{word.title.toUpperCase()}</Text>
+                    <Text className="font-quicksand text-base text-dark">{pecLabel(word.title, profile.sex).toUpperCase()}</Text>
                   </View>
                 ))}
               </View>
@@ -204,12 +224,12 @@ export default function ProfileScreen() {
         </ScrollView>
         <View className="bg-white px-4" style={{ paddingBottom: insets.bottom }}>
           <Button
-            label="Editar Perfil"
+            label={copy.profile.edit}
             icon="pen"
             variant="soft"
             shape="rounded"
             size="md"
-            accessibilityLabel="Editar perfil"
+            accessibilityLabel={copy.settings.editProfile}
             className="w-full"
             onPress={() => setEditing(true)}
           />
@@ -243,54 +263,54 @@ export default function ProfileScreen() {
           }}
         >
           <ImageSourcePicker
-            accessibilityLabel="Adicionar foto do perfil"
-            alertTitle="Foto do perfil"
+            accessibilityLabel={copy.profile.addPhoto}
+            alertTitle={copy.profile.photoTitle}
             allowsEditing
             aspect={[1, 1]}
             className="h-[76px] w-[76px] rounded-2xl border-4 border-light"
             onPicked={usePickedImage}
             onError={setError}
           />
-          <AvatarChoiceButton label="Avatar 1" selected={avatar === "v1"} onPress={() => choosePreset("v1")}>
+          <AvatarChoiceButton label={copy.profile.avatar1} selected={avatar === "v1"} onPress={() => choosePreset("v1")}>
             <Image source={AVATAR_V1} className="h-full w-full" />
           </AvatarChoiceButton>
-          <AvatarChoiceButton label="Avatar 2" selected={avatar === "v2"} onPress={() => choosePreset("v2")}>
+          <AvatarChoiceButton label={copy.profile.avatar2} selected={avatar === "v2"} onPress={() => choosePreset("v2")}>
             <Image source={AVATAR_V2} className="h-full w-full" />
           </AvatarChoiceButton>
           {photoUri ? (
-            <AvatarChoiceButton label="Minha foto" selected={avatar === "photo"} onPress={() => choosePreset("photo")}>
+            <AvatarChoiceButton label={copy.profile.myPhoto} selected={avatar === "photo"} onPress={() => choosePreset("photo")}>
               <Image source={{ uri: photoUri }} className="h-full w-full" />
             </AvatarChoiceButton>
           ) : null}
         </ScrollView>
 
         <View className="flex-row gap-3 px-4">
-          <SexChoice label="Menina" selected={sex === "menina"} onPress={() => chooseSex("menina")} />
-          <SexChoice label="Menino" selected={sex === "menino"} onPress={() => chooseSex("menino")} />
+          <SexChoice label={copy.common.girl} selected={sex === "menina"} onPress={() => chooseSex("menina")} />
+          <SexChoice label={copy.common.boy} selected={sex === "menino"} onPress={() => chooseSex("menino")} />
         </View>
 
         <View className="gap-3 px-4">
           <TextInput
-            accessibilityLabel="Nome"
+            accessibilityLabel={copy.common.name}
             value={name}
             onChangeText={(value) => {
               setName(value);
               setSaved(false);
             }}
-            placeholder="Nome"
+            placeholder={copy.common.name}
             placeholderTextColor={colors.neutralDark}
             maxLength={60}
             className="rounded-2xl border border-neutral bg-neutral-light px-4 font-quicksand text-xl text-dark"
             style={{ fontFamily: FONT_FAMILY, fontSize: 20, height: 64 }}
           />
           <TextInput
-            accessibilityLabel="Apelido"
+            accessibilityLabel={copy.common.nickname}
             value={nickname}
             onChangeText={(value) => {
               setNickname(value);
               setSaved(false);
             }}
-            placeholder="Apelido"
+            placeholder={copy.common.nickname}
             placeholderTextColor={colors.neutralDark}
             maxLength={24}
             className="rounded-2xl border border-neutral bg-neutral-light px-4 font-quicksand text-xl text-dark"
@@ -299,8 +319,8 @@ export default function ProfileScreen() {
         </View>
 
         <Pressable
-          accessibilityLabel={`Voz, ${voiceSummary(voices, settings)}`}
-          accessibilityHint="Abre a escolha de voz"
+          accessibilityLabel={`${copy.common.voice}, ${voiceLabel}`}
+          accessibilityHint={copy.profile.voiceHint}
           onPress={() => setVoiceOpen(true)}
           className="mx-4 flex-row items-center gap-3 rounded-2xl border border-neutral bg-neutral-light px-4 py-3"
         >
@@ -308,9 +328,9 @@ export default function ProfileScreen() {
             <SolarIcon name="volume-loud" size={20} color={colors.primary} />
           </View>
           <View className="flex-1">
-            <Text className="font-quicksand text-base text-neutral-dark">Voz</Text>
+            <Text className="font-quicksand text-base text-neutral-dark">{copy.common.voice}</Text>
             <Text className="font-quicksand text-xl text-dark" numberOfLines={1}>
-              {voiceSummary(voices, settings)}
+              {voiceLabel}
             </Text>
           </View>
           <SolarIcon name="arrow-right" size={20} color={colors.neutralDark} />
@@ -321,25 +341,25 @@ export default function ProfileScreen() {
       <View className="flex-row gap-3 bg-white px-4" style={{ paddingBottom: insets.bottom }}>
         <Button
           icon="close-circle"
-          label="Cancelar"
+          label={copy.common.cancel}
           variant="neutral"
           shape="rounded"
           size="md"
           disabled={saving}
-          accessibilityLabel="Cancelar edição"
+          accessibilityLabel={copy.profile.cancelEdit}
           className="flex-1"
           onPress={handleCancel}
         />
         <Button
           icon="check-circle"
-          label={saved ? "Salvo" : "Salvar"}
+          label={saved ? copy.common.saved : copy.common.save}
           variant="primary"
           shape="rounded"
           size="md"
           loading={saving}
           disabled={!dirty}
-          inactiveReason={!dirty && !saved ? "Nenhuma alteração" : undefined}
-          accessibilityLabel="Salvar perfil"
+          inactiveReason={!dirty && !saved ? copy.profile.noChanges : undefined}
+          accessibilityLabel={copy.profile.saveProfile}
           className="flex-1"
           onPress={handleSave}
         />
@@ -350,10 +370,12 @@ export default function ProfileScreen() {
         gender={settings.voiceGender}
         voiceId={settings.voiceId}
         language={settings.language}
+        speechRate={settings.speechRate}
         onClose={() => setVoiceOpen(false)}
         onSelectGender={chooseGender}
         onSelectVoice={(voice) => chooseVoice(voice.identifier)}
         onSelectLanguage={chooseLanguage}
+        onSelectRate={chooseRate}
       />
     </KeyboardAvoidingView>
   );

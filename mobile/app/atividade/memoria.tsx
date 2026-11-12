@@ -6,6 +6,7 @@ import { PillText } from "@/components/PillText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone, ActivityPrompt, activityPadding } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { useI18n } from "@/i18n";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { useProfile } from "@/context/ProfileContext";
 import { playPecs, sample, shuffle } from "@/data/play";
@@ -44,6 +45,7 @@ function deal(sex: ChildSex): MemoryCard[] {
 export default function MemoriaScreen() {
   const insets = useSafeAreaInsets();
   const { settings, speak, haptic } = useAppSettings();
+  const copy = useI18n();
   const { profile } = useProfile();
   const [cards, setCards] = useState<MemoryCard[]>(() => deal(profile.sex));
   const [finished, setFinished] = useState(false);
@@ -140,17 +142,17 @@ export default function MemoriaScreen() {
   }
 
   return (
-    <ActivityChrome title="Memória com Pecs">
+    <ActivityChrome title={copy.learn.memory}>
       {finished ? (
         <ActivityDone
-          title="Você achou todos!"
-          detail={`${PAIR_COUNT} pares de palavras`}
-          againLabel="Jogar de novo"
+          title={copy.learn.memoryDone}
+          detail={copy.learn.memoryDoneDetail(PAIR_COUNT)}
+          againLabel={copy.learn.memoryAgain}
           onAgain={restart}
         />
       ) : (
         <View className="flex-1" style={activityPadding(insets.bottom)}>
-          <ActivityPrompt instruction="Toque em duas cartas iguais" progress={`${found} de ${PAIR_COUNT}`} />
+          <ActivityPrompt instruction={copy.learn.memoryPrompt} progress={copy.common.of(found, PAIR_COUNT)} />
           <View className="flex-1 gap-3">
             {rows.map((row) => (
               <View key={row.map((card) => card.key).join("-")} className="flex-1 flex-row gap-3">
@@ -170,6 +172,7 @@ export default function MemoriaScreen() {
 
 function MemoryTile({ card, highContrast, onPress }: { card: MemoryCard; highContrast: boolean; onPress: () => void }) {
   const { profile } = useProfile();
+  const copy = useI18n();
   const label = pecLabel(card.title, profile.sex);
   const color = getCategoryColor(card.colorName);
   const background = highContrast ? colors.white : getCategoryBgColor(card.colorName);
@@ -177,7 +180,7 @@ function MemoryTile({ card, highContrast, onPress }: { card: MemoryCard; highCon
 
   return (
     <Pressable
-      accessibilityLabel={showing ? label : "Carta virada"}
+      accessibilityLabel={showing ? label : copy.learn.faceDown}
       onPress={onPress}
       className={`flex-1 overflow-hidden rounded-[22px] active:opacity-90 ${showing ? "px-2 pb-2 pt-2" : "items-center justify-center"}`}
       style={{

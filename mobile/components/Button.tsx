@@ -47,6 +47,7 @@ type ButtonProps = {
   iconSize?: number;
   loading?: boolean;
   disabled?: boolean;
+  inactiveReason?: string;
   elevated?: boolean;
   accessibilityLabel?: string;
   className?: string;
@@ -63,6 +64,7 @@ export function Button({
   iconSize,
   loading = false,
   disabled = false,
+  inactiveReason,
   elevated = false,
   accessibilityLabel,
   className,
@@ -75,6 +77,7 @@ export function Button({
   return (
     <Pressable
       accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityHint={inactive ? inactiveReason : undefined}
       accessibilityState={{ disabled: inactive, busy: loading }}
       onPress={onPress}
       disabled={inactive}
@@ -117,6 +120,7 @@ type IconButtonProps = {
   size?: IconButtonSize;
   iconSize?: number;
   disabled?: boolean;
+  inactiveReason?: string;
   className?: string;
 };
 
@@ -128,6 +132,7 @@ export function IconButton({
   size = "sm",
   iconSize,
   disabled = false,
+  inactiveReason,
   className,
 }: IconButtonProps) {
   const tone = ICON_VARIANT[variant];
@@ -136,6 +141,7 @@ export function IconButton({
   return (
     <Pressable
       accessibilityLabel={accessibilityLabel}
+      accessibilityHint={disabled ? inactiveReason : undefined}
       accessibilityState={{ disabled }}
       onPress={onPress}
       disabled={disabled}

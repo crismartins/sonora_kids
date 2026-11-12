@@ -3,6 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 import { IconButton } from "@/components/Button";
 import { SolarIcon } from "@/components/SolarIcon";
 import { colors } from "@/constants/colors";
+import { useI18n } from "@/i18n";
 
 type ImageSourcePickerProps = {
   accessibilityLabel: string;
@@ -52,6 +53,7 @@ export function ImageSourcePicker({
   className,
   iconSize = 32,
 }: ImageSourcePickerProps) {
+  const copy = useI18n();
   const options = pickerOptions(allowsEditing, aspect);
   const source = previewUri ? { uri: previewUri } : (previewSource ?? null);
 
@@ -59,7 +61,7 @@ export function ImageSourcePicker({
     try {
       const allowed = await ensureAccess(
         ImagePicker.requestMediaLibraryPermissionsAsync,
-        "Permita o acesso às fotos para escolher uma imagem.",
+        copy.photo.galleryDenied,
         onError,
       );
       if (!allowed) return;
@@ -67,7 +69,7 @@ export function ImageSourcePicker({
       const uri = result.canceled ? null : result.assets[0]?.uri;
       if (uri) onPicked(uri);
     } catch {
-      onError?.("Não foi possível abrir a galeria.");
+      onError?.(copy.photo.galleryError);
     }
   };
 
@@ -75,7 +77,7 @@ export function ImageSourcePicker({
     try {
       const allowed = await ensureAccess(
         ImagePicker.requestCameraPermissionsAsync,
-        "Permita o uso da câmera para tirar a foto.",
+        copy.photo.cameraDenied,
         onError,
       );
       if (!allowed) return;
@@ -83,15 +85,15 @@ export function ImageSourcePicker({
       const uri = result.canceled ? null : result.assets[0]?.uri;
       if (uri) onPicked(uri);
     } catch {
-      onError?.("Não foi possível abrir a câmera.");
+      onError?.(copy.photo.cameraError);
     }
   };
 
   const chooseSource = () => {
-    Alert.alert(alertTitle, "Tire uma foto ou escolha uma da galeria.", [
-      { text: "Tirar foto", onPress: takePhoto },
-      { text: "Escolher da galeria", onPress: pickFromGallery },
-      { text: "Cancelar", style: "cancel" },
+    Alert.alert(alertTitle, copy.photo.prompt, [
+      { text: copy.photo.camera, onPress: takePhoto },
+      { text: copy.photo.gallery, onPress: pickFromGallery },
+      { text: copy.common.cancel, style: "cancel" },
     ]);
   };
 
@@ -112,7 +114,7 @@ export function ImageSourcePicker({
         <View className="absolute bottom-0 right-0" pointerEvents="box-none">
           <IconButton
             icon="pen"
-            accessibilityLabel="Editar imagem"
+            accessibilityLabel={copy.photo.edit}
             variant="neutral"
             size="sm"
             iconSize={20}

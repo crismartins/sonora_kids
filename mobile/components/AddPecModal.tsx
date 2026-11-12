@@ -6,12 +6,14 @@ import { Button, IconButton } from "@/components/Button";
 import { FormError } from "@/components/ScreenState";
 import { ImageSourcePicker } from "@/components/ImageSourcePicker";
 import { Category } from "@/types";
+import { localizeName, useI18n } from "@/i18n";
 import { colors } from "@/constants/colors";
 import { FONT_FAMILY } from "@/constants/typography";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { categoryIconBySlug } from "@/constants/categoryIcons";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { CustomPec, NewCustomPec } from "@/services/customPecs";
+import { isQuotaError } from "@/services/quota";
 
 export type PecFormRequest = {
   categories: Category[];
@@ -60,11 +62,17 @@ function existingImage(pec?: CustomPec | null) {
   return pec?.localUri || pec?.imageUrl || "";
 }
 
-function pecSaveReason(name: string, categorySlug: string, previewUri: string | null, imageOnly = false) {
-  if (imageOnly) return previewUri ? undefined : "Escolha uma foto";
-  if (!name) return "Escreva o nome";
-  if (!categorySlug) return "Escolha uma categoria";
-  if (!previewUri) return "Escolha uma foto";
+function pecSaveReason(
+  labels: { choosePhoto: string; writeName: string; chooseCategory: string },
+  name: string,
+  categorySlug: string,
+  previewUri: string | null,
+  imageOnly = false,
+) {
+  if (imageOnly) return previewUri ? undefined : labels.choosePhoto;
+  if (!name) return labels.writeName;
+  if (!categorySlug) return labels.chooseCategory;
+  if (!previewUri) return labels.choosePhoto;
   return undefined;
 }
 
@@ -80,6 +88,7 @@ export function AddPecForm({
 }: AddPecFormProps) {
   const insets = useSafeAreaInsets();
   const { speak } = useAppSettings();
+  const copy = useI18n();
   const [title, setTitle] = useState(initialPec?.title ?? "");
   const [categorySlug, setCategorySlug] = useState(initialPec?.categorySlug ?? initialCategorySlug);
   const [localUri, setLocalUri] = useState<string | null>(imageOnly ? null : existingImage(initialPec) || null);
@@ -102,7 +111,7 @@ export function AddPecForm({
       await onRestore();
       onClose();
     } catch {
-      setError("Não foi possível voltar à imagem original.");
+      setError(copy.pec.resetFailed);
       setSaving(false);
     }
   };
@@ -111,7 +120,7 @@ export function AddPecForm({
     const name = title.trim();
     if (imageOnly) {
       if (!imageChanged || !localUri) {
-        setError("Escolha uma foto.");
+        setError(copy.pec.choosePhotoFull);
         return;
       }
       setSaving(true);
@@ -119,23 +128,23 @@ export function AddPecForm({
       try {
         await onSubmit({ title: name, categorySlug, localUri });
         onClose();
-      } catch {
-        setError("Não foi possível salvar. Tente de novo.");
+      } catch (error) {
+        if (!isQuotaError(error)) setError(copy.common.tryAgain);
         setSaving(false);
       }
       return;
     }
     if (!name) {
-      setError("Escreva o nome do PEC.");
+      setError(copy.pec.writeNameFull);
       return;
     }
     if (!categorySlug) {
-      setError("Escolha uma categoria.");
+      setError(copy.pec.chooseCategoryFull);
       return;
     }
     const keepingImage = !!initialPec && !imageChanged;
     if (!keepingImage && !localUri) {
-      setError("Escolha uma foto do dispositivo ou tire uma foto.");
+      setError(copy.pec.choosePhotoFull);
       return;
     }
     setSaving(true);
@@ -151,8 +160,8 @@ export function AddPecForm({
             },
       );
       onClose();
-    } catch {
-      setError("Não foi possível salvar. Tente de novo.");
+    } catch (error) {
+      if (!isQuotaError(error)) setError(copy.common.tryAgain);
       setSaving(false);
     }
   };
@@ -177,8 +186,8 @@ export function AddPecForm({
         contentContainerStyle={{ paddingHorizontal: 0, paddingTop: 20, paddingBottom: 24, gap: 16 }}
       >
         <ImageSourcePicker
-          accessibilityLabel="Adicionar foto do PEC"
-          alertTitle="Foto do PEC"
+          accessibilityLabel={copy.pec.addPhoto}
+          alertTitle={copy.pec.photoTitle}
           previewUri={previewUri}
           previewSource={imageOnly && !previewUri ? initialPreview : null}
           onPreviewError={() => setPreviewFailed(true)}
@@ -190,7 +199,7 @@ export function AddPecForm({
         {imageOnly && onRestore ? (
           <View className="px-5">
             <Button
-              label="Redefinir imagem"
+              label={copy.pec.resetImage}
               icon="refresh"
               variant="muted"
               shape="rounded"
@@ -206,9 +215,9 @@ export function AddPecForm({
           <TextInput
             value={title}
             onChangeText={setTitle}
-            placeholder="Nome do PEC"
+            placeholder={copy.pec.namePlaceholder}
             placeholderTextColor={colors.neutralDark}
-            accessibilityLabel="Nome do PEC"
+            accessibilityLabel={copy.pec.nameLabel}
             className="rounded-3xl border border-neutral bg-neutral-light px-4 font-quicksand text-xl text-dark"
             style={{ fontFamily: FONT_FAMILY, fontSize: 20, height: 64 }}
           />
@@ -225,7 +234,7 @@ export function AddPecForm({
                   accessibilityState={{ selected }}
                   onPress={() => {
                     setCategorySlug(category.slug);
-                    if (category.name) speak(category.name);
+                    if (category.name) speak(localizeName(category.name));
                   }}
                   className={`h-16 flex-row items-center gap-2 rounded-2xl bg-primary-soft px-3 ${
                     selected ? "border-4 border-primary" : "border-2 border-transparent"
@@ -236,7 +245,7 @@ export function AddPecForm({
                       <CategoryIcon slug={category.slug} size={28} />
                     </View>
                   ) : null}
-                  <Text className="font-quicksand text-lg text-dark">{category.name.toUpperCase()}</Text>
+                  <Text className="font-quicksand text-lg text-dark">{localizeName(category.name).toUpperCase()}</Text>
                 </Pressable>
               );
             })}
@@ -247,23 +256,23 @@ export function AddPecForm({
 
         <IconButton
           icon="volume-loud"
-          accessibilityLabel="Ouvir o nome do PEC"
+          accessibilityLabel={copy.pec.hearName}
           variant="primary"
           size="lg"
           iconSize={28}
           disabled={!canHear}
-          inactiveReason={canHear ? undefined : "Escreva o nome"}
+          inactiveReason={canHear ? undefined : copy.pec.writeName}
           className="self-center"
           onPress={hearTitle}
         />
 
-        <FormError message={previewFailed ? "Não consegui abrir essa imagem. Escolha outra foto." : null} />
+        <FormError message={previewFailed ? copy.pec.badImage : null} />
         <FormError message={error} />
       </ScrollView>
 
       <View className="flex-row gap-3 px-5 pt-2" style={{ paddingBottom: insets.bottom }}>
         <Button
-          label="Sair"
+          label={copy.common.exit}
           icon="close-circle"
           variant="soft"
           shape="rounded"
@@ -273,13 +282,13 @@ export function AddPecForm({
           onPress={onClose}
         />
         <Button
-          label="Salvar"
+          label={copy.common.save}
           icon="check-circle"
           shape="rounded"
           size="md"
           loading={saving}
           disabled={!canSave}
-          inactiveReason={pecSaveReason(name, categorySlug, imageOnly ? pickedUri : previewUri, imageOnly)}
+          inactiveReason={pecSaveReason(copy.pec, name, categorySlug, imageOnly ? pickedUri : previewUri, imageOnly)}
           className="flex-1"
           onPress={handleSave}
         />

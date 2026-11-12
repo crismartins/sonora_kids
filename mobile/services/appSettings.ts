@@ -5,7 +5,7 @@ const STORAGE_KEY = "sonora.settings";
 
 export type VoiceGender = "feminine" | "masculine";
 export type SpeechRate = "slow" | "normal" | "fast";
-export type SpeechLanguage = "pt-BR" | "pt-PT";
+export type SpeechLanguage = "pt-BR" | "pt-PT" | "en" | "es";
 
 export interface AppSettings {
   voiceGender: VoiceGender;
@@ -46,6 +46,42 @@ export const SPEECH_RATE_LABELS: Record<SpeechRate, string> = {
   fast: "Rápida",
 };
 
+export const SPEECH_LANGUAGE_LABELS: Record<SpeechLanguage, string> = {
+  "pt-BR": "Português (Brasil)",
+  "pt-PT": "Português (Portugal)",
+  en: "Inglês",
+  es: "Espanhol",
+};
+
+const SPEECH_LANGUAGE_NAMES: Record<SpeechLanguage, string> = {
+  "pt-BR": "português do Brasil",
+  "pt-PT": "português de Portugal",
+  en: "inglês",
+  es: "espanhol",
+};
+
+export function speechLanguageName(language: SpeechLanguage) {
+  return SPEECH_LANGUAGE_NAMES[language];
+}
+
+export function voicePreview(language: SpeechLanguage) {
+  if (language === "en") return "Hello. I want to play.";
+  if (language === "es") return "Hola. Quiero jugar.";
+  return "Olá. Eu quero brincar.";
+}
+
+export function languagePreview(language: SpeechLanguage) {
+  if (language === "en") return "Hello. This is the voice language.";
+  if (language === "es") return "Hola. Este es el idioma de la voz.";
+  return "Olá. Este é o idioma da voz.";
+}
+
+export function ratePreview(language: SpeechLanguage) {
+  if (language === "en") return "This is the speaking speed.";
+  if (language === "es") return "Esta es la velocidad del habla.";
+  return "Esta é a velocidade da fala.";
+}
+
 const FEMININE_HINTS = [
   "luciana",
   "fernanda",
@@ -71,6 +107,25 @@ const FEMININE_HINTS = [
   "flo",
   "sandy",
   "shelley",
+  "allison",
+  "ava",
+  "nicky",
+  "kate",
+  "serena",
+  "moira",
+  "tessa",
+  "zoe",
+  "susan",
+  "alexa",
+  "monica",
+  "mónica",
+  "paulina",
+  "soledad",
+  "elena",
+  "lucia",
+  "lucía",
+  "marisol",
+  "esperanza",
 ];
 
 const MASCULINE_HINTS = [
@@ -90,14 +145,22 @@ const MASCULINE_HINTS = [
   "eddy",
   "reed",
   "rocko",
+  "alex",
+  "aaron",
+  "nathan",
+  "oliver",
+  "arthur",
+  "rishi",
+  "gordon",
+  "diego",
+  "enrique",
+  "pablo",
+  "miguel",
+  "juan",
 ];
 
 export function normalizeLanguage(language: string) {
   return language.toLowerCase().replace(/_/g, "-");
-}
-
-export function isPortuguese(language: string) {
-  return normalizeLanguage(language).startsWith("pt");
 }
 
 export function inferVoiceGender(voice: Pick<Voice, "name" | "identifier">): VoiceGender | null {
@@ -115,51 +178,44 @@ export function genderLabel(gender: VoiceGender) {
   return gender === "feminine" ? "Feminina" : "Masculina";
 }
 
-function languageScore(language: string, preferred: SpeechLanguage) {
-  const code = normalizeLanguage(language);
-  if (code.startsWith(preferred.toLowerCase())) return 100;
-  if (code.startsWith("pt-br")) return 60;
-  if (code.startsWith("pt")) return 30;
-  return 0;
+export function listSpeakableVoices(voices: Voice[], language: SpeechLanguage, gender: VoiceGender) {
+  return voices
+    .filter(
+      (voice) =>
+        normalizeLanguage(voice.language).startsWith(language.toLowerCase()) &&
+        inferVoiceGender(voice) === gender,
+    )
+    .sort((a, b) => a.name.localeCompare(b.name, "pt"));
 }
 
-function rankVoice(voice: Voice, gender: VoiceGender, language: SpeechLanguage) {
-  let score = languageScore(voice.language, language);
-  if (inferVoiceGender(voice) === gender) score += 50;
-  if (voice.quality === VoiceQuality.Enhanced) score += 10;
-  return score;
+function preferredVoice(voices: Voice[]) {
+  return [...voices].sort((a, b) => {
+    const quality = Number(b.quality === VoiceQuality.Enhanced) - Number(a.quality === VoiceQuality.Enhanced);
+    if (quality !== 0) return quality;
+    return a.name.localeCompare(b.name, "pt");
+  })[0];
 }
 
-export function listSpeakableVoices(voices: Voice[], language: SpeechLanguage) {
-  const preferred = voices.filter((voice) =>
-    normalizeLanguage(voice.language).startsWith(language.toLowerCase()),
-  );
-  const portuguese = voices.filter((voice) => isPortuguese(voice.language));
-  const source = preferred.length ? preferred : portuguese.length ? portuguese : voices;
-  return [...source].sort((a, b) => a.name.localeCompare(b.name, "pt"));
-}
+export function resolveSpeech(
+  voices: Voice[],
+  settings: Pick<AppSettings, "voiceId" | "voiceGender" | "language">,
+) {
+  const compatible = listSpeakableVoices(voices, settings.language, settings.voiceGender);
+  const selected =
+    (settings.voiceId ? compatible.find((voice) => voice.identifier === settings.voiceId) : undefined) ??
+    preferredVoice(compatible);
 
-export function resolveSpeech(voices: Voice[], settings: AppSettings) {
-  const selected = settings.voiceId
-    ? voices.find((voice) => voice.identifier === settings.voiceId)
-    : undefined;
   if (selected) {
-    const code = normalizeLanguage(selected.language);
     return {
       voice: selected.identifier,
       pitch: 1,
-      language: code.startsWith("pt") ? selected.language : settings.language,
+      language: selected.language,
     };
   }
 
-  const ranked = [...voices].sort(
-    (a, b) => rankVoice(b, settings.voiceGender, settings.language) - rankVoice(a, settings.voiceGender, settings.language),
-  );
-  const best = ranked.find((voice) => languageScore(voice.language, settings.language) > 0) ?? ranked[0];
-  const matched = best && inferVoiceGender(best) === settings.voiceGender;
   return {
-    voice: best?.identifier,
-    pitch: matched ? 1 : settings.voiceGender === "masculine" ? 0.82 : 1.12,
+    voice: undefined,
+    pitch: settings.voiceGender === "masculine" ? 0.82 : 1.12,
     language: settings.language,
   };
 }
@@ -185,7 +241,10 @@ function isSettings(value: unknown): value is AppSettings {
   return (
     (settings.voiceGender === "feminine" || settings.voiceGender === "masculine") &&
     (settings.voiceId === null || typeof settings.voiceId === "string") &&
-    (settings.language === "pt-BR" || settings.language === "pt-PT") &&
+    (settings.language === "pt-BR" ||
+      settings.language === "pt-PT" ||
+      settings.language === "en" ||
+      settings.language === "es") &&
     isSpeechRate(settings.speechRate) &&
     typeof settings.autoSpeakCategories === "boolean" &&
     typeof settings.haptics === "boolean" &&

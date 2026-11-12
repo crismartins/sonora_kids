@@ -14,6 +14,7 @@ import { PecItem } from "@/types";
 import { colors, getCategoryBgColor } from "@/constants/colors";
 import { PillText } from "@/components/PillText";
 import { pecLabel } from "@/data/pecLabels";
+import { PEC_FALLBACK_IMAGE } from "@/data/pecFallback";
 import { imageFromPec } from "@/data/pecImages";
 import { usePecImageOverrides } from "@/hooks/usePecImageOverrides";
 import { useAppSettings } from "@/context/AppSettingsContext";
@@ -28,8 +29,6 @@ interface PecCardProps {
   onPress?: () => void;
   compact?: boolean;
 }
-
-const FALLBACK_IMAGE = require("../assets/images/avatar_default_v1.png");
 
 export function PecCard({ item, backgroundColor, colorName = "blue", onLongPressManage, onPress, compact = false }: PecCardProps) {
   const { settings, speak, stopSpeaking, haptic } = useAppSettings();
@@ -59,7 +58,7 @@ export function PecCard({ item, backgroundColor, colorName = "blue", onLongPress
     }
     haptic();
     speak(label);
-    recordWordUse(label, colorName);
+    recordWordUse(item.title, colorName);
   }, [colorName, haptic, label, onPress, scale, speak]);
 
   const handleLongPress = useCallback(() => {
@@ -103,7 +102,7 @@ export function PecCard({ item, backgroundColor, colorName = "blue", onLongPress
             source={imageSource}
             className="h-full w-full"
             resizeMode="cover"
-            defaultSource={FALLBACK_IMAGE}
+            defaultSource={PEC_FALLBACK_IMAGE}
           />
         </View>
         <View className="max-w-full items-center justify-center px-3 py-1">
@@ -196,8 +195,8 @@ export function RoutinePecCard({
     );
     haptic();
     speak(label);
-    recordWordUse(label, color);
-  }, [color, editing, haptic, label, onCancelEditing, scale, speak]);
+    recordWordUse(title, color);
+  }, [color, editing, haptic, label, onCancelEditing, scale, speak, title]);
 
   return (
     <View className="m-1.5 self-stretch" style={{ flexGrow: 1 }}>
@@ -225,7 +224,7 @@ export function RoutinePecCard({
         >
           <View className="mb-2.5 aspect-square w-full self-stretch overflow-hidden rounded-2xl bg-white">
             <Image
-              source={image ?? FALLBACK_IMAGE}
+              source={image ?? PEC_FALLBACK_IMAGE}
               className="h-full w-full"
               resizeMode="cover"
             />

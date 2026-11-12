@@ -5,6 +5,7 @@ import { SolarIcon } from "@/components/SolarIcon";
 import { ScreenTitle } from "@/components/ScreenTitle";
 import { colors } from "@/constants/colors";
 import { useProfile } from "@/context/ProfileContext";
+import { useI18n } from "@/i18n";
 import { profileAvatarSource } from "@/services/profile";
 
 const AVATAR_SIZE = 32;
@@ -16,6 +17,7 @@ const BAR_HEIGHT = Platform.OS === "ios" ? 44 : 64;
 export function AppHeader({ title }: { title: string }) {
   const insets = useSafeAreaInsets();
   const { profile } = useProfile();
+  const copy = useI18n();
 
   return (
     <View className="bg-white" style={{ paddingTop: insets.top }}>
@@ -23,7 +25,7 @@ export function AppHeader({ title }: { title: string }) {
         <ScreenTitle>{title}</ScreenTitle>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Abrir configurações"
+          accessibilityLabel={copy.nav.openSettings}
           onPress={() => router.push("/settings")}
           hitSlop={12}
           className="absolute left-4 h-6 w-6 items-center justify-center"
@@ -32,7 +34,7 @@ export function AppHeader({ title }: { title: string }) {
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Abrir perfil"
+          accessibilityLabel={copy.nav.openProfile}
           onPress={() => router.push("/profile")}
           hitSlop={8}
           className="absolute right-4"

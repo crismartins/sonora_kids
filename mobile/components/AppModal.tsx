@@ -3,6 +3,7 @@ import { Platform, Pressable, View, Text, Modal, KeyboardAvoidingView } from "re
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { IconButton } from "@/components/Button";
 import { ScreenTitle } from "@/components/ScreenTitle";
+import { useI18n } from "@/i18n";
 
 const SCRIM = "rgba(0,0,0,0.4)";
 
@@ -19,15 +20,17 @@ export function BottomSheet({
   visible,
   onClose,
   title,
-  closeLabel = "Fechar",
+  closeLabel,
   avoidKeyboard = false,
   children,
 }: BottomSheetProps) {
   const insets = useSafeAreaInsets();
+  const copy = useI18n();
+  const close = closeLabel ?? copy.common.close;
   const sheet = (
     <View className="flex-1 justify-end">
       <Pressable
-        accessibilityLabel={closeLabel}
+        accessibilityLabel={close}
         onPress={onClose}
         style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: SCRIM }}
       />
@@ -62,10 +65,11 @@ type ScreenModalProps = {
 
 export function ScreenModal({ visible, onClose, title, avoidKeyboard = false, children }: ScreenModalProps) {
   const insets = useSafeAreaInsets();
+  const copy = useI18n();
   const body = (
     <>
       <View className="h-14 flex-row items-center px-2" style={{ marginTop: insets.top }}>
-        <IconButton variant="ghost" size="md" icon="close-circle" accessibilityLabel="Fechar" onPress={onClose} />
+        <IconButton variant="ghost" size="md" icon="close-circle" accessibilityLabel={copy.common.close} onPress={onClose} />
         <ScreenTitle className="flex-1 text-center">{title}</ScreenTitle>
         <View className="w-12" />
       </View>

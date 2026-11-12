@@ -27,6 +27,10 @@ export function routineSlotKey(day: number, period: DayPeriod) {
   return `${day}:${period}`;
 }
 
+export function countRoutineItems(slots: Record<string, RoutineItem[]>) {
+  return Object.values(slots).reduce((sum, items) => sum + items.length, 0);
+}
+
 function isRoutineItem(value: unknown): value is RoutineItem {
   if (!value || typeof value !== "object") return false;
   const item = value as RoutineItem;

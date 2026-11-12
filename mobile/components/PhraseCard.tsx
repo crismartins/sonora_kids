@@ -15,10 +15,10 @@ import { colors, getCategoryBgColor } from "@/constants/colors";
 import { PillText } from "@/components/PillText";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { useProfile } from "@/context/ProfileContext";
+import { useI18n } from "@/i18n";
+import { PEC_FALLBACK_IMAGE } from "@/data/pecFallback";
 import { pecBaseTitle, pecLabel, pecPhrase } from "@/data/pecLabels";
 import { recordWordUse } from "@/services/wordUsage";
-
-const FALLBACK_IMAGE = require("../assets/images/avatar_default_v1.png");
 
 const TAB = 12;
 const OUTER_RADIUS = 20;
@@ -118,7 +118,7 @@ function pieceImage(images: Map<string, ImageSourcePropType> | undefined, text: 
   const source =
     images?.get(text.trim().toLocaleLowerCase("pt-BR")) ??
     images?.get(pecBaseTitle(text).trim().toLocaleLowerCase("pt-BR"));
-  return source ?? FALLBACK_IMAGE;
+  return source ?? PEC_FALLBACK_IMAGE;
 }
 
 function labelSize(text: string, largeText: boolean) {
@@ -160,6 +160,7 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
   const { width: windowWidth } = useWindowDimensions();
   const { settings, speak, stopSpeaking, haptic } = useAppSettings();
   const { profile } = useProfile();
+  const copy = useI18n();
   const scale = useSharedValue(1);
   const longPressed = useRef(false);
   const [rowWidth, setRowWidth] = useState(0);
@@ -176,7 +177,7 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
     scale.value = withSequence(withTiming(0.98, { duration: 60 }), withSpring(1, { damping: 12 }));
     haptic();
     speak(pecPhrase(phrase.map((item) => item.text), profile.sex));
-    if (!onRemoveItem) phrase.forEach((item) => recordWordUse(pecLabel(item.text, profile.sex), item.color));
+    if (!onRemoveItem) phrase.forEach((item) => recordWordUse(item.text, item.color));
   }, [haptic, onRemoveItem, phrase, profile.sex, scale, speak]);
 
   const handleLongPress = useCallback(() => {
@@ -281,7 +282,7 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
     <View style={{ paddingTop: 22, paddingLeft: 22, paddingRight: 8, paddingBottom: 4 }}>
       <View style={{ flexDirection: "row", width: contentWidth, alignItems: "center" }}>
         {wordPieces}
-        <Pressable accessibilityLabel="Ouvir a frase" onPress={handlePress}>
+        <Pressable accessibilityLabel={copy.phrases.listen} onPress={handlePress}>
           {speaker}
         </Pressable>
       </View>
@@ -290,7 +291,7 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={pecPhrase(phrase.map((item) => item.text), profile.sex)}
-      accessibilityHint={onManage ? "Toque e segure para editar ou apagar" : undefined}
+      accessibilityHint={onManage ? copy.phrases.hold : undefined}
       onPress={handlePress}
       onLongPress={handleLongPress}
       delayLongPress={450}

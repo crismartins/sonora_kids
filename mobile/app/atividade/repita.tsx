@@ -4,6 +4,7 @@ import { requireOptionalNativeModule } from "expo";
 import Constants, { ExecutionEnvironment } from "expo-constants";
 import { ActivityChrome } from "@/components/activities/ActivityChrome";
 import { EmptyState } from "@/components/ScreenState";
+import { useI18n } from "@/i18n";
 
 const inExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 const nativeReady =
@@ -14,13 +15,14 @@ const Listening = nativeReady
   : null;
 
 export default function RepitaScreen() {
+  const copy = useI18n();
   if (!Listening) {
     return (
-      <ActivityChrome title="Repita Comigo">
+      <ActivityChrome title={copy.learn.repeat}>
         <EmptyState
           icon="microphone"
-          title="Abra o app instalado"
-          detail="O Expo Go não reconhece a voz. Abra o Sonora Kids instalado no celular, não o Expo Go."
+          title={copy.learn.installApp}
+          detail={copy.learn.expoDetail}
         />
       </ActivityChrome>
     );

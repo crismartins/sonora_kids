@@ -10,14 +10,18 @@ import { openPecForm } from "@/components/AddPecModal";
 import { Category, PecItem } from "@/types";
 import { getCategoryBgColor } from "@/constants/colors";
 import { pecLabel, pecPhrase } from "@/data/pecLabels";
+import { PEC_FALLBACK_IMAGE } from "@/data/pecFallback";
 import { imageFromPec } from "@/data/pecImages";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { useProfile } from "@/context/ProfileContext";
 import { CustomPec, NewCustomPec } from "@/services/customPecs";
-import { DayPeriod, PERIOD_LABELS, DAY_LABELS } from "@/services/routine";
+import { isQuotaError } from "@/services/quota";
+import { DayPeriod } from "@/services/routine";
+import { getActiveLocale } from "@/i18n/locale";
+import { UI } from "@/i18n/messages";
+import { localizeName, useI18n } from "@/i18n";
 
 const DIA_A_DIA = "dia-a-dia";
-const FALLBACK_IMAGE = require("../assets/images/avatar_default_v1.png");
 
 export interface RoutinePecOption {
   id: string;
@@ -38,6 +42,7 @@ export type RoutineFormRequest = {
   initialSelected: RoutinePick[];
   getCategories: () => Category[];
   addPec: (input: NewCustomPec) => Promise<CustomPec>;
+  beforeCreatePec?: () => boolean;
   onSubmit: (items: RoutinePick[]) => Promise<void>;
   onClose?: () => void;
 };
@@ -64,7 +69,8 @@ export function finishRoutineForm() {
 }
 
 export function routineFormTitle(day: number, period: DayPeriod) {
-  return `${PERIOD_LABELS[period]} · ${DAY_LABELS[day]}`;
+  const copy = UI[getActiveLocale()];
+  return `${copy.routine.periods[period]} · ${copy.routine.days[day]}`;
 }
 
 function categoryColorName(category: Category) {
@@ -75,12 +81,14 @@ export function AddRoutineForm({
   initialSelected,
   getCategories,
   addPec,
+  beforeCreatePec,
   onClose,
   onSubmit,
 }: Omit<RoutineFormRequest, "day" | "period" | "onClose"> & { onClose: () => void }) {
   const insets = useSafeAreaInsets();
   const { settings, speak } = useAppSettings();
   const { profile } = useProfile();
+  const copy = useI18n();
   const categories = getCategories();
   const [selected, setSelected] = useState<RoutinePick[]>(initialSelected);
   const [extras, setExtras] = useState<{ slug: string; pec: PecItem }[]>([]);
@@ -115,6 +123,7 @@ export function AddRoutineForm({
   };
 
   const createPec = () => {
+    if (beforeCreatePec && !beforeCreatePec()) return;
     const slug = categorySlug || DIA_A_DIA;
     openPecForm({
       categories: getCategories(),
@@ -141,8 +150,8 @@ export function AddRoutineForm({
     try {
       await onSubmit(selected);
       onClose();
-    } catch {
-      setError("Não foi possível salvar. Tente de novo.");
+    } catch (error) {
+      if (!isQuotaError(error)) setError(copy.common.tryAgain);
       setSaving(false);
     }
   };
@@ -157,7 +166,7 @@ export function AddRoutineForm({
               className="h-14 flex-row items-center gap-1.5 rounded-full py-1 pl-1 pr-1"
               style={{ backgroundColor: getCategoryBgColor(item.color) }}
             >
-              <Image source={item.image ?? FALLBACK_IMAGE} className="h-10 w-10 rounded-full" />
+              <Image source={item.image ?? PEC_FALLBACK_IMAGE} className="h-10 w-10 rounded-full" />
               <View className="max-w-[140px] items-center justify-center rounded-xl">
                 <Text className="font-quicksand text-lg text-dark" numberOfLines={1}>
                   {pecLabel(item.title, profile.sex)}
@@ -167,7 +176,7 @@ export function AddRoutineForm({
                 icon="close-circle"
                 variant="ghost"
                 size="sm"
-                accessibilityLabel={`Remover ${pecLabel(item.title, profile.sex)}`}
+                accessibilityLabel={copy.phrases.remove(pecLabel(item.title, profile.sex))}
                 onPress={() => setSelected((current) => current.filter((entry) => entry.id !== item.id))}
               />
             </View>
@@ -176,7 +185,7 @@ export function AddRoutineForm({
 
         <IconButton
           icon="volume-loud"
-          accessibilityLabel="Ouvir os itens da rotina"
+          accessibilityLabel={copy.routine.listenItems}
           variant="primary"
           size="lg"
           iconSize={28}
@@ -203,7 +212,7 @@ export function AddRoutineForm({
               highContrast={settings.highContrast}
               onPress={() => {
                 setCategorySlug(category.slug);
-                if (category.name) speak(category.name);
+                if (category.name) speak(localizeName(category.name));
               }}
             />
           ))}
@@ -216,7 +225,7 @@ export function AddRoutineForm({
           contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 4 }}
         >
           {pecs.length === 0 ? (
-            <Text className="py-6 font-quicksand text-lg text-neutral-dark">Nenhum PEC nesta categoria</Text>
+            <Text className="py-6 font-quicksand text-lg text-neutral-dark">{copy.routine.emptyCategory}</Text>
           ) : (
             pecs.map((pec) => (
               <PecCard
@@ -235,11 +244,11 @@ export function AddRoutineForm({
       </ScrollView>
 
       <View className="items-end px-5 pb-2">
-        <FloatingButton icon="widget-add" tooltip="Adicionar" accessibilityLabel="Criar PEC" onPress={createPec} />
+        <FloatingButton icon="widget-add" tooltip={copy.common.add} accessibilityLabel={copy.routine.createPec} onPress={createPec} />
       </View>
       <View className="flex-row gap-3 px-5 pt-2" style={{ paddingBottom: insets.bottom }}>
         <Button
-          label="Sair"
+          label={copy.common.exit}
           icon="close-circle"
           variant="soft"
           shape="rounded"
@@ -249,7 +258,7 @@ export function AddRoutineForm({
           onPress={onClose}
         />
         <Button
-          label="Salvar"
+          label={copy.common.save}
           icon="check-circle"
           shape="rounded"
           size="md"

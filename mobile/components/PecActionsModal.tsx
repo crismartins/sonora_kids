@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BottomSheet } from "@/components/AppModal";
 import { ManageActions } from "@/components/ManageActions";
+import { useI18n } from "@/i18n";
 import { CustomPec } from "@/services/customPecs";
 
 interface PecActionsModalProps {
@@ -11,6 +12,7 @@ interface PecActionsModalProps {
 }
 
 export function PecActionsModal({ pec, onClose, onEdit, onDelete }: PecActionsModalProps) {
+  const copy = useI18n();
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -30,12 +32,12 @@ export function PecActionsModal({ pec, onClose, onEdit, onDelete }: PecActionsMo
   };
 
   return (
-    <BottomSheet visible={!!pec} title={pec?.title} closeLabel="Fechar opções" onClose={onClose}>
+    <BottomSheet visible={!!pec} title={pec?.title} closeLabel={copy.pec.closeOptions} onClose={onClose}>
       <ManageActions
         confirming={confirming}
-        message="Excluir este PEC? Ele sai do aparelho."
+        message={copy.pec.deleteAsk}
         deleting={deleting}
-        editLabel="Editar PEC"
+        editLabel={copy.pec.edit}
         onEdit={() => pec && onEdit(pec)}
         onAskDelete={() => setConfirming(true)}
         onConfirmDelete={handleDelete}

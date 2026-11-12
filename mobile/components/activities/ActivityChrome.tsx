@@ -7,6 +7,7 @@ import { ScreenTitle } from "@/components/ScreenTitle";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/constants/colors";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { useI18n } from "@/i18n";
 
 export function activityPadding(bottomInset: number) {
   return {
@@ -46,6 +47,7 @@ export function ActivityChrome({
 }) {
   const insets = useSafeAreaInsets();
   const { settings, speak } = useAppSettings();
+  const copy = useI18n();
   const announced = useRef(false);
 
   useEffect(() => {
@@ -61,7 +63,7 @@ export function ActivityChrome({
           icon="arrow-left"
           variant="ghost"
           size="md"
-          accessibilityLabel="Voltar"
+          accessibilityLabel={copy.common.back}
           onPress={() => (onBack ? onBack() : router.back())}
         />
         <ScreenTitle className="flex-1 text-center">{title}</ScreenTitle>

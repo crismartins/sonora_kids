@@ -3,6 +3,7 @@ import { BottomSheet } from "@/components/AppModal";
 import { ManageActions } from "@/components/ManageActions";
 import { useProfile } from "@/context/ProfileContext";
 import { pecPhrase } from "@/data/pecLabels";
+import { useI18n } from "@/i18n";
 import { CustomPhrase } from "@/services/customPhrases";
 
 interface PhraseActionsModalProps {
@@ -14,6 +15,7 @@ interface PhraseActionsModalProps {
 
 export function PhraseActionsModal({ phrase, onClose, onEdit, onDelete }: PhraseActionsModalProps) {
   const { profile } = useProfile();
+  const copy = useI18n();
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const label = phrase ? pecPhrase(phrase.items.map((item) => item.text), profile.sex) : undefined;
@@ -34,12 +36,12 @@ export function PhraseActionsModal({ phrase, onClose, onEdit, onDelete }: Phrase
   };
 
   return (
-    <BottomSheet visible={!!phrase} title={label} closeLabel="Fechar opções" onClose={onClose}>
+    <BottomSheet visible={!!phrase} title={label} closeLabel={copy.phrases.closeOptions} onClose={onClose}>
       <ManageActions
         confirming={confirming}
-        message="Excluir esta frase? Ela sai do aparelho."
+        message={copy.phrases.deletePhrase}
         deleting={deleting}
-        editLabel="Editar frase"
+        editLabel={copy.phrases.editPhrase}
         onEdit={() => phrase && onEdit(phrase)}
         onAskDelete={() => setConfirming(true)}
         onConfirmDelete={handleDelete}

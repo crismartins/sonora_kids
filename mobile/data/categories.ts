@@ -1,8 +1,7 @@
 import { ImageSourcePropType } from "react-native";
+import { PEC_FALLBACK_IMAGE } from "@/data/pecFallback";
 import { imageForPecTitle } from "@/data/pecLocalImages";
 import { Category, PecItem } from "@/types";
-
-const AVATAR = require("../assets/images/avatar_default_v1.png");
 
 const LEADING_CATEGORY_SLUGS = ["boas-maneiras", "pessoas", "palavras", "acoes-e-atividades"];
 
@@ -12,7 +11,7 @@ function leadingRank(slug: string) {
 }
 
 function pecImage(title: string): ImageSourcePropType {
-  return imageForPecTitle(title) ?? AVATAR;
+  return imageForPecTitle(title) ?? PEC_FALLBACK_IMAGE;
 }
 
 function pec(slug: string, title: string, index: number): PecItem {

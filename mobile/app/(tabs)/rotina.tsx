@@ -7,10 +7,12 @@ import { SolarIcon, SolarIconName } from "@/components/SolarIcon";
 import { BottomSheet } from "@/components/AppModal";
 import { Button, FloatingButton } from "@/components/Button";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { usePremium } from "@/context/PremiumContext";
 import { useProfile } from "@/context/ProfileContext";
 import { useCategories } from "@/hooks/useCategories";
 import { useCustomPecs } from "@/hooks/useCustomPecs";
 import { useRoutine } from "@/hooks/useRoutine";
+import { useI18n } from "@/i18n";
 import { usePillPager } from "@/hooks/usePillPager";
 import { RoutinePecCard } from "@/components/PecCard";
 import { openRoutineForm, RoutinePick } from "@/components/AddRoutineItemModal";
@@ -23,7 +25,8 @@ import { EmptyState } from "@/components/ScreenState";
 import { colors } from "@/constants/colors";
 import { tabBarClearance } from "@/constants/tabBar";
 import { customPecToItem } from "@/services/customPecs";
-import { DAY_LABELS, DAY_PERIODS, DayPeriod, PERIOD_LABELS, RoutineItem } from "@/services/routine";
+import { canIncrease, QuotaError } from "@/services/quota";
+import { DAY_PERIODS, DayPeriod, RoutineItem } from "@/services/routine";
 
 const DAY_CHIPS = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
 const DIA_A_DIA = "dia-a-dia";
@@ -87,6 +90,7 @@ function RoutineDayPage({
   onRemoveFrame: (id: string, frame: RemoveFrame) => void;
   onRemove: (item: RoutineItem) => void;
 }) {
+  const copy = useI18n();
   return (
     <ScrollView
       nestedScrollEnabled
@@ -124,7 +128,7 @@ function RoutineDayPage({
             </View>
           ))
         ) : (
-          <EmptyState icon="clock" title="Nada nesta parte do dia" detail="Toque no lápis e escolha os PECs" />
+          <EmptyState icon="clock" title={copy.routine.emptyTitle} detail={copy.routine.emptyDetail} />
         )}
       </View>
     </ScrollView>
@@ -135,16 +139,22 @@ export default function RotinaScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { speak, haptic } = useAppSettings();
+  const { isPremium, openPaywall } = usePremium();
+  const copy = useI18n();
   const { profile } = useProfile();
   const pecImagesVersion = usePecImageOverrides();
   const { data: categories } = useCategories();
   const { pecs: customPecs, addPec } = useCustomPecs();
-  const { itemsFor, addItem, removeItem } = useRoutine();
+  const { itemsFor, itemsNow, countItems, addItem, removeItem } = useRoutine();
+  const isPremiumRef = useRef(isPremium);
+  isPremiumRef.current = isPremium;
+  const pecCountRef = useRef(customPecs.length);
+  pecCountRef.current = customPecs.length;
   const today = new Date().getDay();
   const onDayChange = useCallback(
     (index: number) => {
       haptic(Haptics.ImpactFeedbackStyle.Light);
-      speak(DAY_LABELS[index]);
+      speak(copy.routine.days[index]);
     },
     [haptic, speak],
   );
@@ -259,15 +269,32 @@ export default function RotinaScreen() {
     }
     if (catalogRef.current.length === 0) return;
     const day = selectedDay;
-    const saved = itemsFor(day, period);
+    const saved = itemsNow(day, period);
+    const total = countItems();
+    if (saved.length === 0 && !canIncrease("routine", total, total + 1, isPremiumRef.current)) {
+      openPaywall();
+      return;
+    }
     openRoutineForm({
       day,
       period,
       initialSelected: saved.map((item) => describePick(item.pecId, item.title)),
       getCategories: () => catalogRef.current,
       addPec,
+      beforeCreatePec: () => {
+        const count = pecCountRef.current;
+        if (canIncrease("pec", count, count + 1, isPremiumRef.current)) return true;
+        openPaywall();
+        return false;
+      },
       onSubmit: async (chosen) => {
-        const current = itemsFor(day, period);
+        const current = itemsNow(day, period);
+        const weekTotal = countItems();
+        const projected = weekTotal - current.length + chosen.length;
+        if (!canIncrease("routine", weekTotal, projected, isPremiumRef.current)) {
+          openPaywall();
+          throw new QuotaError();
+        }
         const savedIds = new Set(current.map((item) => item.pecId));
         const chosenIds = new Set(chosen.map((item) => item.id));
         for (const pick of chosen) {
@@ -288,7 +315,7 @@ export default function RotinaScreen() {
     }
     setSelectedPeriod(period);
     haptic(Haptics.ImpactFeedbackStyle.Light);
-    speak(PERIOD_LABELS[period]);
+    speak(copy.routine.periods[period]);
   };
 
   return (
@@ -306,11 +333,11 @@ export default function RotinaScreen() {
             flexDirection: "row",
           }}
         >
-          {DAY_CHIPS.map((day, index) => (
+          {copy.routine.dayChips.map((day, index) => (
             <FilterChip
               key={day}
               label={day}
-              accessibilityLabel={DAY_LABELS[index]}
+              accessibilityLabel={copy.routine.days[index]}
               selected={index === selectedDay}
               onPress={() => {
                 if (editing) {
@@ -332,14 +359,14 @@ export default function RotinaScreen() {
           return (
             <Pressable
               key={period}
-              accessibilityLabel={PERIOD_LABELS[period]}
+              accessibilityLabel={copy.routine.periods[period]}
               accessibilityState={{ selected: active }}
               onPress={() => selectPeriod(period)}
               className={`flex-1 items-center justify-center gap-0 rounded-full py-3 ${active ? "bg-primary-soft" : ""}`}
             >
               <SolarIcon name={icon} size={24} color={tint} />
               <PillText size={16} style={{ color: tint }}>
-                {PERIOD_LABELS[period]}
+                {copy.routine.periods[period]}
               </PillText>
             </Pressable>
           );
@@ -403,15 +430,15 @@ export default function RotinaScreen() {
       <FloatingButton
         icon="pen"
         iconSize={26}
-        tooltip="Editar"
-        accessibilityLabel={`Editar ${PERIOD_LABELS[selectedPeriod]}`}
+        tooltip={copy.common.edit}
+        accessibilityLabel={copy.routine.edit(copy.routine.periods[selectedPeriod])}
         onPress={() => openPeriod(selectedPeriod)}
         bottom={tabBarHeight + 12}
       />
 
       <Modal visible={editing && !removing} transparent animationType="none" onRequestClose={cancelEditing}>
         <Pressable
-          accessibilityLabel="Cancelar remoção"
+          accessibilityLabel={copy.routine.cancelRemove}
           style={{ flex: 1 }}
           onPress={(event) => {
             const match = itemAtPoint(event.nativeEvent.pageX, event.nativeEvent.pageY);
@@ -436,12 +463,12 @@ export default function RotinaScreen() {
       >
         <View className="gap-3">
           <Text className="text-center font-quicksand text-xl text-neutral-dark">
-            Tirar de {removing ? PERIOD_LABELS[removing.period] : ""}? O PEC continua em Dia a Dia.
+            {removing ? copy.routine.removeAsk(copy.routine.periods[removing.period]) : ""}
           </Text>
           <Button
-            label="Tirar da rotina"
+            label={copy.routine.remove}
             variant="danger"
-            accessibilityLabel="Tirar da rotina"
+            accessibilityLabel={copy.routine.remove}
             onPress={async () => {
               if (!removing) return;
               await removeItem(selectedDay, removing.period, removing.item.id);
@@ -449,7 +476,7 @@ export default function RotinaScreen() {
             }}
           />
           <Button
-            label="Cancelar"
+            label={copy.common.cancel}
             variant="muted"
             onPress={() => {
               setRemoving(null);

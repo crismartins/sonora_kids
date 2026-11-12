@@ -3,6 +3,7 @@ import { AppState, Platform } from "react-native";
 import * as Haptics from "expo-haptics";
 import * as Speech from "expo-speech";
 import { Voice } from "expo-speech";
+import { setActiveLocale } from "@/i18n/locale";
 import { warmSilentModeCache, warnIfSilentModeBlocksSpeech } from "@/services/silentMode";
 import {
   AppSettings,
@@ -37,6 +38,7 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
   const voicesRef = useRef(voices);
   settingsRef.current = settings;
   voicesRef.current = voices;
+  setActiveLocale(settings.language);
 
   useEffect(() => {
     let active = true;

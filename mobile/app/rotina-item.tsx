@@ -6,16 +6,18 @@ import {
   finishRoutineForm,
   routineFormTitle,
 } from "@/components/AddRoutineItemModal";
+import { useI18n } from "@/i18n";
 
 export default function RotinaItemScreen() {
   const navigation = useNavigation();
+  const copy = useI18n();
   const request = useRef(currentRoutineForm()).current;
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: request ? routineFormTitle(request.day, request.period) : "Rotina",
+      title: request ? routineFormTitle(request.day, request.period) : copy.nav.routine,
     });
-  }, [navigation, request]);
+  }, [copy, navigation, request]);
 
   useEffect(() => {
     if (!request) {
@@ -35,6 +37,7 @@ export default function RotinaItemScreen() {
       initialSelected={request.initialSelected}
       getCategories={request.getCategories}
       addPec={request.addPec}
+      beforeCreatePec={request.beforeCreatePec}
       onSubmit={request.onSubmit}
       onClose={() => router.back()}
     />

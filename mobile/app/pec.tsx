@@ -1,16 +1,18 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { router, useNavigation } from "expo-router";
 import { AddPecForm, currentPecForm, finishPecForm } from "@/components/AddPecModal";
+import { useI18n } from "@/i18n";
 
 export default function PecScreen() {
   const navigation = useNavigation();
+  const copy = useI18n();
   const request = useRef(currentPecForm()).current;
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: request?.imageOnly ? "Trocar imagem" : request?.initialPec ? "Editar PEC" : "Novo PEC",
+      title: request?.imageOnly ? copy.nav.swapImage : request?.initialPec ? copy.nav.editPec : copy.nav.newPec,
     });
-  }, [navigation, request]);
+  }, [copy, navigation, request]);
 
   useEffect(() => {
     if (!request) {

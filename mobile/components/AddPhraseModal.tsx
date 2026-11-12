@@ -15,6 +15,8 @@ import { usePecImageOverrides } from "@/hooks/usePecImageOverrides";
 import { useProfile } from "@/context/ProfileContext";
 import { useAppSettings } from "@/context/AppSettingsContext";
 import { CustomPhrase } from "@/services/customPhrases";
+import { isQuotaError } from "@/services/quota";
+import { localizeName, useI18n } from "@/i18n";
 
 const MAX_ITEMS = 8;
 
@@ -65,6 +67,7 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
   const insets = useSafeAreaInsets();
   const { settings, speak } = useAppSettings();
   const { profile } = useProfile();
+  const copy = useI18n();
   const pecImagesVersion = usePecImageOverrides();
   const [items, setItems] = useState<PhraseItem[]>(
     initialPhrase?.items.map((item) => ({ text: item.text, color: item.color, image: item.image })) ?? [],
@@ -105,7 +108,7 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
 
   const addPec = (pec: PecItem) => {
     if (items.length >= MAX_ITEMS) {
-      setError(`A frase pode ter até ${MAX_ITEMS} PECs.`);
+      setError(copy.phrases.maxItems(MAX_ITEMS));
       return;
     }
     setItems((current) => [...current, { text: pec.title, color: selectedColor, image: pecImageUri(pec) }]);
@@ -125,8 +128,8 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
     try {
       await onSubmit(items);
       onClose();
-    } catch {
-      setError("Não foi possível salvar. Tente de novo.");
+    } catch (error) {
+      if (!isQuotaError(error)) setError(copy.common.tryAgain);
       setSaving(false);
     }
   };
@@ -154,7 +157,7 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
               highContrast={settings.highContrast}
               onPress={() => {
                 setCategorySlug(category.slug);
-                if (category.name) speak(category.name);
+                if (category.name) speak(localizeName(category.name));
               }}
             />
           ))}
@@ -183,7 +186,7 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
 
       <View className="flex-row gap-3 px-5 pt-2" style={{ paddingBottom: insets.bottom }}>
         <Button
-          label="Sair"
+          label={copy.common.exit}
           icon="close-circle"
           variant="soft"
           shape="rounded"
@@ -193,13 +196,13 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
           onPress={onClose}
         />
         <Button
-          label="Salvar"
+          label={copy.common.save}
           icon="check-circle"
           shape="rounded"
           size="md"
           loading={saving}
           disabled={!canSave}
-          inactiveReason={items.length === 0 ? "Adicione um PEC" : undefined}
+          inactiveReason={items.length === 0 ? copy.phrases.needPec : undefined}
           className="flex-1"
           onPress={handleSave}
         />

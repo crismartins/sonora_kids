@@ -1,12 +1,13 @@
 import { ImageSourcePropType } from "react-native";
 import { MOCK_CATEGORIES } from "@/data/categories";
 import { boyImageForTitle } from "@/data/pecBoyImages";
+import { PEC_FALLBACK_IMAGE } from "@/data/pecFallback";
 import { pecBaseTitle } from "@/data/pecLabels";
 import { pecImageOverride } from "@/services/pecImageOverrides";
 import { ChildSex } from "@/services/profile";
 import { PecItem } from "@/types";
 
-export const PEC_FALLBACK_IMAGE = require("../assets/images/avatar_default_v1.png");
+export { PEC_FALLBACK_IMAGE };
 
 function bundledImage(pec: PecItem, sex: ChildSex): ImageSourcePropType {
   const uri = pec.featuredImage?.node?.sourceUrl;

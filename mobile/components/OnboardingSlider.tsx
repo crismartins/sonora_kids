@@ -23,6 +23,7 @@ import { SolarIcon, type SolarIconName } from "@/components/SolarIcon";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { FONT_FAMILY } from "@/constants/typography";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { useI18n } from "@/i18n";
 import { useProfile } from "@/context/ProfileContext";
 import { MOCK_CATEGORIES } from "@/data/categories";
 import { pecLabel } from "@/data/pecLabels";
@@ -257,50 +258,50 @@ function PhraseArt({ width, height }: { width: number; height: number }) {
 
 const ACTIVITY_DESIGN_WIDTH = 520;
 
-const ACTIVITY_ROWS: { icon: SolarIconName; title: string; description: string; tag: string; color: string; background: string }[] = [
-  {
-    icon: "gamepad",
-    title: "Memória com PECS",
-    description: "Encontre os pares de palavras",
-    tag: "Jogo",
-    color: colors.primary,
-    background: colors.primaryWash,
-  },
-  {
-    icon: "volume-loud",
-    title: "Ache a Palavra",
-    description: "Ouça e toque na palavra",
-    tag: "Ouvir",
-    color: getCategoryColor("greenAccent"),
-    background: getCategoryBgColor("greenAccent"),
-  },
-  {
-    icon: "microphone",
-    title: "Repita Comigo",
-    description: "Ouça e fale a palavra",
-    tag: "Fala",
-    color: getCategoryColor("pink"),
-    background: getCategoryBgColor("pink"),
-  },
-  {
-    icon: "text-field",
-    title: "Monte a Frase",
-    description: "Ouça e toque as palavras na ordem",
-    tag: "Frase",
-    color: getCategoryColor("purple"),
-    background: getCategoryBgColor("purple"),
-  },
-  {
-    icon: "book",
-    title: "História do Dia",
-    description: "Ouça o conto e passe a página",
-    tag: "Leitura",
-    color: getCategoryColor("orange"),
-    background: getCategoryBgColor("orange"),
-  },
-];
-
 function ActivitiesPreview({ width }: { width: number }) {
+  const copy = useI18n();
+  const rows: { icon: SolarIconName; title: string; description: string; tag: string; color: string; background: string }[] = [
+    {
+      icon: "gamepad",
+      title: copy.learn.memory,
+      description: copy.learn.memoryDetail,
+      tag: copy.learn.tags.game,
+      color: colors.primary,
+      background: colors.primaryWash,
+    },
+    {
+      icon: "volume-loud",
+      title: copy.learn.find,
+      description: copy.learn.findDetail,
+      tag: copy.learn.tags.listen,
+      color: getCategoryColor("greenAccent"),
+      background: getCategoryBgColor("greenAccent"),
+    },
+    {
+      icon: "microphone",
+      title: copy.learn.repeat,
+      description: copy.learn.repeatDetail,
+      tag: copy.learn.tags.speak,
+      color: getCategoryColor("pink"),
+      background: getCategoryBgColor("pink"),
+    },
+    {
+      icon: "text-field",
+      title: copy.learn.build,
+      description: copy.learn.buildDetail,
+      tag: copy.learn.tags.phrase,
+      color: getCategoryColor("purple"),
+      background: getCategoryBgColor("purple"),
+    },
+    {
+      icon: "book",
+      title: copy.learn.story,
+      description: copy.learn.storyDetail,
+      tag: copy.learn.tags.read,
+      color: getCategoryColor("orange"),
+      background: getCategoryBgColor("orange"),
+    },
+  ];
   return (
     <View
       style={{
@@ -313,7 +314,7 @@ function ActivitiesPreview({ width }: { width: number }) {
         paddingVertical: 8,
       }}
     >
-      {ACTIVITY_ROWS.map((activity, index) => (
+      {rows.map((activity, index) => (
         <View key={activity.title}>
           {index > 0 ? <View style={{ height: 1, backgroundColor: colors.line }} /> : null}
           <View style={{ flexDirection: "row", alignItems: "center", gap: 14, paddingVertical: 14 }}>
@@ -364,11 +365,10 @@ function ActivitiesArt({ width, height }: { width: number; height: number }) {
   );
 }
 
-const ROUTINE_DAYS = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
-const ROUTINE_PERIODS: { label: string; icon: SolarIconName }[] = [
-  { label: "Manhã", icon: "sun" },
-  { label: "Tarde", icon: "cloud-sun" },
-  { label: "Noite", icon: "moon" },
+const ROUTINE_PERIODS: { key: "manha" | "tarde" | "noite"; icon: SolarIconName }[] = [
+  { key: "manha", icon: "sun" },
+  { key: "tarde", icon: "cloud-sun" },
+  { key: "noite", icon: "moon" },
 ];
 const ROUTINE_CARD_TITLES = ["Acordar", "Escovar os dentes"];
 const ROUTINE_DESIGN_WIDTH = 600;
@@ -417,13 +417,14 @@ function RoutinePreviewCard({ item, backgroundColor }: { item: PecItem; backgrou
 
 function RoutinePreview({ width }: { width: number }) {
   usePecImageOverrides();
+  const copy = useI18n();
   const cards = ROUTINE_CARD_TITLES.map(pecByTitle).filter((item): item is PecItem => item != null);
   const cardColor = getCategoryBgColor("deepPurple");
 
   return (
     <View style={{ width }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-        {ROUTINE_DAYS.map((day, index) => (
+        {copy.routine.dayChips.map((day, index) => (
           <FilterChip key={day} label={day} selected={index === 0} onPress={() => undefined} />
         ))}
       </View>
@@ -431,9 +432,10 @@ function RoutinePreview({ width }: { width: number }) {
         {ROUTINE_PERIODS.map((period, index) => {
           const active = index === 0;
           const tint = active ? colors.primary : colors.neutralDark;
+          const label = copy.routine.periods[period.key];
           return (
             <View
-              key={period.label}
+              key={period.key}
               style={{
                 flex: 1,
                 alignItems: "center",
@@ -445,7 +447,7 @@ function RoutinePreview({ width }: { width: number }) {
               }}
             >
               <SolarIcon name={period.icon} size={28} color={tint} />
-              <Text style={{ fontFamily: FONT_FAMILY, fontSize: 18, color: tint }}>{period.label}</Text>
+              <Text style={{ fontFamily: FONT_FAMILY, fontSize: 18, color: tint }}>{label}</Text>
             </View>
           );
         })}
@@ -497,6 +499,11 @@ export function OnboardingSlider({ onDone }: { onDone: () => void }) {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { speak, stopSpeaking, haptic } = useAppSettings();
+  const copy = useI18n();
+  const slideText = (slideIndex: number) => {
+    const text = copy.onboarding.slides[slideIndex];
+    return { title: text.title, body: text.body(LIBRARY_SIZE) };
+  };
   const pagerRef = useRef<ScrollViewInstance>(null);
   const indexRef = useRef(0);
   const closing = useRef(false);
@@ -567,11 +574,10 @@ export function OnboardingSlider({ onDone }: { onDone: () => void }) {
   );
 
   const speakCurrent = useCallback(() => {
-    const slide = SLIDES[index];
-    if (!slide) return;
+    const text = slideText(index);
     haptic(Haptics.ImpactFeedbackStyle.Light);
-    speak(`${slide.title}. ${slide.body}`);
-  }, [haptic, index, speak]);
+    speak(`${text.title}. ${text.body}`);
+  }, [haptic, index, speak, copy]);
 
   return (
     <Animated.View
@@ -582,7 +588,7 @@ export function OnboardingSlider({ onDone }: { onDone: () => void }) {
       <View style={{ paddingTop: insets.top + 4, paddingHorizontal: 20 }}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Pular introdução"
+          accessibilityLabel={copy.onboarding.skip}
           onPress={finish}
           hitSlop={8}
           style={({ pressed }) => ({
@@ -620,10 +626,12 @@ export function OnboardingSlider({ onDone }: { onDone: () => void }) {
             onMomentumScrollEnd={handleScroll}
             style={{ height: pageHeight }}
           >
-            {SLIDES.map((slide) => (
+            {SLIDES.map((slide, slideIndex) => {
+              const text = slideText(slideIndex);
+              return (
               <View
                 key={slide.key}
-                accessibilityLabel={`${slide.title}. ${slide.body}`}
+                accessibilityLabel={`${text.title}. ${text.body}`}
                 style={{ width, height: pageHeight, overflow: "hidden" }}
               >
                 <View
@@ -652,7 +660,7 @@ export function OnboardingSlider({ onDone }: { onDone: () => void }) {
                       color: colors.primary,
                     }}
                   >
-                    {slide.title}
+                    {text.title}
                   </Text>
                   <Text
                     style={{
@@ -664,11 +672,12 @@ export function OnboardingSlider({ onDone }: { onDone: () => void }) {
                       color: BODY_COLOR,
                     }}
                   >
-                    {slide.body}
+                    {text.body}
                   </Text>
                 </View>
               </View>
-            ))}
+              );
+            })}
           </ScrollView>
         ) : null}
       </View>
@@ -686,7 +695,7 @@ export function OnboardingSlider({ onDone }: { onDone: () => void }) {
                 <Pressable
                   key={slide.key}
                   accessibilityRole="button"
-                  accessibilityLabel={`Etapa ${slideIndex + 1} de ${SLIDES.length}`}
+                  accessibilityLabel={copy.onboarding.step(slideIndex + 1, SLIDES.length)}
                   accessibilityState={{ selected: slideIndex === index }}
                   hitSlop={10}
                   onPress={() => scrollTo(slideIndex)}
@@ -700,7 +709,7 @@ export function OnboardingSlider({ onDone }: { onDone: () => void }) {
             icon="volume-loud"
             size="lg"
             variant="neutral"
-            accessibilityLabel="Ouvir esta etapa"
+            accessibilityLabel={copy.onboarding.hearStep}
             onPress={speakCurrent}
           />
         </View>

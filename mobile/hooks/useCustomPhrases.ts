@@ -6,9 +6,11 @@ import {
   replaceCustomPhrase,
   saveCustomPhrases,
 } from "@/services/customPhrases";
+import { usePremium } from "@/context/PremiumContext";
 import { PhraseItem } from "@/types";
 
 export function useCustomPhrases() {
+  const { ensureCanAdd } = usePremium();
   const [phrases, setPhrases] = useState<CustomPhrase[]>([]);
   const phrasesRef = useRef(phrases);
   phrasesRef.current = phrases;
@@ -28,13 +30,14 @@ export function useCustomPhrases() {
   }, []);
 
   const addPhrase = useCallback(async (items: PhraseItem[]) => {
+    ensureCanAdd("phrase", phrasesRef.current.length);
     const phrase = createCustomPhrase(items);
     const next = [phrase, ...phrasesRef.current];
     phrasesRef.current = next;
     setPhrases(next);
     await saveCustomPhrases(next);
     return phrase;
-  }, []);
+  }, [ensureCanAdd]);
 
   const updatePhrase = useCallback(async (id: string, items: PhraseItem[]) => {
     const current = phrasesRef.current.find((phrase) => phrase.id === id);

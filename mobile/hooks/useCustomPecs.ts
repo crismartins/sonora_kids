@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { usePremium } from "@/context/PremiumContext";
 import {
   createCustomPec,
   CustomPec,
@@ -10,6 +11,7 @@ import {
 } from "@/services/customPecs";
 
 export function useCustomPecs() {
+  const { ensureCanAdd } = usePremium();
   const [pecs, setPecs] = useState<CustomPec[]>([]);
   const pecsRef = useRef(pecs);
   pecsRef.current = pecs;
@@ -29,13 +31,14 @@ export function useCustomPecs() {
   }, []);
 
   const addPec = useCallback(async (input: NewCustomPec) => {
+    ensureCanAdd("pec", pecsRef.current.length);
     const pec = await createCustomPec(input);
     const next = [...pecsRef.current, pec];
     pecsRef.current = next;
     setPecs(next);
     await saveCustomPecs(next);
     return pec;
-  }, []);
+  }, [ensureCanAdd]);
 
   const updatePec = useCallback(async (id: string, input: NewCustomPec) => {
     const current = pecsRef.current.find((pec) => pec.id === id);

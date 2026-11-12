@@ -1,25 +1,28 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, Pressable, Switch, Platform, Modal, TextInput, Alert } from "react-native";
+import { View, Text, ScrollView, Pressable, Switch, Platform, Modal, TextInput, Alert, Linking } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { OnboardingSlider } from "@/components/OnboardingSlider";
 import { SolarIcon } from "@/components/SolarIcon";
 import { BottomSheet, ScreenModal } from "@/components/AppModal";
 import { Button } from "@/components/Button";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors } from "@/constants/colors";
 import { useAppSettings } from "@/context/AppSettingsContext";
-import { VoicePickerModal, VOICE_PREVIEW } from "@/components/VoicePickerModal";
+import { usePremium } from "@/context/PremiumContext";
+import { useI18n } from "@/i18n";
+import { VoicePickerModal } from "@/components/VoicePickerModal";
 import {
   inferVoiceGender,
-  SPEECH_RATE_LABELS,
+  languagePreview,
+  ratePreview,
   SpeechLanguage,
   SpeechRate,
+  voicePreview,
   voiceSummary,
   VoiceGender,
 } from "@/services/appSettings";
 
-const SUGGESTIONS_KEY = "sonora.suggestions";
+const SUGGESTION_RECIPIENTS = ["cristophermartins.77@gmail.com", "hello@cristophermartins.com"];
 
 interface RowProps {
   icon: React.ReactNode;
@@ -77,29 +80,23 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-const GUIDE_STEPS = [
-  "Toque em um PEC para ouvir a palavra.",
-  "Segure um PEC para trocar a imagem. Nos que você criou, também dá para editar ou apagar.",
-  "Em Frases, toque em + e monte a frase com os PECs.",
-  "Aqui você escolhe a voz, a velocidade e a vibração.",
-];
-
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { settings, voices, updateSettings, resetSettings, speak, haptic } = useAppSettings();
+  const { isPremium, openPaywall } = usePremium();
+  const copy = useI18n();
   const [guideOpen, setGuideOpen] = useState(false);
   const [introOpen, setIntroOpen] = useState(false);
   const [voiceOpen, setVoiceOpen] = useState(false);
-  const [rateOpen, setRateOpen] = useState(false);
   const [suggestionOpen, setSuggestionOpen] = useState(false);
   const [suggestion, setSuggestion] = useState("");
   const [suggestionSent, setSuggestionSent] = useState(false);
 
-  const languageLabel = settings.language === "pt-PT" ? "Português (Portugal)" : "Português (Brasil)";
+  const languageLabel = copy.voice.languages[settings.language];
 
   const chooseGender = (gender: VoiceGender) => {
     updateSettings({ voiceGender: gender, voiceId: null });
-    speak(VOICE_PREVIEW, { voiceGender: gender, voiceId: null });
+    speak(voicePreview(settings.language), { voiceGender: gender, voiceId: null });
     haptic();
   };
 
@@ -111,28 +108,27 @@ export default function SettingsScreen() {
       voiceGender: inferred ?? settings.voiceGender,
     };
     updateSettings(patch);
-    speak(VOICE_PREVIEW, patch);
+    speak(voicePreview(settings.language), patch);
     haptic();
   };
 
   const chooseLanguage = (language: SpeechLanguage) => {
     updateSettings({ language, voiceId: null });
-    speak("Olá. Este é o idioma da voz.", { language, voiceId: null });
+    speak(languagePreview(language), { language, voiceId: null });
     haptic();
   };
 
   const chooseRate = (speechRate: SpeechRate) => {
     updateSettings({ speechRate });
-    speak("Esta é a velocidade da fala.", { speechRate });
+    speak(ratePreview(settings.language), { speechRate });
     haptic();
-    setRateOpen(false);
   };
 
   const confirmReset = () => {
-    Alert.alert("Redefinir configurações", "Voz, velocidade, vibração e acessibilidade voltam ao padrão.", [
-      { text: "Cancelar", style: "cancel" },
+    Alert.alert(copy.settings.resetTitle, copy.settings.resetBody, [
+      { text: copy.common.cancel, style: "cancel" },
       {
-        text: "Redefinir",
+        text: copy.settings.resetAction,
         style: "destructive",
         onPress: () => {
           resetSettings();
@@ -144,17 +140,14 @@ export default function SettingsScreen() {
   const sendSuggestion = async () => {
     const text = suggestion.trim();
     if (!text) return;
-    const raw = await AsyncStorage.getItem(SUGGESTIONS_KEY);
-    let current: unknown = [];
+    const url = `mailto:${SUGGESTION_RECIPIENTS.join(",")}?subject=${encodeURIComponent(copy.settings.suggestionSubject)}&body=${encodeURIComponent(text)}`;
     try {
-      current = raw ? JSON.parse(raw) : [];
+      await Linking.openURL(url);
+      setSuggestion("");
+      setSuggestionSent(true);
     } catch {
-      current = [];
+      Alert.alert(copy.settings.suggestionTitle, copy.settings.suggestionMailMissing);
     }
-    const next = Array.isArray(current) ? [...current, { text, at: Date.now() }] : [{ text, at: Date.now() }];
-    await AsyncStorage.setItem(SUGGESTIONS_KEY, JSON.stringify(next));
-    setSuggestion("");
-    setSuggestionSent(true);
   };
 
   return (
@@ -165,56 +158,54 @@ export default function SettingsScreen() {
         paddingBottom: (Platform.OS === "web" ? 34 : insets.bottom) + 32,
       }}
     >
-      <Section title="Primeiros Passos">
+      <Section title={copy.premium.settingsTitle}>
+        <Row
+          icon={<SolarIcon name="crown" size={20} color={colors.primary} />}
+          label={isPremium ? copy.premium.ownedTitle : copy.premium.unlock}
+          description={isPremium ? copy.premium.settingsUnlocked : copy.premium.settingsLocked}
+          onPress={openPaywall}
+          isLast
+        />
+      </Section>
+
+      <Section title={copy.settings.firstSteps}>
         <Row
           icon={<SolarIcon name="flag" size={20} color={colors.primary} />}
-          label="Guia de início"
-          description="Como usar PECs, frases e a voz"
+          label={copy.settings.guide}
+          description={copy.settings.guideDetail}
           onPress={() => setGuideOpen(true)}
         />
         <Row
           icon={<SolarIcon name="book" size={20} color={colors.primary} />}
-          label="Ver introdução"
-          description="Reveja as telas iniciais do app"
+          label={copy.settings.intro}
+          description={copy.settings.introDetail}
           onPress={() => setIntroOpen(true)}
           isLast
         />
       </Section>
 
-      <Section title="Comunicação">
-        <Row
-          icon={<SolarIcon name="microphone" size={20} color={colors.primary} />}
-          label="Idioma da voz"
-          description={languageLabel}
-          onPress={() => setVoiceOpen(true)}
-        />
-        <Row
-          icon={<SolarIcon name="user" size={20} color={colors.primary} />}
-          label="Voz"
-          description={voiceSummary(voices, settings)}
-          onPress={() => setVoiceOpen(true)}
-        />
+      <Section title={copy.settings.communication}>
         <Row
           icon={<SolarIcon name="volume-loud" size={20} color={colors.primary} />}
-          label="Falar automaticamente"
-          description="Fala ao selecionar categoria ou tela"
+          label={copy.common.voice}
+          description={`${languageLabel} · ${voiceSummary(voices, settings).replace("Feminina", copy.voice.feminine).replace("Masculina", copy.voice.masculine)} · ${copy.voice.rates[settings.speechRate]}`}
+          onPress={() => setVoiceOpen(true)}
+        />
+        <Row
+          icon={<SolarIcon name="microphone" size={20} color={colors.primary} />}
+          label={copy.settings.autoSpeak}
+          description={copy.settings.autoSpeakDetail}
           toggle
           value={settings.autoSpeakCategories}
           onToggle={(value) => updateSettings({ autoSpeakCategories: value })}
-        />
-        <Row
-          icon={<SolarIcon name="speedometer" size={20} color={colors.primary} />}
-          label="Velocidade da fala"
-          description={SPEECH_RATE_LABELS[settings.speechRate]}
-          onPress={() => setRateOpen(true)}
           isLast
         />
       </Section>
 
-      <Section title="Acessibilidade">
+      <Section title={copy.settings.access}>
         <Row
           icon={<SolarIcon name="vibration" size={20} color={colors.primary} />}
-          label="Vibração (haptics)"
+          label={copy.settings.haptics}
           toggle
           value={settings.haptics}
           onToggle={(value) => {
@@ -226,16 +217,16 @@ export default function SettingsScreen() {
         />
         <Row
           icon={<SolarIcon name="text-field" size={20} color={colors.primary} />}
-          label="Texto grande"
-          description="Aumenta o texto em todo o app"
+          label={copy.settings.largeText}
+          description={copy.settings.largeTextDetail}
           toggle
           value={settings.largeText}
           onToggle={(value) => updateSettings({ largeText: value })}
         />
         <Row
           icon={<SolarIcon name="fallback" size={20} color={colors.primary} />}
-          label="Alto contraste"
-          description="Deixa as palavras mais fáceis de ler"
+          label={copy.settings.contrast}
+          description={copy.settings.contrastDetail}
           toggle
           value={settings.highContrast}
           onToggle={(value) => updateSettings({ highContrast: value })}
@@ -243,17 +234,11 @@ export default function SettingsScreen() {
         />
       </Section>
 
-      <Section title="Conectar">
-        <Row
-          icon={<SolarIcon name="microphone" size={20} color={colors.primary} />}
-          label="Conecta à Alexa"
-          description="Ainda não disponível"
-          onPress={() => Alert.alert("Alexa", "A conexão com a Amazon Alexa ainda não está disponível nesta versão.")}
-        />
+      <Section title={copy.settings.connect}>
         <Row
           icon={<SolarIcon name="chat-round" size={20} color={colors.primary} />}
-          label="Envie-nos Sugestões"
-          description="Guarde uma ideia para melhorar o app"
+          label={copy.settings.suggestions}
+          description={copy.settings.suggestionsDetail}
           onPress={() => {
             setSuggestionSent(false);
             setSuggestionOpen(true);
@@ -262,33 +247,22 @@ export default function SettingsScreen() {
         />
       </Section>
 
-      <Section title="Conta">
+      <Section title={copy.settings.account}>
         <Row
           icon={<SolarIcon name="user" size={20} color={colors.neutralDark} />}
-          label="Editar perfil"
+          label={copy.settings.editProfile}
           onPress={() => router.push("/profile")}
         />
         <Row
-          icon={<SolarIcon name="cloud-download" size={20} color={colors.neutralDark} />}
-          label="Sincronizar dados"
-          description="Salvo neste aparelho"
-          onPress={() =>
-            Alert.alert(
-              "Dados neste aparelho",
-              "PECs, frases e configurações ficam salvos neste aparelho. Não há uma conta na nuvem para sincronizar.",
-            )
-          }
-        />
-        <Row
           icon={<SolarIcon name="trash" size={20} color={colors.danger} />}
-          label="Redefinir configurações"
+          label={copy.settings.reset}
           destructive
           onPress={confirmReset}
           isLast
         />
       </Section>
 
-      <Text className="mb-1 mt-3 text-center font-quicksand text-base text-neutral-dark">App Versão 1.0</Text>
+      <Text className="mb-1 mt-3 text-center font-quicksand text-base text-neutral-dark">{copy.common.version}</Text>
 
       <Modal
         visible={introOpen}
@@ -308,41 +282,22 @@ export default function SettingsScreen() {
         gender={settings.voiceGender}
         voiceId={settings.voiceId}
         language={settings.language}
+        speechRate={settings.speechRate}
         onClose={() => setVoiceOpen(false)}
         onSelectGender={chooseGender}
         onSelectVoice={(voice) => chooseVoice(voice.identifier)}
         onSelectLanguage={chooseLanguage}
+        onSelectRate={chooseRate}
       />
 
       <BottomSheet
-        visible={rateOpen}
-        title="Velocidade da fala"
-        closeLabel="Fechar velocidade"
-        onClose={() => setRateOpen(false)}
-      >
-        <View className="gap-3">
-          {(Object.keys(SPEECH_RATE_LABELS) as SpeechRate[]).map((rate) => {
-            const selected = settings.speechRate === rate;
-            return (
-              <Button
-                key={rate}
-                label={SPEECH_RATE_LABELS[rate]}
-                variant={selected ? "primary" : "soft"}
-                onPress={() => chooseRate(rate)}
-              />
-            );
-          })}
-        </View>
-      </BottomSheet>
-
-      <BottomSheet
         visible={guideOpen}
-        title="Guia de início"
-        closeLabel="Fechar guia"
+        title={copy.settings.guideTitle}
+        closeLabel={copy.settings.closeGuide}
         onClose={() => setGuideOpen(false)}
       >
         <View className="gap-3">
-          {GUIDE_STEPS.map((step, index) => (
+          {copy.settings.guideSteps.map((step, index) => (
             <View key={step} className="flex-row gap-3">
               <View className="h-8 w-8 items-center justify-center rounded-full bg-primary-wash">
                 <Text className="font-quicksand text-xl text-primary">{index + 1}</Text>
@@ -350,31 +305,27 @@ export default function SettingsScreen() {
               <Text className="flex-1 font-quicksand text-xl text-dark">{step}</Text>
             </View>
           ))}
-          <Button label="Entendi" className="mt-2" onPress={() => setGuideOpen(false)} />
+          <Button label={copy.common.gotIt} className="mt-2" onPress={() => setGuideOpen(false)} />
         </View>
       </BottomSheet>
 
-      <ScreenModal visible={suggestionOpen} title="Sugestão" avoidKeyboard onClose={() => setSuggestionOpen(false)}>
+      <ScreenModal visible={suggestionOpen} title={copy.settings.suggestionTitle} avoidKeyboard onClose={() => setSuggestionOpen(false)}>
         <View className="gap-4 px-5 pt-5">
           {suggestionSent ? (
-            <Text className="font-quicksand text-2xl text-dark">
-              Sugestão guardada neste aparelho. Obrigado por ajudar o Sonora.
-            </Text>
+            <Text className="font-quicksand text-2xl text-dark">{copy.settings.suggestionThanks}</Text>
           ) : (
             <>
-              <Text className="font-quicksand text-xl text-neutral-dark">
-                Conte o que facilitaria o dia de quem usa o app.
-              </Text>
+              <Text className="font-quicksand text-xl text-neutral-dark">{copy.settings.suggestionPrompt}</Text>
               <TextInput
                 value={suggestion}
                 onChangeText={setSuggestion}
-                placeholder="Escreva aqui"
+                placeholder={copy.settings.suggestionPlaceholder}
                 placeholderTextColor={colors.neutralDark}
                 multiline
                 className="min-h-[140px] rounded-2xl border border-neutral bg-neutral-light px-4 py-3 text-dark"
                 style={{ fontSize: 18, textAlignVertical: "top" }}
               />
-              <Button label="Guardar sugestão" onPress={sendSuggestion} />
+              <Button label={copy.settings.suggestionSave} onPress={sendSuggestion} />
             </>
           )}
         </View>

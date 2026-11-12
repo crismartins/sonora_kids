@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { tabBarClearance } from "@/constants/tabBar";
 import { PillText } from "@/components/PillText";
+import { useI18n } from "@/i18n";
 
 interface ActivityCardProps {
   href: Href;
@@ -16,54 +17,6 @@ interface ActivityCardProps {
   background: string;
   tag: string;
 }
-
-const ACTIVITIES: ActivityCardProps[] = [
-  {
-    href: "/atividade/memoria",
-    icon: "gamepad",
-    title: "Memória com PECS",
-    description: "Encontre os pares de palavras",
-    tag: "Jogo",
-    color: colors.primary,
-    background: colors.primaryWash,
-  },
-  {
-    href: "/atividade/ache",
-    icon: "volume-loud",
-    title: "Ache a Palavra",
-    description: "Ouça e toque na palavra",
-    tag: "Ouvir",
-    color: getCategoryColor("greenAccent"),
-    background: getCategoryBgColor("greenAccent"),
-  },
-  {
-    href: "/atividade/repita",
-    icon: "microphone",
-    title: "Repita Comigo",
-    description: "Ouça e fale a palavra",
-    tag: "Fala",
-    color: getCategoryColor("pink"),
-    background: getCategoryBgColor("pink"),
-  },
-  {
-    href: "/atividade/frase",
-    icon: "text-field",
-    title: "Monte a Frase",
-    description: "Ouça e toque as palavras na ordem",
-    tag: "Frase",
-    color: getCategoryColor("purple"),
-    background: getCategoryBgColor("purple"),
-  },
-  {
-    href: "/atividade/historia",
-    icon: "book",
-    title: "História do Dia",
-    description: "Ouça o conto e passe a página",
-    tag: "Leitura",
-    color: getCategoryColor("orange"),
-    background: getCategoryBgColor("orange"),
-  },
-];
 
 function ActivityCard({ href, icon, title, description, color, background, tag }: ActivityCardProps) {
   return (
@@ -93,7 +46,55 @@ function ActivityCard({ href, icon, title, description, color, background, tag }
 
 export default function AprenderScreen() {
   const insets = useSafeAreaInsets();
+  const copy = useI18n();
   const tabBarHeight = tabBarClearance(insets.bottom);
+  const activities: ActivityCardProps[] = [
+    {
+      href: "/atividade/memoria",
+      icon: "gamepad",
+      title: copy.learn.memory,
+      description: copy.learn.memoryDetail,
+      tag: copy.learn.tags.game,
+      color: colors.primary,
+      background: colors.primaryWash,
+    },
+    {
+      href: "/atividade/ache",
+      icon: "volume-loud",
+      title: copy.learn.find,
+      description: copy.learn.findDetail,
+      tag: copy.learn.tags.listen,
+      color: getCategoryColor("greenAccent"),
+      background: getCategoryBgColor("greenAccent"),
+    },
+    {
+      href: "/atividade/repita",
+      icon: "microphone",
+      title: copy.learn.repeat,
+      description: copy.learn.repeatDetail,
+      tag: copy.learn.tags.speak,
+      color: getCategoryColor("pink"),
+      background: getCategoryBgColor("pink"),
+    },
+    {
+      href: "/atividade/frase",
+      icon: "text-field",
+      title: copy.learn.build,
+      description: copy.learn.buildDetail,
+      tag: copy.learn.tags.phrase,
+      color: getCategoryColor("purple"),
+      background: getCategoryBgColor("purple"),
+    },
+    {
+      href: "/atividade/historia",
+      icon: "book",
+      title: copy.learn.story,
+      description: copy.learn.storyDetail,
+      tag: copy.learn.tags.read,
+      color: getCategoryColor("orange"),
+      background: getCategoryBgColor("orange"),
+    },
+  ];
 
   return (
     <ScrollView
@@ -107,7 +108,7 @@ export default function AprenderScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View className="rounded-[22px] border border-line bg-canvas p-4">
-        {ACTIVITIES.map((activity, index) => (
+        {activities.map((activity, index) => (
           <View key={activity.title}>
             {index > 0 ? <View className="h-px bg-line" /> : null}
             <ActivityCard {...activity} />

@@ -6,8 +6,10 @@ import { FloatingButton } from "@/components/Button";
 import { CategoryPill } from "@/components/CategoryPill";
 import { EmptyState } from "@/components/ScreenState";
 import { useAppSettings } from "@/context/AppSettingsContext";
-import { useCategories } from "@/hooks/useCategories";
+import { usePremium } from "@/context/PremiumContext";
+import { localizeName, useI18n } from "@/i18n";
 import { useCustomPecs } from "@/hooks/useCustomPecs";
+import { useCategories } from "@/hooks/useCategories";
 import { imageFromPec } from "@/data/pecImages";
 import { useProfile } from "@/context/ProfileContext";
 import { CustomPec, customPecToItem } from "@/services/customPecs";
@@ -23,6 +25,8 @@ import { Category, PecItem } from "@/types";
 export default function PecsScreen() {
   const insets = useSafeAreaInsets();
   const { settings, speak, stopSpeaking, haptic } = useAppSettings();
+  const { canAdd, openPaywall } = usePremium();
+  const copy = useI18n();
   const { profile } = useProfile();
   const { data: categories, isLoading, error, refetch } = useCategories();
   const { pecs: customPecs, addPec, updatePec, deletePec } = useCustomPecs();
@@ -57,7 +61,7 @@ export default function PecsScreen() {
       const name = categories[index]?.name;
       if (name && settings.autoSpeakCategories) {
         stopSpeaking();
-        speak(name);
+        speak(localizeName(name));
       }
       haptic(Haptics.ImpactFeedbackStyle.Light);
       if (source === "chip" && pageWidthRef.current > 0) {
@@ -158,8 +162,8 @@ export default function PecsScreen() {
       <View className="flex-1 bg-white">
         <EmptyState
           icon="cloud-cross"
-          title="Não foi possível carregar"
-          actionLabel="Tentar novamente"
+          title={copy.home.loadError}
+          actionLabel={copy.common.retry}
           onAction={() => refetch()}
         />
       </View>
@@ -291,10 +295,14 @@ export default function PecsScreen() {
       {!isLoading && categories ? (
         <FloatingButton
           icon="widget-add"
-          tooltip="Adicionar"
-          accessibilityLabel="Adicionar PEC"
+          tooltip={copy.common.add}
+          accessibilityLabel={copy.home.addPec}
           onPress={() => {
             if (!categories?.length) return;
+            if (!canAdd("pec", customPecs.length)) {
+              openPaywall();
+              return;
+            }
             openPecForm({
               categories,
               initialCategorySlug: categories[selectedIndex]?.slug ?? categories[0].slug,
@@ -346,6 +354,7 @@ function CategoryPage({
   tabBarHeight: number;
   onManageItem: (item: PecItem) => void;
 }) {
+  const copy = useI18n();
   const pecs: PecItem[] = category.pECS?.nodes ?? [];
   const colorName = category.categoriasDePec?.configuracoesCategorias?.cor ?? "blue";
   const backgroundColor = getCategoryBgColor(colorName);
@@ -353,7 +362,7 @@ function CategoryPage({
   return (
     <View style={{ width, height }}>
       {pecs.length === 0 ? (
-        <EmptyState icon="gallery" title="Nenhum item nesta categoria" />
+        <EmptyState icon="gallery" title={copy.home.emptyCategory} />
       ) : (
         <ScrollView
           nestedScrollEnabled
