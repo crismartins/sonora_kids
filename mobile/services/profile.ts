@@ -6,8 +6,9 @@ const STORAGE_KEY = "sonora.profile";
 
 export const AVATAR_V1 = require("../assets/images/avatar_default_v1.png");
 export const AVATAR_V2 = require("../assets/images/avatar_default_v2.png");
+export const AVATAR_V3 = require("../assets/images/avatar_default_v3.png");
 
-export type AvatarChoice = "v1" | "v2" | "photo";
+export type AvatarChoice = "v1" | "v2" | "v3" | "photo";
 export type ChildSex = "menina" | "menino";
 
 export interface ChildProfile {
@@ -21,20 +22,22 @@ export interface ChildProfile {
 export const DEFAULT_PROFILE: ChildProfile = {
   nickname: "Joãozinho",
   name: "João Roberto Pereira da Silva",
-  avatar: "v1",
+  avatar: "v3",
   sex: "menina",
 };
 
 export function profileAvatarSource(profile: ChildProfile): ImageSourcePropType {
   if (profile.avatar === "photo" && profile.photoUri) return { uri: profile.photoUri };
+  if (profile.avatar === "v1") return AVATAR_V1;
   if (profile.avatar === "v2") return AVATAR_V2;
-  return AVATAR_V1;
+  return AVATAR_V3;
 }
 
 function isProfile(value: unknown): value is ChildProfile {
   if (!value || typeof value !== "object") return false;
   const profile = value as Partial<ChildProfile>;
-  const avatarOk = profile.avatar === "v1" || profile.avatar === "v2" || profile.avatar === "photo";
+  const avatarOk =
+    profile.avatar === "v1" || profile.avatar === "v2" || profile.avatar === "v3" || profile.avatar === "photo";
   const sexOk = profile.sex === undefined || profile.sex === "menina" || profile.sex === "menino";
   return (
     typeof profile.nickname === "string" &&
@@ -55,7 +58,7 @@ export async function loadProfile(): Promise<ChildProfile> {
   const parsed: unknown = JSON.parse(raw);
   if (!isProfile(parsed)) return DEFAULT_PROFILE;
   const profile = withSex(parsed);
-  if (profile.avatar === "photo" && !profile.photoUri) return { ...profile, avatar: "v1" };
+  if (profile.avatar === "photo" && !profile.photoUri) return { ...profile, avatar: "v3" };
   return profile;
 }
 

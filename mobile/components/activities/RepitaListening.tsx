@@ -246,7 +246,10 @@ export default function RepitaListening() {
           contentContainerStyle={{ ...activityPadding(insets.bottom), flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
         >
-          <ActivityPrompt instruction={copy.learn.repeatPrompt} progress={copy.common.of(index + 1, rounds.length)} />
+          <ActivityPrompt
+            instruction={copy.learn.repeatPrompt}
+            steps={{ done: index + (phase === "matched" ? 1 : 0), total: rounds.length }}
+          />
 
           <WordCard pec={target} label={label} highContrast={settings.highContrast} phase={phase} missTick={missTick} />
 
@@ -347,7 +350,7 @@ function WordCard({
         <PillText size={36} numberOfLines={2} style={{ color: colors.dark }}>
           {label}
         </PillText>
-        {matched ? <SolarIcon name="check" size={28} color={color} /> : null}
+        {matched ? <SolarIcon name="check-circle" size={28} color={color} /> : null}
       </View>
     </Animated.View>
   );

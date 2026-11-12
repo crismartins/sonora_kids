@@ -90,9 +90,12 @@ function PhrasePage({
 
 export default function FrasesScreen() {
   const insets = useSafeAreaInsets();
-  const { haptic, speak } = useAppSettings();
+  const { settings, haptic, speak } = useAppSettings();
   const { canAdd, openPaywall } = usePremium();
   const copy = useI18n();
+  const filters = copy.phrases.filters;
+  const filtersRef = useRef(filters);
+  filtersRef.current = filters;
   const { profile } = useProfile();
   const pecImagesVersion = usePecImageOverrides();
   const { data: categories } = useCategories();
@@ -101,7 +104,8 @@ export default function FrasesScreen() {
   const onFilterChange = useCallback(
     (index: number) => {
       haptic(Haptics.ImpactFeedbackStyle.Light);
-      speak(copy.phrases.filters[index]);
+      const label = filtersRef.current[index];
+      if (label) speak(label);
     },
     [haptic, speak],
   );
@@ -200,6 +204,7 @@ export default function FrasesScreen() {
     <View className="flex-1 bg-white">
       <View className="bg-white">
         <ScrollView
+          key={settings.language}
           ref={chipScrollRef}
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -212,10 +217,10 @@ export default function FrasesScreen() {
             paddingVertical: 10,
           }}
         >
-          {FILTER_TABS.map((tab, index) => (
+          {filters.map((label, index) => (
             <FilterChip
-              key={tab}
-              label={copy.phrases.filters[index]}
+              key={`${settings.language}-${index}`}
+              label={label}
               selected={index === selectedIndex}
               onPress={() => selectIndex(index, "chip")}
               onLayout={(event) => onChipLayout(index, event)}

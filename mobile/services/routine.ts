@@ -58,3 +58,97 @@ export async function saveRoutine(slots: Record<string, RoutineItem[]>): Promise
   const stored: StoredRoutine = { slots };
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
 }
+
+let slots: Record<string, RoutineItem[]> = {};
+const listeners = new Set<() => void>();
+let loading: Promise<void> | null = null;
+let queue: Promise<void> = Promise.resolve();
+let itemSerial = 0;
+
+function emit() {
+  listeners.forEach((listener) => listener());
+}
+
+function enqueue<T>(task: () => Promise<T>): Promise<T> {
+  const run = queue.then(task, task);
+  queue = run.then(
+    () => undefined,
+    () => undefined,
+  );
+  return run;
+}
+
+export function ensureRoutineLoaded() {
+  if (!loading) {
+    loading = loadRoutine()
+      .then((stored) => {
+        slots = stored;
+        emit();
+      })
+      .catch(() => {
+        slots = {};
+        emit();
+      });
+  }
+  return loading;
+}
+
+export function subscribeRoutine(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+export function getRoutineSlots() {
+  return slots;
+}
+
+export function addRoutineItem(day: number, period: DayPeriod, pec: { id: string; title: string }) {
+  return enqueue(async () => {
+    await ensureRoutineLoaded();
+    const key = routineSlotKey(day, period);
+    const current = slots[key] ?? [];
+    if (current.some((item) => item.pecId === pec.id)) return;
+    const item: RoutineItem = {
+      id: `routine-${Date.now()}-${itemSerial++}`,
+      pecId: pec.id,
+      title: pec.title,
+    };
+    const next = { ...slots, [key]: [...current, item] };
+    await saveRoutine(next);
+    slots = next;
+    emit();
+  });
+}
+
+export function removeRoutineItem(day: number, period: DayPeriod, itemId: string) {
+  return enqueue(async () => {
+    await ensureRoutineLoaded();
+    const key = routineSlotKey(day, period);
+    const current = slots[key] ?? [];
+    const kept = current.filter((item) => item.id !== itemId);
+    if (kept.length === current.length) return;
+    const next = { ...slots, [key]: kept };
+    await saveRoutine(next);
+    slots = next;
+    emit();
+  });
+}
+
+export function removePecFromRoutine(pecId: string) {
+  return enqueue(async () => {
+    await ensureRoutineLoaded();
+    let changed = false;
+    const next: Record<string, RoutineItem[]> = {};
+    for (const [key, items] of Object.entries(slots)) {
+      const kept = items.filter((item) => item.pecId !== pecId);
+      if (kept.length !== items.length) changed = true;
+      next[key] = kept;
+    }
+    if (!changed) return;
+    await saveRoutine(next);
+    slots = next;
+    emit();
+  });
+}

@@ -23,7 +23,7 @@ interface AppSettingsContextValue {
   voices: Voice[];
   updateSettings: (patch: Partial<AppSettings>) => Promise<void>;
   resetSettings: () => Promise<void>;
-  speak: (text: string, override?: Partial<AppSettings>) => void;
+  speak: (text: string, override?: Partial<AppSettings>, onDone?: () => void) => void;
   stopSpeaking: () => void;
   haptic: (style?: Haptics.ImpactFeedbackStyle) => void;
 }
@@ -36,9 +36,17 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
   const [ready, setReady] = useState(false);
   const settingsRef = useRef(settings);
   const voicesRef = useRef(voices);
+  const speakGeneration = useRef(0);
+  const speakTask = useRef<ReturnType<typeof setTimeout> | null>(null);
   settingsRef.current = settings;
   voicesRef.current = voices;
   setActiveLocale(settings.language);
+
+  useEffect(() => {
+    return () => {
+      if (speakTask.current) clearTimeout(speakTask.current);
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -92,22 +100,41 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
     await saveAppSettings(DEFAULT_SETTINGS);
   }, []);
 
-  const speak = useCallback((text: string, override?: Partial<AppSettings>) => {
-    if (text.trim()) warnIfSilentModeBlocksSpeech();
-    const current = { ...settingsRef.current, ...override };
-    const resolved = resolveSpeech(voicesRef.current, current);
-    Speech.stop();
-    Speech.speak(text, {
-      language: resolved.language,
-      pitch: resolved.pitch,
-      rate: SPEECH_RATES[current.speechRate],
-      ...(resolved.voice ? { voice: resolved.voice } : {}),
-    });
+  const scheduleSpeech = useCallback((task: () => void) => {
+    if (speakTask.current) clearTimeout(speakTask.current);
+    const generation = ++speakGeneration.current;
+    // TTS stop/speak can block the JS thread for the whole utterance.
+    // Yield so the press paints before the native call starts.
+    speakTask.current = setTimeout(() => {
+      speakTask.current = null;
+      if (generation !== speakGeneration.current) return;
+      task();
+    }, 0);
   }, []);
 
+  const speak = useCallback((text: string, override?: Partial<AppSettings>, onDone?: () => void) => {
+    const utterance = text.trim();
+    if (!utterance) return;
+    const snapshot = { ...settingsRef.current, ...override };
+    scheduleSpeech(() => {
+      warnIfSilentModeBlocksSpeech();
+      const resolved = resolveSpeech(voicesRef.current, snapshot);
+      void Speech.stop().catch(() => undefined);
+      Speech.speak(utterance, {
+        language: resolved.language,
+        pitch: resolved.pitch,
+        rate: SPEECH_RATES[snapshot.speechRate],
+        ...(resolved.voice ? { voice: resolved.voice } : {}),
+        onDone: () => onDone?.(),
+      });
+    });
+  }, [scheduleSpeech]);
+
   const stopSpeaking = useCallback(() => {
-    Speech.stop();
-  }, []);
+    scheduleSpeech(() => {
+      void Speech.stop().catch(() => undefined);
+    });
+  }, [scheduleSpeech]);
 
   const haptic = useCallback((style: Haptics.ImpactFeedbackStyle = Haptics.ImpactFeedbackStyle.Medium) => {
     if (!settingsRef.current.haptics || Platform.OS === "web") return;

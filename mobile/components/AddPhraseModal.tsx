@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { View, ScrollView, ImageSourcePropType } from "react-native";
+import { View, ScrollView, ImageSourcePropType, Text } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "@/components/Button";
@@ -32,16 +32,27 @@ let open = false;
 
 export function openPhraseForm(next: PhraseFormRequest) {
   if (open) return;
-  open = true;
   request = next;
-  router.push("/frase");
+  open = true;
+  try {
+    router.push("/frase");
+  } catch (error) {
+    request = null;
+    open = false;
+    throw error;
+  }
 }
 
 export function currentPhraseForm() {
   return request;
 }
 
+export function isPhraseFormOpen() {
+  return open;
+}
+
 export function finishPhraseForm() {
+  if (!open && !request) return;
   const closing = request;
   request = null;
   open = false;
@@ -75,6 +86,7 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
   const [categorySlug, setCategorySlug] = useState(categories[0]?.slug ?? "");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [dragging, setDragging] = useState(false);
 
   const imagesByTitle = useMemo(() => {
     const map = new Map<string, ImageSourcePropType>();
@@ -121,6 +133,18 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
     setError(null);
   };
 
+  const reorder = (from: number, to: number) => {
+    setItems((current) => {
+      if (from === to || from < 0 || to < 0 || from >= current.length || to >= current.length) return current;
+      const next = [...current];
+      const [moved] = next.splice(from, 1);
+      if (!moved) return current;
+      next.splice(to, 0, moved);
+      return next;
+    });
+    setError(null);
+  };
+
   const handleSave = async () => {
     if (items.length === 0) return;
     setSaving(true);
@@ -136,8 +160,21 @@ export function AddPhraseForm({ categories, initialPhrase, onClose, onSubmit }: 
 
   return (
     <View className="flex-1 bg-white">
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 16 }}>
-        {items.length > 0 ? <PhraseCard phrase={items} images={previewImages} onRemoveItem={removeAt} /> : null}
+      <ScrollView scrollEnabled={!dragging} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 16 }}>
+        {items.length > 0 ? (
+          <View>
+            <PhraseCard
+              phrase={items}
+              images={previewImages}
+              onRemoveItem={removeAt}
+              onReorder={reorder}
+              onDraggingChange={setDragging}
+            />
+            {items.length > 1 ? (
+              <Text className="px-5 text-center font-quicksand text-base text-neutral-dark">{copy.phrases.dragOrder}</Text>
+            ) : null}
+          </View>
+        ) : null}
 
         <View className="mx-5 mt-5 h-px bg-line" />
 

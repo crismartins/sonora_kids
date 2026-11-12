@@ -4,8 +4,10 @@ import {
   AddRoutineForm,
   currentRoutineForm,
   finishRoutineForm,
+  isRoutineFormOpen,
   routineFormTitle,
 } from "@/components/AddRoutineItemModal";
+import { useFormLeave } from "@/hooks/useFormLeave";
 import { useI18n } from "@/i18n";
 
 export default function RotinaItemScreen() {
@@ -20,15 +22,12 @@ export default function RotinaItemScreen() {
   }, [copy, navigation, request]);
 
   useEffect(() => {
-    if (!request) {
-      router.back();
-      return;
-    }
-    const unsubscribe = navigation.addListener("removed", () => {
-      finishRoutineForm();
-    });
-    return () => queueMicrotask(unsubscribe);
-  }, [navigation, request]);
+    if (request) return;
+    finishRoutineForm();
+    router.back();
+  }, [request]);
+
+  useFormLeave(request != null, isRoutineFormOpen, finishRoutineForm);
 
   if (!request) return null;
 

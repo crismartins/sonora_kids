@@ -43,7 +43,7 @@ export default function TabLayout() {
   );
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white" style={{ flex: 1 }}>
       <AppHeader title={titleForPath(pathname, tabTitles)} />
       <Tabs
         safeAreaInsets={{ bottom: 0 }}

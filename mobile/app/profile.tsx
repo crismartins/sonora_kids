@@ -22,7 +22,7 @@ import {
   voiceSummary,
   VoiceGender,
 } from "@/services/appSettings";
-import { AVATAR_V1, AVATAR_V2, AvatarChoice, ChildSex, profileAvatarSource } from "@/services/profile";
+import { AVATAR_V1, AVATAR_V2, AVATAR_V3, AvatarChoice, ChildSex, profileAvatarSource } from "@/services/profile";
 import { loadTopWords, UsedWord } from "@/services/wordUsage";
 import { VoicePickerModal } from "@/components/VoicePickerModal";
 
@@ -186,7 +186,11 @@ export default function ProfileScreen() {
           contentContainerStyle={{ paddingTop: 28, paddingBottom: 24, alignItems: "center" }}
           showsVerticalScrollIndicator={false}
         >
-          <Image source={profileAvatarSource(profile)} className="h-28 w-28 rounded-3xl border-4 border-light" />
+          <Image
+            source={profileAvatarSource(profile)}
+            resizeMode="cover"
+            className="h-28 w-28 rounded-3xl border-4 border-light"
+          />
           <Text className="mt-4 font-quicksand text-3xl text-primary">{profile.nickname}</Text>
           <Text className="mt-1 px-6 text-center font-quicksand text-xl text-dark">{profile.name}</Text>
           <Text className="mt-1 font-quicksand text-lg text-neutral-dark">
@@ -271,6 +275,9 @@ export default function ProfileScreen() {
             onPicked={usePickedImage}
             onError={setError}
           />
+          <AvatarChoiceButton label={copy.profile.avatarSonora} selected={avatar === "v3"} onPress={() => choosePreset("v3")}>
+            <Image source={AVATAR_V3} className="h-full w-full" />
+          </AvatarChoiceButton>
           <AvatarChoiceButton label={copy.profile.avatar1} selected={avatar === "v1"} onPress={() => choosePreset("v1")}>
             <Image source={AVATAR_V1} className="h-full w-full" />
           </AvatarChoiceButton>

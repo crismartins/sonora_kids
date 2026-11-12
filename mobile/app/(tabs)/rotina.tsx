@@ -24,7 +24,7 @@ import { PillText } from "@/components/PillText";
 import { EmptyState } from "@/components/ScreenState";
 import { colors } from "@/constants/colors";
 import { tabBarClearance } from "@/constants/tabBar";
-import { customPecToItem } from "@/services/customPecs";
+import { customPecCount, customPecToItem } from "@/services/customPecs";
 import { canIncrease, QuotaError } from "@/services/quota";
 import { DAY_PERIODS, DayPeriod, RoutineItem } from "@/services/routine";
 
@@ -148,8 +148,6 @@ export default function RotinaScreen() {
   const { itemsFor, itemsNow, countItems, addItem, removeItem } = useRoutine();
   const isPremiumRef = useRef(isPremium);
   isPremiumRef.current = isPremium;
-  const pecCountRef = useRef(customPecs.length);
-  pecCountRef.current = customPecs.length;
   const today = new Date().getDay();
   const onDayChange = useCallback(
     (index: number) => {
@@ -282,7 +280,7 @@ export default function RotinaScreen() {
       getCategories: () => catalogRef.current,
       addPec,
       beforeCreatePec: () => {
-        const count = pecCountRef.current;
+        const count = customPecCount();
         if (canIncrease("pec", count, count + 1, isPremiumRef.current)) return true;
         openPaywall();
         return false;

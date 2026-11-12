@@ -20,6 +20,7 @@
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#2567FF"
       },
       "package": "com.sonorakids.app"
@@ -34,7 +35,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#2567FF",
+          "backgroundColor": "#FFFFFF",
           "resizeMode": "contain"
         }
       ],

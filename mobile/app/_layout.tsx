@@ -7,7 +7,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { Quicksand_700Bold } from "@expo-google-fonts/quicksand";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context";
 import { AnimatedSplash } from "@/components/AnimatedSplash";
 import { OnboardingSlider } from "@/components/OnboardingSlider";
 import { SilentModeToast } from "@/components/SilentModeToast";
@@ -18,10 +18,12 @@ import { FONT_FAMILY } from "@/constants/typography";
 import { colors } from "@/constants/colors";
 import { useI18n } from "@/i18n";
 import { loadOnboardingSeen } from "@/services/onboarding";
+import { ensureCustomPecsLoaded } from "@/services/customPecs";
 import { ensurePecImageOverridesLoaded } from "@/services/pecImageOverrides";
+import { ensureRoutineLoaded } from "@/services/routine";
 
 SplashScreen.preventAutoHideAsync();
-SystemUI.setBackgroundColorAsync(colors.primary);
+SystemUI.setBackgroundColorAsync(colors.white);
 
 function RootNavigator() {
   const { fontScale } = useAppSettings();
@@ -162,7 +164,7 @@ export default function RootLayout() {
       .catch(() => {
         if (active) setOnboardingSeen(true);
       });
-    ensurePecImageOverridesLoaded().finally(() => {
+    Promise.all([ensurePecImageOverridesLoaded(), ensureCustomPecsLoaded(), ensureRoutineLoaded()]).finally(() => {
       if (active) setImagesReady(true);
     });
     return () => {
@@ -177,12 +179,9 @@ export default function RootLayout() {
   }, [splashVisible]);
 
   return (
-    <GestureHandlerRootView
-      className="flex-1"
-      style={{ backgroundColor: splashVisible ? colors.primary : colors.white }}
-    >
-      {ready && onboardingSeen !== null ? (
-        <SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.white }}>
+      <SafeAreaProvider style={{ flex: 1 }} initialMetrics={initialWindowMetrics}>
+        {ready && onboardingSeen !== null ? (
           <AppSettingsProvider>
             <PremiumProvider>
               <ProfileProvider>
@@ -190,8 +189,8 @@ export default function RootLayout() {
               </ProfileProvider>
             </PremiumProvider>
           </AppSettingsProvider>
-        </SafeAreaProvider>
-      ) : null}
+        ) : null}
+      </SafeAreaProvider>
       {splashVisible ? (
         <AnimatedSplash hold={!ready} onHidden={() => setSplashVisible(false)} />
       ) : null}

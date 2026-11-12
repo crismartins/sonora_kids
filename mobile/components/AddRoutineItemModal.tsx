@@ -52,16 +52,27 @@ let open = false;
 
 export function openRoutineForm(next: RoutineFormRequest) {
   if (open) return;
-  open = true;
   request = next;
-  router.push("/rotina-item");
+  open = true;
+  try {
+    router.push("/rotina-item");
+  } catch (error) {
+    request = null;
+    open = false;
+    throw error;
+  }
 }
 
 export function currentRoutineForm() {
   return request;
 }
 
+export function isRoutineFormOpen() {
+  return open;
+}
+
 export function finishRoutineForm() {
+  if (!open && !request) return;
   const closing = request;
   request = null;
   open = false;

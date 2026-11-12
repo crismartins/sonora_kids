@@ -183,6 +183,8 @@ export const CATALOG: Record<string, CatalogEntry> = {
   espera: { en: "Wait", es: "Espera" },
   meu: { en: "Mine", es: "Mío" },
   seu: { en: "Yours", es: "Tuyo", pt: "Teu" },
+  nosso: { en: "Ours", es: "Nuestro" },
+  deles: { en: "Theirs", es: "De ellos" },
   onde: { en: "Where", es: "Dónde" },
   "o quê": { en: "What", es: "Qué" },
   quando: { en: "When", es: "Cuándo" },

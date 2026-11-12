@@ -1,12 +1,15 @@
-import React, { useCallback, useRef, useState } from "react";
-import { View, Pressable, Image, ImageSourcePropType, ScrollView, useWindowDimensions, Platform } from "react-native";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { View, Pressable, Image, ImageSourcePropType, useWindowDimensions, Platform } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import { GestureDetector, ScrollView as GestureScrollView, usePanGesture, type NativeGesture } from "react-native-gesture-handler";
 import Animated, {
-  useSharedValue,
+  runOnJS,
+  type SharedValue,
   useAnimatedStyle,
+  useSharedValue,
   withSequence,
-  withTiming,
   withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { IconButton } from "@/components/Button";
 import { SolarIcon } from "@/components/SolarIcon";
@@ -37,6 +40,8 @@ interface PhraseCardProps {
   images?: Map<string, ImageSourcePropType>;
   onManage?: () => void;
   onRemoveItem?: (index: number) => void;
+  onReorder?: (from: number, to: number) => void;
+  onDraggingChange?: (dragging: boolean) => void;
 }
 
 function puzzlePath(bodyWidth: number, height: number, leftSocket: boolean, rightTab: boolean) {
@@ -73,6 +78,7 @@ function PuzzlePiece({
   fill,
   stroke,
   badge,
+  overlap = true,
   children,
 }: {
   bodyWidth: number;
@@ -82,11 +88,12 @@ function PuzzlePiece({
   fill: string;
   stroke: string;
   badge?: React.ReactNode;
+  overlap?: boolean;
   children?: React.ReactNode;
 }) {
   const width = bodyWidth + (rightTab ? TAB : 0);
   return (
-    <View style={{ width, height, marginLeft: leftSocket ? -TAB : 0 }}>
+    <View style={{ width, height, marginLeft: overlap && leftSocket ? -TAB : 0 }}>
       <Svg pointerEvents="none" width={width} height={height} style={{ position: "absolute", left: 0, top: 0 }}>
         <Path
           d={puzzlePath(bodyWidth, height, leftSocket, rightTab)}
@@ -156,7 +163,125 @@ function pieceHeightFor(textSize: number) {
   return 16 + IMAGE_SIZE + 4 + lineHeight * 2 + 4;
 }
 
-export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCardProps) {
+function pieceStride(bodyWidth: number, index: number) {
+  return bodyWidth + (index === 0 ? TAB : 0);
+}
+
+function dropIndex(from: number, translationX: number, strides: number[]) {
+  "worklet";
+  let index = from;
+  if (translationX > 0) {
+    let remaining = translationX;
+    while (index < strides.length - 1) {
+      const next = strides[index + 1] ?? 0;
+      const step = ((strides[index] ?? 0) + next) / 2;
+      if (remaining < step) break;
+      remaining -= next;
+      index += 1;
+    }
+  } else if (translationX < 0) {
+    let remaining = -translationX;
+    while (index > 0) {
+      const previous = strides[index - 1] ?? 0;
+      const step = ((strides[index] ?? 0) + previous) / 2;
+      if (remaining < step) break;
+      remaining -= previous;
+      index -= 1;
+    }
+  }
+  return index;
+}
+
+function slotShift(index: number, from: number, target: number, draggedStride: number) {
+  "worklet";
+  if (from < 0 || index === from) return 0;
+  if (from < target && index > from && index <= target) return -draggedStride;
+  if (from > target && index < from && index >= target) return draggedStride;
+  return 0;
+}
+
+function DraggablePiece({
+  index,
+  enabled,
+  scrollGesture,
+  activeIndex,
+  dragX,
+  strides,
+  onGrab,
+  onDrop,
+  onDragChange,
+  children,
+}: {
+  index: number;
+  enabled: boolean;
+  scrollGesture: NativeGesture | null;
+  activeIndex: SharedValue<number>;
+  dragX: SharedValue<number>;
+  strides: SharedValue<number[]>;
+  onGrab: () => void;
+  onDrop: (from: number, to: number) => void;
+  onDragChange: (dragging: boolean) => void;
+  children: React.ReactNode;
+}) {
+  const style = useAnimatedStyle(() => {
+    const from = activeIndex.value;
+    const widths = strides.value;
+    if (from < 0 || widths.length === 0) {
+      return { transform: [{ translateX: 0 }, { scale: 1 }], zIndex: 0, elevation: 0 };
+    }
+    const target = dropIndex(from, dragX.value, widths);
+    const draggedStride = widths[from] ?? 0;
+    const dragging = index === from;
+    const shift = dragging ? dragX.value : slotShift(index, from, target, draggedStride);
+    return {
+      transform: [{ translateX: shift }, { scale: dragging ? 1.04 : 1 }],
+      zIndex: dragging ? 8 : 1,
+      elevation: dragging ? 8 : 0,
+    };
+  });
+
+  const pan = usePanGesture(
+    useMemo(
+      () => ({
+        enabled,
+        activeOffsetX: [-10, 10] as [number, number],
+        failOffsetY: [-16, 16] as [number, number],
+        cancelsTouchesInView: false,
+        ...(scrollGesture ? { block: scrollGesture } : {}),
+        onActivate: () => {
+          "worklet";
+          activeIndex.value = index;
+          dragX.value = 0;
+          runOnJS(onDragChange)(true);
+          runOnJS(onGrab)();
+        },
+        onUpdate: (event: { translationX: number }) => {
+          "worklet";
+          dragX.value = event.translationX;
+        },
+        onFinalize: (event: { canceled: boolean }) => {
+          "worklet";
+          const from = activeIndex.value;
+          const widths = strides.value;
+          const to = from < 0 || event.canceled ? from : dropIndex(from, dragX.value, widths);
+          activeIndex.value = -1;
+          dragX.value = 0;
+          runOnJS(onDragChange)(false);
+          if (!event.canceled && from >= 0 && to !== from) runOnJS(onDrop)(from, to);
+        },
+      }),
+      [activeIndex, dragX, enabled, index, onDragChange, onDrop, onGrab, scrollGesture, strides],
+    ),
+  );
+
+  return (
+    <GestureDetector gesture={pan}>
+      <Animated.View style={[{ marginLeft: index > 0 ? -TAB : 0 }, style]}>{children}</Animated.View>
+    </GestureDetector>
+  );
+}
+
+export function PhraseCard({ phrase, images, onManage, onRemoveItem, onReorder, onDraggingChange }: PhraseCardProps) {
   const { width: windowWidth } = useWindowDimensions();
   const { settings, speak, stopSpeaking, haptic } = useAppSettings();
   const { profile } = useProfile();
@@ -164,6 +289,13 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
   const scale = useSharedValue(1);
   const longPressed = useRef(false);
   const [rowWidth, setRowWidth] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [scrollGesture, setScrollGesture] = useState<NativeGesture | null>(null);
+  const activeIndex = useSharedValue(-1);
+  const dragX = useSharedValue(0);
+  const strides = useSharedValue<number[]>([]);
+  const reorderRef = useRef(onReorder);
+  reorderRef.current = onReorder;
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -203,6 +335,26 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
   const extra = Math.max(0, available - preferredTotal);
   const grow = preferredTotal <= available && growBudget > 0 ? Math.min(1, extra / growBudget) : 0;
   const bodyWidths = specs.map((spec) => spec.bodyWidth + Math.max(0, MAX_BODY - spec.bodyWidth) * grow);
+  const strideKey = bodyWidths.map((body, index) => pieceStride(body, index)).join(",");
+  useEffect(() => {
+    strides.value = strideKey.length === 0 ? [] : strideKey.split(",").map(Number);
+  }, [strideKey, strides]);
+  const grabPiece = useCallback(() => {
+    haptic();
+  }, [haptic]);
+  const dropPiece = useCallback((from: number, to: number) => {
+    reorderRef.current?.(from, to);
+  }, []);
+  const changeDragging = useCallback(
+    (next: boolean) => {
+      setDragging(next);
+      onDraggingChange?.(next);
+    },
+    [onDraggingChange],
+  );
+  const rememberScroll = useCallback((gesture: NativeGesture) => {
+    setScrollGesture((current) => (current?.handlerTag === gesture.handlerTag ? current : gesture));
+  }, []);
   const contentWidth = bodyWidths.reduce((sum, width) => sum + width, 0) + SPEAKER_BODY;
   const sideInset = onRemoveItem ? 30 : 0;
   const needsScroll = contentWidth + sideInset > available + 1;
@@ -237,13 +389,13 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
         </PillText>
       </>
     );
-    return (
+    const piece = (
       <PuzzlePiece
-        key={`${item.text}-${index}`}
         bodyWidth={bodyWidth}
         height={pieceHeight}
         leftSocket={index > 0}
         rightTab
+        overlap={!onReorder}
         fill={settings.highContrast ? colors.white : getCategoryBgColor(item.color)}
         stroke={stroke}
         badge={
@@ -251,7 +403,7 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
             <View style={{ position: "absolute", top: -18, left: -16, zIndex: 3 }}>
               <IconButton
                 icon="close-circle"
-                accessibilityLabel={`Remover ${item.text}`}
+                accessibilityLabel={copy.phrases.remove(pecLabel(item.text, profile.sex))}
                 variant="muted"
                 size="sm"
                 onPress={() => onRemoveItem(index)}
@@ -262,6 +414,23 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
       >
         {body}
       </PuzzlePiece>
+    );
+    if (!onReorder) return <React.Fragment key={`${item.text}-${index}`}>{piece}</React.Fragment>;
+    return (
+      <DraggablePiece
+        key={`${item.text}-${index}`}
+        index={index}
+        enabled={phrase.length > 1}
+        scrollGesture={scrollGesture}
+        activeIndex={activeIndex}
+        dragX={dragX}
+        strides={strides}
+        onGrab={grabPiece}
+        onDrop={dropPiece}
+        onDragChange={changeDragging}
+      >
+        {piece}
+      </DraggablePiece>
     );
   });
 
@@ -325,17 +494,18 @@ export function PhraseCard({ phrase, images, onManage, onRemoveItem }: PhraseCar
         animatedStyle,
       ]}
     >
-      <ScrollView
+      <GestureScrollView
         horizontal
         nestedScrollEnabled
         directionalLockEnabled
-        scrollEnabled={needsScroll}
+        scrollEnabled={needsScroll && !dragging}
         showsHorizontalScrollIndicator={false}
         style={{ width: "100%" }}
         contentContainerStyle={needsScroll ? undefined : { flexGrow: 1 }}
+        onGestureUpdate_CAN_CAUSE_INFINITE_RERENDER={onReorder ? rememberScroll : undefined}
       >
         {pieces}
-      </ScrollView>
+      </GestureScrollView>
     </Animated.View>
   );
 }

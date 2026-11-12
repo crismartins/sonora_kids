@@ -11,7 +11,7 @@ import { CameraIcon } from "@solar-icons/react-native/bold-duotone/camera";
 import { ChatRoundIcon } from "@solar-icons/react-native/bold-duotone/chat-round";
 import { ChatSquareLineIcon } from "@solar-icons/react-native/bold-duotone/chat-square-line";
 import { CheckCircleIcon } from "@solar-icons/react-native/bold-duotone/check-circle";
-import { CheckReadIcon } from "@solar-icons/react-native/bold-duotone/check-read";
+import { CupStarIcon } from "@solar-icons/react-native/bold-duotone/cup-star";
 import { ChefHatIcon } from "@solar-icons/react-native/bold-duotone/chef-hat";
 import { ClockCircleIcon } from "@solar-icons/react-native/bold-duotone/clock-circle";
 import { CloseCircleIcon } from "@solar-icons/react-native/bold-duotone/close-circle";
@@ -75,11 +75,11 @@ const ICONS = {
   "chat-round": ChatRoundIcon,
   "chat-square-line": ChatSquareLineIcon,
   "chat-square-add": ChatSquareAddIcon,
-  check: CheckReadIcon,
   "check-circle": CheckCircleIcon,
   "chef-hat": ChefHatIcon,
   clock: ClockCircleIcon,
   crown: CrownIcon,
+  trophy: CupStarIcon,
   "cloud-cross": CloudCrossIcon,
   "cloud-download": CloudDownloadIcon,
   "cloud-sun": CloudSunIcon,

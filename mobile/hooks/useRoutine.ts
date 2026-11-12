@@ -1,63 +1,30 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import {
   DayPeriod,
-  RoutineItem,
+  addRoutineItem,
   countRoutineItems,
-  loadRoutine,
+  ensureRoutineLoaded,
+  getRoutineSlots,
+  removeRoutineItem,
   routineSlotKey,
-  saveRoutine,
+  subscribeRoutine,
 } from "@/services/routine";
 
 export function useRoutine() {
-  const [slots, setSlots] = useState<Record<string, RoutineItem[]>>({});
-  const slotsRef = useRef(slots);
-  slotsRef.current = slots;
+  const slots = useSyncExternalStore(subscribeRoutine, getRoutineSlots, getRoutineSlots);
 
   useEffect(() => {
-    let active = true;
-    loadRoutine()
-      .then((stored) => {
-        if (active) setSlots(stored);
-      })
-      .catch(() => {
-        if (active) setSlots({});
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const persist = useCallback(async (next: Record<string, RoutineItem[]>) => {
-    slotsRef.current = next;
-    setSlots(next);
-    await saveRoutine(next);
+    void ensureRoutineLoaded();
   }, []);
 
   const addItem = useCallback(
-    async (day: number, period: DayPeriod, pec: { id: string; title: string }) => {
-      const key = routineSlotKey(day, period);
-      const current = slotsRef.current[key] ?? [];
-      if (current.some((item) => item.pecId === pec.id)) return;
-      const item: RoutineItem = {
-        id: `routine-${Date.now()}`,
-        pecId: pec.id,
-        title: pec.title,
-      };
-      await persist({ ...slotsRef.current, [key]: [...current, item] });
-    },
-    [persist],
+    (day: number, period: DayPeriod, pec: { id: string; title: string }) => addRoutineItem(day, period, pec),
+    [],
   );
 
   const removeItem = useCallback(
-    async (day: number, period: DayPeriod, itemId: string) => {
-      const key = routineSlotKey(day, period);
-      const current = slotsRef.current[key] ?? [];
-      await persist({
-        ...slotsRef.current,
-        [key]: current.filter((item) => item.id !== itemId),
-      });
-    },
-    [persist],
+    (day: number, period: DayPeriod, itemId: string) => removeRoutineItem(day, period, itemId),
+    [],
   );
 
   const itemsFor = useCallback(
@@ -66,11 +33,11 @@ export function useRoutine() {
   );
 
   const itemsNow = useCallback(
-    (day: number, period: DayPeriod) => slotsRef.current[routineSlotKey(day, period)] ?? [],
+    (day: number, period: DayPeriod) => getRoutineSlots()[routineSlotKey(day, period)] ?? [],
     [],
   );
 
-  const countItems = useCallback(() => countRoutineItems(slotsRef.current), []);
+  const countItems = useCallback(() => countRoutineItems(getRoutineSlots()), []);
 
   return { itemsFor, itemsNow, countItems, addItem, removeItem };
 }

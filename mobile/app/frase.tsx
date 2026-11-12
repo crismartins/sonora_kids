@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { router, useNavigation } from "expo-router";
-import { AddPhraseForm, currentPhraseForm, finishPhraseForm } from "@/components/AddPhraseModal";
+import { AddPhraseForm, currentPhraseForm, finishPhraseForm, isPhraseFormOpen } from "@/components/AddPhraseModal";
+import { useFormLeave } from "@/hooks/useFormLeave";
 import { useI18n } from "@/i18n";
 
 export default function FraseScreen() {
@@ -13,15 +14,12 @@ export default function FraseScreen() {
   }, [copy, navigation, request]);
 
   useEffect(() => {
-    if (!request) {
-      router.back();
-      return;
-    }
-    const unsubscribe = navigation.addListener("removed", () => {
-      finishPhraseForm();
-    });
-    return () => queueMicrotask(unsubscribe);
-  }, [navigation, request]);
+    if (request) return;
+    finishPhraseForm();
+    router.back();
+  }, [request]);
+
+  useFormLeave(request != null, isPhraseFormOpen, finishPhraseForm);
 
   if (!request) return null;
 

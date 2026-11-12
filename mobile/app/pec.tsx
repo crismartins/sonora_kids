@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { router, useNavigation } from "expo-router";
-import { AddPecForm, currentPecForm, finishPecForm } from "@/components/AddPecModal";
+import { AddPecForm, currentPecForm, finishPecForm, isPecFormOpen } from "@/components/AddPecModal";
+import { useFormLeave } from "@/hooks/useFormLeave";
 import { useI18n } from "@/i18n";
 
 export default function PecScreen() {
@@ -15,15 +16,12 @@ export default function PecScreen() {
   }, [copy, navigation, request]);
 
   useEffect(() => {
-    if (!request) {
-      router.back();
-      return;
-    }
-    const unsubscribe = navigation.addListener("removed", () => {
-      finishPecForm();
-    });
-    return () => queueMicrotask(unsubscribe);
-  }, [navigation, request]);
+    if (request) return;
+    finishPecForm();
+    router.back();
+  }, [request]);
+
+  useFormLeave(request != null, isPecFormOpen, finishPecForm);
 
   if (!request) return null;
 

@@ -2,6 +2,7 @@ import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Directory, File, Paths } from "expo-file-system";
 import { PecItem } from "@/types";
+import { removePecFromRoutine } from "@/services/routine";
 
 const STORAGE_KEY = "sonora.customPecs";
 
@@ -210,4 +211,93 @@ export function customPecToItem(pec: CustomPec): PecItem {
       node: { sourceUrl: pec.localUri || pec.imageUrl },
     },
   };
+}
+
+let records: CustomPec[] = [];
+const listeners = new Set<() => void>();
+let loading: Promise<void> | null = null;
+let queue: Promise<void> = Promise.resolve();
+
+function emit() {
+  listeners.forEach((listener) => listener());
+}
+
+function enqueue<T>(task: () => Promise<T>): Promise<T> {
+  const run = queue.then(task, task);
+  queue = run.then(
+    () => undefined,
+    () => undefined,
+  );
+  return run;
+}
+
+export function ensureCustomPecsLoaded() {
+  if (!loading) {
+    loading = loadCustomPecs()
+      .then((stored) => {
+        records = stored;
+        emit();
+      })
+      .catch(() => {
+        records = [];
+        emit();
+      });
+  }
+  return loading;
+}
+
+export function subscribeCustomPecs(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+export function getCustomPecs() {
+  return records;
+}
+
+export function customPecCount() {
+  return records.length;
+}
+
+export function addSharedCustomPec(input: NewCustomPec, assertCanAdd: (count: number) => void) {
+  return enqueue(async () => {
+    await ensureCustomPecsLoaded();
+    assertCanAdd(records.length);
+    const pec = await createCustomPec(input);
+    const next = [...records, pec];
+    await saveCustomPecs(next);
+    records = next;
+    emit();
+    return pec;
+  });
+}
+
+export function updateSharedCustomPec(id: string, input: NewCustomPec) {
+  return enqueue(async () => {
+    await ensureCustomPecsLoaded();
+    const current = records.find((pec) => pec.id === id);
+    if (!current) throw new Error("PEC não encontrado");
+    const pec = await updateCustomPec(current, input);
+    const next = records.map((item) => (item.id === id ? pec : item));
+    await saveCustomPecs(next);
+    records = next;
+    emit();
+    return pec;
+  });
+}
+
+export function deleteSharedCustomPec(id: string) {
+  return enqueue(async () => {
+    await ensureCustomPecsLoaded();
+    await removePecFromRoutine(id);
+    const current = records.find((pec) => pec.id === id);
+    if (!current) return;
+    await deleteCustomPecImage(current);
+    const next = records.filter((pec) => pec.id !== id);
+    await saveCustomPecs(next);
+    records = next;
+    emit();
+  });
 }

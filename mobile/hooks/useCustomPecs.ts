@@ -1,65 +1,31 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import { usePremium } from "@/context/PremiumContext";
 import {
-  createCustomPec,
-  CustomPec,
-  deleteCustomPecImage,
-  loadCustomPecs,
+  addSharedCustomPec,
+  deleteSharedCustomPec,
+  ensureCustomPecsLoaded,
+  getCustomPecs,
   NewCustomPec,
-  saveCustomPecs,
-  updateCustomPec,
+  subscribeCustomPecs,
+  updateSharedCustomPec,
 } from "@/services/customPecs";
 
 export function useCustomPecs() {
   const { ensureCanAdd } = usePremium();
-  const [pecs, setPecs] = useState<CustomPec[]>([]);
-  const pecsRef = useRef(pecs);
-  pecsRef.current = pecs;
+  const pecs = useSyncExternalStore(subscribeCustomPecs, getCustomPecs, getCustomPecs);
 
   useEffect(() => {
-    let active = true;
-    loadCustomPecs()
-      .then((stored) => {
-        if (active) setPecs(stored);
-      })
-      .catch(() => {
-        if (active) setPecs([]);
-      });
-    return () => {
-      active = false;
-    };
+    void ensureCustomPecsLoaded();
   }, []);
 
-  const addPec = useCallback(async (input: NewCustomPec) => {
-    ensureCanAdd("pec", pecsRef.current.length);
-    const pec = await createCustomPec(input);
-    const next = [...pecsRef.current, pec];
-    pecsRef.current = next;
-    setPecs(next);
-    await saveCustomPecs(next);
-    return pec;
-  }, [ensureCanAdd]);
+  const addPec = useCallback(
+    (input: NewCustomPec) => addSharedCustomPec(input, (count) => ensureCanAdd("pec", count)),
+    [ensureCanAdd],
+  );
 
-  const updatePec = useCallback(async (id: string, input: NewCustomPec) => {
-    const current = pecsRef.current.find((pec) => pec.id === id);
-    if (!current) throw new Error("PEC não encontrado");
-    const pec = await updateCustomPec(current, input);
-    const next = pecsRef.current.map((item) => (item.id === id ? pec : item));
-    pecsRef.current = next;
-    setPecs(next);
-    await saveCustomPecs(next);
-    return pec;
-  }, []);
+  const updatePec = useCallback((id: string, input: NewCustomPec) => updateSharedCustomPec(id, input), []);
 
-  const deletePec = useCallback(async (id: string) => {
-    const current = pecsRef.current.find((pec) => pec.id === id);
-    if (!current) return;
-    await deleteCustomPecImage(current);
-    const next = pecsRef.current.filter((pec) => pec.id !== id);
-    pecsRef.current = next;
-    setPecs(next);
-    await saveCustomPecs(next);
-  }, []);
+  const deletePec = useCallback((id: string) => deleteSharedCustomPec(id), []);
 
   return { pecs, addPec, updatePec, deletePec };
 }

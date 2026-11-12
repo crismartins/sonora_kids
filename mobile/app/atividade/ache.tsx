@@ -48,13 +48,18 @@ export default function AcheScreen() {
   const [pickedId, setPickedId] = useState<string | null>(null);
   const [wrongId, setWrongId] = useState<string | null>(null);
   const [finished, setFinished] = useState(false);
+  const [heardKey, setHeardKey] = useState<string | null>(null);
   const lock = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const alive = useRef(true);
 
   const round = rounds[index];
+  const roundKey = `${session}-${index}`;
+  const heard = heardKey === roundKey;
 
   useEffect(() => {
     return () => {
+      alive.current = false;
       if (timer.current) clearTimeout(timer.current);
     };
   }, []);
@@ -74,8 +79,16 @@ export default function AcheScreen() {
     setSession((value) => value + 1);
   };
 
+  const listen = () => {
+    if (!round) return;
+    const key = roundKey;
+    speak(pecLabel(round.target.title, profile.sex), undefined, () => {
+      if (alive.current) setHeardKey(key);
+    });
+  };
+
   const choose = (pec: PlayPec) => {
-    if (!round || lock.current || pickedId) return;
+    if (!round || !heard || lock.current || pickedId) return;
     if (pec.id !== round.target.id) {
       setWrongId(pec.id);
       haptic(Haptics.ImpactFeedbackStyle.Light);
@@ -116,7 +129,10 @@ export default function AcheScreen() {
           contentContainerStyle={{ ...activityPadding(insets.bottom), flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
         >
-          <ActivityPrompt instruction={copy.learn.findDetail} progress={copy.common.of(index + 1, rounds.length)} />
+          <ActivityPrompt
+            instruction={copy.learn.findDetail}
+            steps={{ done: index + (pickedId ? 1 : 0), total: rounds.length }}
+          />
 
           <View className="gap-3">
             {round.options.map((pec) => (
@@ -126,6 +142,7 @@ export default function AcheScreen() {
                 highContrast={settings.highContrast}
                 selected={pickedId === pec.id}
                 wrong={wrongId === pec.id}
+                disabled={!heard}
                 onPress={() => choose(pec)}
               />
             ))}
@@ -137,7 +154,7 @@ export default function AcheScreen() {
               icon="volume-loud"
               iconSize={24}
               labelSize="md"
-              onPress={() => speak(pecLabel(round.target.title, profile.sex))}
+              onPress={listen}
             />
           </View>
         </ScrollView>
@@ -151,12 +168,14 @@ function ChoiceCard({
   highContrast,
   selected,
   wrong,
+  disabled,
   onPress,
 }: {
   pec: PlayPec;
   highContrast: boolean;
   selected: boolean;
   wrong: boolean;
+  disabled: boolean;
   onPress: () => void;
 }) {
   const { profile } = useProfile();
@@ -182,12 +201,15 @@ function ChoiceCard({
     <Animated.View style={animatedStyle}>
       <Pressable
         accessibilityLabel={label}
+        accessibilityState={{ disabled }}
+        disabled={disabled}
         onPress={onPress}
         className="min-h-[96px] flex-row items-center gap-3 rounded-[22px] py-3 pl-3 pr-12 active:opacity-90"
         style={{
           backgroundColor: highContrast ? colors.white : getCategoryBgColor(pec.colorName),
           borderWidth: selected || wrong || highContrast ? 3 : 0,
           borderColor: wrong ? colors.dark : color,
+          opacity: disabled ? 0.45 : 1,
         }}
       >
         <View className="h-[72px] w-[72px] overflow-hidden rounded-2xl bg-white">
@@ -200,7 +222,7 @@ function ChoiceCard({
         </View>
         {selected ? (
           <View className="absolute right-4 h-8 w-8 items-center justify-center rounded-full bg-white">
-            <SolarIcon name="check" size={20} color={color} />
+            <SolarIcon name="check-circle" size={20} color={color} />
           </View>
         ) : null}
       </Pressable>

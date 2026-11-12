@@ -11,10 +11,12 @@ import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors
 import { useProfile } from "@/context/ProfileContext";
 import { playPecs, sample, shuffle } from "@/data/play";
 import { pecLabel } from "@/data/pecLabels";
-import { ChildSex } from "@/services/profile";
+import { AVATAR_V3, ChildSex } from "@/services/profile";
 import { recordWordUse } from "@/services/wordUsage";
 
 const PAIR_COUNT = 4;
+const GRID_COLUMNS = 2;
+const GRID_GAP = 12;
 
 type MemoryCard = {
   key: string;
@@ -49,6 +51,7 @@ export default function MemoriaScreen() {
   const { profile } = useProfile();
   const [cards, setCards] = useState<MemoryCard[]>(() => deal(profile.sex));
   const [finished, setFinished] = useState(false);
+  const [board, setBoard] = useState({ width: 0, height: 0 });
   const lock = useRef(false);
   const openRef = useRef<MemoryCard | null>(null);
   const dealId = useRef(0);
@@ -137,9 +140,19 @@ export default function MemoriaScreen() {
   };
 
   const rows: MemoryCard[][] = [];
-  for (let i = 0; i < cards.length; i += 2) {
-    rows.push(cards.slice(i, i + 2));
+  for (let i = 0; i < cards.length; i += GRID_COLUMNS) {
+    rows.push(cards.slice(i, i + GRID_COLUMNS));
   }
+
+  const cardSize =
+    board.width > 0 && board.height > 0 && rows.length > 0
+      ? Math.floor(
+          Math.min(
+            (board.width - GRID_GAP * (GRID_COLUMNS - 1)) / GRID_COLUMNS,
+            (board.height - GRID_GAP * (rows.length - 1)) / rows.length,
+          ),
+        )
+      : 0;
 
   return (
     <ActivityChrome title={copy.learn.memory}>
@@ -152,17 +165,29 @@ export default function MemoriaScreen() {
         />
       ) : (
         <View className="flex-1" style={activityPadding(insets.bottom)}>
-          <ActivityPrompt instruction={copy.learn.memoryPrompt} progress={copy.common.of(found, PAIR_COUNT)} />
-          <View className="flex-1 gap-3">
-            {rows.map((row) => (
-              <View key={row.map((card) => card.key).join("-")} className="flex-1 flex-row gap-3">
-                {row.map((card) => (
-                  <View key={card.key} className="flex-1">
-                    <MemoryTile card={card} highContrast={settings.highContrast} onPress={() => flip(card)} />
+          <ActivityPrompt instruction={copy.learn.memoryPrompt} steps={{ done: found, total: PAIR_COUNT }} />
+          <View
+            className="flex-1 items-center justify-center"
+            onLayout={(event) => {
+              const { width, height } = event.nativeEvent.layout;
+              setBoard((current) =>
+                current.width === width && current.height === height ? current : { width, height },
+              );
+            }}
+          >
+            {cardSize > 0 ? (
+              <View style={{ gap: GRID_GAP }}>
+                {rows.map((row) => (
+                  <View key={row.map((card) => card.key).join("-")} className="flex-row" style={{ gap: GRID_GAP }}>
+                    {row.map((card) => (
+                      <View key={card.key} style={{ width: cardSize, height: cardSize }}>
+                        <MemoryTile card={card} highContrast={settings.highContrast} onPress={() => flip(card)} />
+                      </View>
+                    ))}
                   </View>
                 ))}
               </View>
-            ))}
+            ) : null}
           </View>
         </View>
       )}
@@ -182,7 +207,7 @@ function MemoryTile({ card, highContrast, onPress }: { card: MemoryCard; highCon
     <Pressable
       accessibilityLabel={showing ? label : copy.learn.faceDown}
       onPress={onPress}
-      className={`flex-1 overflow-hidden rounded-[22px] active:opacity-90 ${showing ? "px-2 pb-2 pt-2" : "items-center justify-center"}`}
+      className={`h-full w-full overflow-hidden rounded-[22px] active:opacity-90 ${showing ? "px-2 pb-2 pt-2" : ""}`}
       style={{
         backgroundColor: showing ? background : colors.primary,
         borderWidth: showing && (card.matched || highContrast) ? 3 : 0,
@@ -199,11 +224,11 @@ function MemoryTile({ card, highContrast, onPress }: { card: MemoryCard; highCon
           </PillText>
         </View>
       ) : (
-        <SolarIcon name="star" size={36} color={colors.white} />
+        <Image source={AVATAR_V3} className="h-full w-full" resizeMode="cover" />
       )}
       {card.matched ? (
         <View className="absolute right-2 top-2 h-8 w-8 items-center justify-center rounded-full bg-white">
-          <SolarIcon name="check" size={20} color={color} />
+          <SolarIcon name="check-circle" size={20} color={color} />
         </View>
       ) : null}
     </Pressable>

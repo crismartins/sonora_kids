@@ -49,6 +49,7 @@ export function AppHeader({ title }: { title: string }) {
           >
             <Image
               fadeDuration={0}
+              resizeMode="cover"
               source={profileAvatarSource(profile)}
               style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }}
             />

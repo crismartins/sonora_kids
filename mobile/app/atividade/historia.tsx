@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -15,28 +15,59 @@ import { IconButton } from "@/components/Button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityChrome, ActivityDone, ActivityPrompt, activityPadding } from "@/components/activities/ActivityChrome";
 import { useAppSettings } from "@/context/AppSettingsContext";
+import { useProfile } from "@/context/ProfileContext";
 import { colors, getCategoryBgColor, getCategoryColor } from "@/constants/colors";
 import { STORIES, Story, StoryPage } from "@/data/stories";
+import { pecLabel } from "@/data/pecLabels";
+import { customPlayPecs } from "@/data/play";
 import { localizedStory } from "@/i18n/stories";
 import { useI18n } from "@/i18n";
+import { useCustomPecs } from "@/hooks/useCustomPecs";
+
+const MY_WORDS = "minhas-palavras";
 
 export default function HistoriaScreen() {
   const [story, setStory] = useState<Story | null>(null);
   const copy = useI18n();
   const { settings } = useAppSettings();
+  const { profile } = useProfile();
+  const { pecs: customPecs } = useCustomPecs();
+  const mine = useMemo(() => {
+    const words = customPlayPecs(profile.sex);
+    const first = words[0];
+    if (!first) return null;
+    return {
+      id: MY_WORDS,
+      title: copy.learn.myWords,
+      summary: copy.learn.myWordsDetail,
+      colorName: first.colorName,
+      cover: first.image,
+      pages: words.map((word) => ({
+        text: copy.learn.myWordsPage(pecLabel(word.title, profile.sex)),
+        image: word.image,
+      })),
+    } satisfies Story;
+  }, [copy, customPecs, profile.sex]);
 
-  if (!story) {
+  useEffect(() => {
+    if (story?.id === MY_WORDS && !mine) setStory(null);
+  }, [mine, story]);
+
+  const openStory = story?.id === MY_WORDS ? mine : story;
+
+  if (!openStory) {
     return (
       <ActivityChrome title={copy.learn.story}>
-        <StoryList onOpen={setStory} />
+        <StoryList mine={mine} onOpen={setStory} />
       </ActivityChrome>
     );
   }
 
-  return <StoryReader story={localizedStory(story, settings.language)} onClose={() => setStory(null)} />;
+  const reading = openStory.id === MY_WORDS ? openStory : localizedStory(openStory, settings.language);
+  return <StoryReader story={reading} onClose={() => setStory(null)} />;
 }
 
-function StoryList({ onOpen }: { onOpen: (story: Story) => void }) {
+function StoryList({ mine, onOpen }: { mine: Story | null; onOpen: (story: Story) => void }) {
   const insets = useSafeAreaInsets();
   const { settings, haptic } = useAppSettings();
   const copy = useI18n();
@@ -49,8 +80,8 @@ function StoryList({ onOpen }: { onOpen: (story: Story) => void }) {
     >
       <ActivityPrompt instruction={copy.learn.storyPick} />
       <View className="gap-3">
-        {STORIES.map((item) => {
-          const story = localizedStory(item, settings.language);
+        {(mine ? [mine, ...STORIES] : STORIES).map((item) => {
+          const story = item.id === MY_WORDS ? item : localizedStory(item, settings.language);
           const color = getCategoryColor(story.colorName);
           const background = settings.highContrast ? colors.white : getCategoryBgColor(story.colorName);
           return (
@@ -267,7 +298,7 @@ function StoryReader({ story, onClose }: { story: Story; onClose: () => void }) 
           </View>
 
           <IconButton
-            icon={page === story.pages.length - 1 ? "check" : "arrow-right"}
+            icon={page === story.pages.length - 1 ? "check-circle" : "arrow-right"}
             variant="primary"
             size="md"
             accessibilityLabel={page === story.pages.length - 1 ? copy.learn.finishStory : copy.learn.nextPage}

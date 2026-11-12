@@ -19,16 +19,41 @@ export function activityPadding(bottomInset: number) {
 
 export function ActivityPrompt({
   instruction,
-  progress,
+  steps,
 }: {
   instruction: string;
-  progress?: string;
+  steps?: { done: number; total: number };
 }) {
+  const copy = useI18n();
+  const total = Math.max(0, steps?.total ?? 0);
+  const done = Math.min(total, Math.max(0, steps?.done ?? 0));
+
   return (
     <View className="pb-5">
       <Text className="text-center font-quicksand text-lg text-neutral-dark">{instruction}</Text>
-      {progress ? (
-        <Text className="pt-1 text-center font-quicksand text-base text-primary">{progress}</Text>
+      {total > 0 ? (
+        <View
+          accessibilityLabel={copy.common.of(done, total)}
+          className="flex-row flex-wrap items-center justify-center gap-2 pt-3"
+        >
+          {Array.from({ length: total }, (_, index) => {
+            const step = index + 1;
+            const complete = step <= done;
+            return (
+              <View
+                key={step}
+                className="h-9 w-9 items-center justify-center rounded-full"
+                style={{ backgroundColor: complete ? "transparent" : colors.light }}
+              >
+                {complete ? (
+                  <SolarIcon name="check-circle" size={36} color={colors.primary} />
+                ) : (
+                  <Text className="font-quicksand text-base text-primary">{step}</Text>
+                )}
+              </View>
+            );
+          })}
+        </View>
       ) : null}
     </View>
   );
@@ -98,8 +123,11 @@ export function ActivityDone({
 
   return (
     <View className="flex-1 items-center justify-center px-8" style={{ paddingBottom: insets.bottom + 24 }}>
-      <View className="mb-5 h-28 w-28 items-center justify-center rounded-full bg-light">
-        <SolarIcon name="star" size={64} color={colors.primary} />
+      <View
+        className="mb-5 h-28 w-28 items-center justify-center rounded-full"
+        style={{ backgroundColor: colors.goldSoft }}
+      >
+        <SolarIcon name="trophy" size={64} color={colors.gold} secondaryColor={colors.goldLight} secondaryOpacity={0.85} />
       </View>
       <Text className="text-center font-quicksand text-4xl text-dark">{title}</Text>
       <Text className="mt-2 text-center font-quicksand text-xl text-neutral-dark">{detail}</Text>

@@ -31,16 +31,27 @@ let open = false;
 
 export function openPecForm(next: PecFormRequest) {
   if (open) return;
-  open = true;
   request = next;
-  router.push("/pec");
+  open = true;
+  try {
+    router.push("/pec");
+  } catch (error) {
+    request = null;
+    open = false;
+    throw error;
+  }
 }
 
 export function currentPecForm() {
   return request;
 }
 
+export function isPecFormOpen() {
+  return open;
+}
+
 export function finishPecForm() {
+  if (!open && !request) return;
   const closing = request;
   request = null;
   open = false;

@@ -2,16 +2,16 @@
 
 Augmentative and Alternative Communication (AAC) app for autistic children, built with **Expo / React Native**.
 
-Uses the PECS (Picture Exchange Communication System) methodology with local catalog data, text-to-speech in Portuguese (pt-BR), haptic feedback, and animated interactions.
+Uses the PECS (Picture Exchange Communication System) methodology with a local catalog, text-to-speech, haptic feedback, and activities for practice.
 
 ## Tech Stack
 
-- **Expo SDK 57** (React Native 0.86.3, React 19.2)
-- **Expo Router v6** — file-based navigation
+- **Expo SDK 58** (React Native 0.88, React 19.3)
+- **Expo Router** — file-based navigation
 - **NativeWind v4** + TailwindCSS — utility-first styling
 - **TypeScript**
 - **react-native-reanimated v4** — spring animations
-- **expo-speech** — TTS in pt-BR
+- **expo-speech** — text-to-speech
 - **expo-haptics** — tactile feedback
 
 ## Project Structure
@@ -19,15 +19,17 @@ Uses the PECS (Picture Exchange Communication System) methodology with local cat
 ```
 mobile/
 ├── app/                  # Expo Router screens
-│   ├── (tabs)/           # Bottom-tab screens (Pecs, Frases, Aprender, Rotina)
-│   ├── profile.tsx       # Profile modal
-│   └── settings.tsx      # Settings modal
-├── components/           # PecCard, PhraseCard, SkeletonCard
+│   ├── (tabs)/           # PECs, Frases, Aprender, Rotina
+│   ├── atividade/        # Memory, find, repeat, phrase, and story
+│   ├── profile.tsx       # Profile
+│   └── settings.tsx      # Settings
+├── components/           # Cards, forms, activities
 ├── constants/            # colors, phrases, category icons
-├── data/                 # Local PECS category catalog (mock)
-├── hooks/                # useCategories
-├── types/                # TypeScript interfaces
-└── assets/               # fonts (Dongle), images
+├── data/                 # Local PECS catalog, stories, play pools
+├── hooks/                # Categories, custom PECs, routine
+├── services/             # Device storage, speech, purchases
+├── i18n/                 # Portuguese, English, and Spanish copy
+└── assets/               # fonts and images
 ```
 
 ## Running
@@ -38,7 +40,9 @@ npm install
 npx expo start
 ```
 
-Scan the QR code with **Expo Go** on your phone for the full native experience (haptics, TTS, animations).
+Scan the QR code with **Expo Go** on your phone for haptics, text-to-speech, and animations.
+
+Speech recognition in **Repita comigo** needs an installed build (`npx expo run:ios` or `npx expo run:android`). Expo Go does not include that native module.
 
 For web preview:
 
@@ -48,6 +52,6 @@ npx expo start --web
 
 ## Data
 
-PECS categories and cards are loaded from `mobile/data/categories.ts` (offline snapshot of the original WordPress catalog). No backend or authentication is required to run the app.
+PECS categories and cards are loaded from `mobile/data/categories.ts` (offline snapshot of the original catalog). No backend or authentication is required to run the app.
 
-Settings toggles and profile content are local UI state only.
+Profile, settings, custom PECs, phrases, and the routine are stored on the device.

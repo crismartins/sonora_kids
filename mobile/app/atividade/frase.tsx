@@ -140,7 +140,7 @@ export default function FraseScreen() {
         >
           <ActivityPrompt
             instruction={copy.learn.buildDetail}
-            progress={copy.common.of(roundIndex + 1, rounds.length)}
+            steps={{ done: roundIndex + (solved ? 1 : 0), total: rounds.length }}
           />
 
           <Text className="pb-2 text-center font-quicksand text-base text-neutral-dark">{copy.learn.buildHere}</Text>

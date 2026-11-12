@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { Animated, StatusBar, StyleSheet, useWindowDimensions, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Animated, Platform, StatusBar, StyleSheet, useWindowDimensions } from "react-native";
 import LottieView from "lottie-react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { colors } from "@/constants/colors";
@@ -19,8 +19,10 @@ type AnimatedSplashProps = {
 };
 
 export function AnimatedSplash({ hold, onHidden }: AnimatedSplashProps) {
-  const { width, height } = useWindowDimensions();
+  const window = useWindowDimensions();
+  const [box, setBox] = useState({ width: window.width, height: window.height });
   const animationRef = useRef<LottieView>(null);
+  const playedRef = useRef(false);
   const opacity = useRef(new Animated.Value(1)).current;
   const startedAt = useRef(Date.now());
   const lastPlayAt = useRef(Date.now());
@@ -42,7 +44,7 @@ export function AnimatedSplash({ hold, onHidden }: AnimatedSplashProps) {
     Animated.timing(opacity, {
       toValue: 0,
       duration: FADE_MS,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== "android",
     }).start(() => {
       if (mounted.current) onHiddenRef.current();
     });
@@ -96,9 +98,17 @@ export function AnimatedSplash({ hold, onHidden }: AnimatedSplashProps) {
     SplashScreen.hideAsync().catch(() => {});
   };
 
-  let logoWidth = width * 0.37;
+  const play = () => {
+    if (playedRef.current || !animationRef.current) return;
+    playedRef.current = true;
+    requestAnimationFrame(() => {
+      animationRef.current?.play();
+    });
+  };
+
+  let logoWidth = box.width * 0.37;
   let logoHeight = logoWidth * ARTBOARD_RATIO;
-  const maxHeight = height * 0.29;
+  const maxHeight = box.height * 0.29;
   if (logoHeight > maxHeight) {
     logoHeight = maxHeight;
     logoWidth = logoHeight / ARTBOARD_RATIO;
@@ -108,40 +118,50 @@ export function AnimatedSplash({ hold, onHidden }: AnimatedSplashProps) {
     <Animated.View
       accessibilityLabel="Sonora Kids"
       accessibilityRole="image"
-      onLayout={hideNativeSplash}
+      onLayout={(event) => {
+        const { width, height } = event.nativeEvent.layout;
+        if (width <= 0 || height <= 0) return;
+        setBox((current) => (current.width === width && current.height === height ? current : { width, height }));
+        hideNativeSplash();
+        play();
+      }}
       style={[styles.overlay, { opacity }]}
     >
-      <StatusBar barStyle="light-content" />
-      <View style={styles.stage}>
-        <LottieView
-          ref={animationRef}
-          source={splashAnimation}
-          autoPlay
-          loop={false}
-          resizeMode="contain"
-          onAnimationFinish={handleAnimationFinish}
-          onAnimationFailure={() => {
-            animationEnded.current = true;
-            hide();
-          }}
-          style={{ width: logoWidth, height: logoHeight }}
-          webStyle={{ width: logoWidth, height: logoHeight }}
-        />
-      </View>
+      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+      <LottieView
+        ref={animationRef}
+        source={splashAnimation}
+        autoPlay={false}
+        loop={false}
+        resizeMode="contain"
+        renderMode={Platform.OS === "android" ? "SOFTWARE" : "AUTOMATIC"}
+        onAnimationLoaded={play}
+        onAnimationFinish={handleAnimationFinish}
+        onAnimationFailure={() => {
+          animationEnded.current = true;
+          hide();
+        }}
+        style={{
+          position: "absolute",
+          width: logoWidth,
+          height: logoHeight,
+          left: (box.width - logoWidth) / 2,
+          top: (box.height - logoHeight) / 2,
+        }}
+        webStyle={{ width: logoWidth, height: logoHeight }}
+      />
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFill,
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
     backgroundColor: colors.white,
     zIndex: 100,
-    elevation: 100,
-  },
-  stage: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });

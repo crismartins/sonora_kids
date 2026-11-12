@@ -14,6 +14,9 @@ export const colors = {
   canvas: "#FAFAFA",
   danger: "#D32F2F",
   dangerSoft: "#FDECEC",
+  goldSoft: "#FFF4CC",
+  gold: "#F5A018",
+  goldLight: "#F8C14A",
   white: "#FFFFFF",
 };
 
