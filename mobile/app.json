@@ -16,14 +16,21 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.sonorakids.app"
+      "bundleIdentifier": "com.sonorakids.app",
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "O Sonora Kids usa o reconhecimento de voz para saber se você falou a palavra.",
+        "NSMicrophoneUsageDescription": "O Sonora Kids usa o microfone para ouvir quando você repete a palavra."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#2567FF"
       },
-      "package": "com.sonorakids.app"
+      "package": "com.sonorakids.app",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -59,6 +66,16 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "2f517ca1-b272-4c49-934d-7cf2d9fb45c6"
+      }
     }
   }
 }
